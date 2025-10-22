@@ -486,7 +486,7 @@ calculate_network_specificity <- function(sce,
 #' \itemize{
 #'   \item \code{...}: Besides 'weight', other edge features initiated from the input igraph object.
 #'   \item \code{weight}: Final combined edge weights (nornalized PPI * specificity). A positive numeric vector. Larger edge weights correspond to stronger connections.
-#'   \item \code{original_weight}:  Original PPI scores (STRING combined_score/1000)
+#'   \item \code{norm_PPI_score}:  Original PPI scores (STRING combined_score/1000)
 #'   \item \code{corexp_sign}: Sign of co-expression correlation ('positive' or 'negative')
 #'   \item \code{coexp_target}: Cell-type specific co-expression scores used for weighting
 #' }
@@ -527,7 +527,7 @@ calculate_network_specificity <- function(sce,
 #'         specificity_method = "combined"
 #'     )
 #'     edge_attr_names(updated_networks[["A"]])
-#'     # [1] "weight"          "original_weight" "corexp_sign"     "coexp_target"
+#'     # [1] "weight"          "norm_PPI_score" "corexp_sign"     "coexp_target"
 #'
 #'     plot(E(updated_networks[["A"]])$coexp_target, E(updated_networks[["A"]])$weight,
 #'         xlab = "Pearson cor", ylab = "Coexp&PPI-combined Weights", main = "Cell cluster A-specific"
@@ -569,7 +569,7 @@ update_network_weights <- function(graph_list,
 
         # Get the graph
         g <- graph_list[[net_name]]
-        E(g)$original_weight <- E(g)$weight
+        E(g)$norm_PPI_score <- E(g)$weight # Store original normalized PPI weights
 
         # Get specificity data
         spec_data <- specificity_scores[[net_name]]
@@ -622,7 +622,7 @@ update_network_weights <- function(graph_list,
         nE <- igraph::ecount(g)
         corexp_vals <- rep(NA_character_, nE)
         coexp_target_vals <- rep(NA_real_, nE)
-        new_weights <- E(g)$original_weight # default: keep old weights
+        new_weights <- E(g)$norm_PPI_score # default: keep old weights
 
         # Fill for valid edges
         corexp_vals[valid] <- as.character(spec_data$corexp_sign[idx])
