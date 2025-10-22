@@ -5,15 +5,9 @@ library(Matrix)
 library(qlcMatrix)
 library(igraph)
 library(parallel)
-# Auto-detect based on file system
-if (file.exists("/project/imoskowitz/")) {
-    # We're on midway3
-    #   source('/project/imoskowitz/xyang2/heart_dev/GSE175634_iPSC_CM/BioTIP_update_06162025.R')
-    source("/project/xyang2/felixy/GSE87038_weighted/code/BioTIP_update_06162025.R")
-} else {
-    # We're on local machine
-    source("/Users/felixyu/Documents/GSE87038_weighted/code/BioTIP_update_06162025.R")
-}
+
+BioTIP_version <- '06232025'
+source(paste0('https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/heads/master/R/BioTIP_update_', BioTIP_version, '.R'))
 
 ################  The above lines should be removed when submission to Bioconductor !!!###############################
 ## version 10 update robustness_MonteCarlo(..., measure = "btwn.cent") to use 1/weight when calling new_centr_betw() and betweenness()  
@@ -1077,4 +1071,357 @@ strength_distribution <- function(g, use_weights = TRUE, normalized = TRUE, cumu
         res <- rev(cumsum(rev(hi)))
     }
     res
+}
+
+
+#### additional visualization fuctions in v10 #######
+
+#' Extract edge weights and assign PPI categories from a list of graphs
+#'
+#' This function iterates over a list of igraph objects, extracts edge weights,
+#' and classifies each network into CTS, HiGCTS, or HiG categories based on
+#' graph names. For each network, it returns a tidy data frame of edge weights
+#' with associated metadata (network name, PPI category, cluster ID, and edge count).
+#' Optionally, clusters listed in `unstable_cluster_ID` are labeled as 'unstable'.
+#'
+#' @param graph_list A named list of igraph objects containing PPI networks.
+#' @param PPI_color_palette A named color vector for PPI categories (not directly used here but for consistency).
+#' @param unstable_cluster_ID A character vector of cluster IDs to mark as 'unstable'.
+#'
+#' @return A data frame with columns:
+#'   \describe{
+#'     \item{sample}{Graph name.}
+#'     \item{PPI_cat}{Category of PPIN: 'CTS', 'HiGCTS', or 'HiG'.}
+#'     \item{edge_weight}{Numeric weight of each edge.}
+#'     \item{num_edges}{Number of edges in the network.}
+#'     \item{cluster_ID}{Cluster identifier parsed from the graph name.}
+#'     \item{cluster_cat}{Cluster classification: 'unstable' or 'stable'.}
+#'   }
+#'
+#' @details
+#' If a network lacks explicit edge weights, all edges are assigned a weight of 1.
+#' Graph names are assumed to follow the pattern "CTS_", "HiGCTS_", or "HiG_".
+#'
+#' @examples
+#' edge_df <- extract_edge_weights_by_category(graph_list, PPI_color_palette, unstable_cluster_ID)
+#'
+extract_edge_weights_by_category <- function(graph_list, PPI_color_palette, unstable_cluster_ID) {  
+  # Initialize storage for edge weights
+  all_edge_data <- data.frame()  
+  # Extract edge weights from each graph
+  for (graph_name in names(graph_list)) {
+    graph <- graph_list[[graph_name]]    
+    # Get edge weights (assumes edges have 'weight' attribute)
+    edge_weights <- E(graph)$weight    
+    # If no weights, use default of 1
+    if (is.null(edge_weights)) {
+      edge_weights <- rep(1, ecount(graph))
+    }
+    # Assign PPI category
+    PPI_cat <- case_when(
+      grepl("^HiGCTS_", graph_name) ~ "HiGCTS",
+      grepl("^HiG_", graph_name) ~ "HiG", 
+      grepl("^CTS_", graph_name) ~ "CTS",
+      TRUE ~ "Other"
+    )    
+    # Store data
+    edge_data <- data.frame(
+      sample = graph_name,
+      PPI_cat = PPI_cat,
+      edge_weight = edge_weights,
+      num_edges = length(edge_weights),
+	  cluster_ID = unlist(strsplit(graph_name, split='_'))[2]
+    )    
+    all_edge_data <- rbind(all_edge_data, edge_data)
+  }  
+  # Filter to main categories
+  all_edge_data <- all_edge_data[all_edge_data$PPI_cat %in% c("CTS", "HiGCTS", "HiG"), ]
+  all_edge_data$PPI_cat <- factor(all_edge_data$PPI_cat, levels = c("CTS", "HiGCTS", "HiG"))
+  all_edge_data$cluster_cat <- ifelse(all_edge_data$cluster_ID %in% unstable_cluster_ID, 'unstable', 'stable')
+  
+  return(all_edge_data)
+}
+
+#' Plot and summarize PPI edge-weight distributions by category
+#'
+#' This function visualizes and statistically compares the distribution of
+#' edge weights across PPI categories. It generates (1) density plots for each
+#' category and (2) combined violin/box plots with pairwise Wilcoxon tests.
+#'
+#' @param edge_data A data frame produced by `extract_edge_weights_by_category()`
+#'   containing columns `PPI_cat` and `edge_weight`.
+#' @param PPI_color_palette A named vector of colors corresponding to PPI categories.
+#'
+#' @return A list containing:
+#'   \describe{
+#'     \item{density_plot}{Faceted density plots showing edge-weight distributions per PPI category.}
+#'     \item{boxplot}{Combined box-violin plots with Wilcoxon significance comparisons.}
+#'     \item{summary_stats}{Data frame summarizing mean, median, and total number of edges per category.}
+#'   }
+#'
+#' @details
+#' Pairwise comparisons (CTS–HiGCTS, CTS–HiG, HiGCTS–HiG) are performed using
+#' `wilcox.test`, with Bonferroni correction and significance labels displayed
+#' directly on the plot. The density and box-violin plots share a common
+#' color scheme for category consistency.
+#'
+#' @examples
+#' plots <- plot_edge_weight_distributions(edge_df, PPI_color_palette)
+#' plots$density_plot
+#' plots$boxplot
+#' 
+plot_edge_weight_distributions <- function(edge_data, PPI_color_palette) {  
+  # Calculate summary statistics
+  summary_stats <- edge_data %>%
+    group_by(PPI_cat) %>%
+    summarise(
+      mean_weight = round(mean(edge_weight), 3),
+      median_weight = round(median(edge_weight), 3),
+      total_edges = n(),
+      .groups = 'drop'
+    )  
+  # 1. Density plot for HiG PPIs, colored by cluster_categories (stable or instable)
+ p1 <- ggplot(edge_data, aes(
+    x = log10(edge_weight + 1),         # log10 transform inside aes()
+    fill = PPI_cat, 
+    color = PPI_cat)) + 
+  geom_density(alpha = 0.3, size = 1.2, adjust = 1.2) +  # adjust controls smoothness 
+  #facet_wrap(~PPI_cat, ncol = 1, scales = "free_y") +
+  labs(
+    title = "hiPSC",
+    x = expression(log[10]~"(PPI edge weight + 1)"),
+    y = "Density"
+  ) +  
+  scale_fill_manual(values = PPI_color_palette) +
+  scale_color_manual(values = PPI_color_palette) + 
+  # Optional: label ticks in original (non-log) units
+  scale_x_continuous(
+    breaks = seq(0, 2, by = 0.5),
+    labels = c("1", "3", "10", "32", "100")
+  ) +  
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "top",
+   # strip.text = element_text(face = "bold", size = 11),
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+   # plot.subtitle = element_text(hjust = 0.5, color = "gray60"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold")
+  )
+
+  
+  # 2. violin comparison
+  p2 <- ggplot(edge_data, aes(x = PPI_cat, y = edge_weight, fill = PPI_cat)) +
+    # geom_boxplot(alpha = 0.7, outlier.alpha = 0.5) +
+    geom_violin(alpha = 0.3, width = 0.8, trim = TRUE) +
+    stat_compare_means(comparisons = list(c("HiG", "HiGCTS"), c("HiG", "CTS"), c("HiGCTS", "CTS")), 
+                      method = "wilcox.test",
+					  label = "p.signif",
+                      p.adjust.method = "bonferroni"
+                      ) +
+    labs(
+      title = "wilcox.test",
+      subtitle = paste("Total edges - CTS:", summary_stats$total_edges[1],
+                       " | HiGCTS:", summary_stats$total_edges[2],
+                       " | HiG:", summary_stats$total_edges[3]),
+      x = "PPI Category",
+      y = "Edge weight"
+    ) +
+    scale_fill_manual(values = PPI_color_palette) +
+    theme_minimal() +
+    theme(
+      legend.position = "none",
+      plot.title = element_text(hjust = 0.5, face = "bold"),
+      plot.subtitle = element_text(hjust = 0.5, color = "gray60")
+    )
+    
+  return(list(
+    density_plot = p1,
+    boxplot = p2,
+    summary_stats = summary_stats
+  ))
+}
+
+#' Plot network-wise edge betweenness metrics across PPIN categories
+#'
+#' This function visualizes the number of network communities identified
+#' by edge-betweenness clustering across three categories of
+#' protein–protein interaction networks (PPINs): CTS, HiGCTS, and HiG.
+#' It produces (1) a line plot connecting HiG clusters and overlaying
+#' corresponding CTS and HiGCTS transition states, and (2) a boxplot
+#' comparing the three categories with statistical tests.
+#'
+#' @param nEB_data A named numeric vector containing the number of
+#'   communities per PPIN (e.g., from edge-betweenness clustering). 
+#'   Names must encode sample categories with prefixes such as
+#'   "CTS_", "HiGCTS_", or "HiG_".
+#' @param PPI_color_palette A named vector of colors for each PPIN
+#'   category, e.g. `c(CTS = "blue", HiGCTS = "pink", HiG = "gold")`.
+#' @param method Character string specifying the statistical test to use
+#'   for pairwise comparisons in the boxplot. Either `"t.test"` or `"wilcox.test"`.
+#'   Defaults to `"t.test"`.
+#'
+#' @return A list with two ggplot objects:
+#'   \describe{
+#'     \item{line_plot}{A line plot showing the HiG cluster trend
+#'       (ordered by increasing number of communities) with CTS and
+#'       HiGCTS points overlaid at corresponding positions.}
+#'     \item{boxplot}{A boxplot with optional jitter displaying the
+#'       distribution of community counts across PPIN categories,
+#'       annotated with pairwise significance results.}
+#'   }
+#'
+#' @details
+#' - The function first classifies each sample name into one of the
+#'   PPIN categories (`CTS`, `HiGCTS`, or `HiG`) and extracts the
+#'   associated cluster identifier.
+#' - HiG networks are sorted by their community counts to define
+#'   the x-axis order, and corresponding CTS/HiGCTS samples with
+#'   matching cluster IDs are aligned above these positions.
+#' - The boxplot compares distributions among the three PPIN categories,
+#'   using either a t-test or Wilcoxon test for significance annotation.
+#'
+#' @examples
+#' plots <- plot_nEB_ggplot(nEB_data, PPI_color_palette, method = "wilcox.test")
+#' plots$line_plot
+#' plots$boxplot
+#'
+plot_nEB_ggplot <- function(nEB_data, PPI_color_palette, method=c('t.test', 'wilcox.test')) {
+  method = match.arg(method)
+  # Convert to data frame
+  plot_data <- data.frame(
+    sample = factor(names(nEB_data), levels = names(nEB_data)),
+    value = as.numeric(nEB_data),
+    index = 1:length(nEB_data),
+	stringsAsFactors = FALSE  #not to automatically convert character strings into factors when creating a data frame.
+  )
+  # Assign categories based on sample names
+  plot_data$PPI_cat <- case_when(
+    grepl("^HiGCTS_", plot_data$sample) ~ "HiGCTS",
+    grepl("^HiG_", plot_data$sample) ~ "HiG", 
+    grepl("^CTS_", plot_data$sample) ~ "CTS",
+    TRUE ~ "Other"
+  )
+  # Extract sample cluster (remove prefix)
+  plot_data$sample_type <- case_when(
+    plot_data$PPI_cat == "HiG" ~ gsub("^HiG_", "", plot_data$sample),
+    plot_data$PPI_cat == "HiGCTS" ~ gsub("^HiGCTS_", "", plot_data$sample),
+    plot_data$PPI_cat == "CTS" ~ gsub("^CTS_", "", plot_data$sample),
+    TRUE ~ plot_data$sample  #catches anything that didn't match the previous conditions
+  )
+  # Get HiG samples as the base x-axis (13 positions)
+  hig_data <- plot_data[plot_data$PPI_cat == "HiG", ]
+  hig_data <- hig_data[order(hig_data$value), ]  # Order by value (smallest to largest)  # Maintain original order
+  hig_data$x_position <- 1:nrow(hig_data)
+  # Map other categories to corresponding HiG positions
+  other_data <- plot_data[plot_data$PPI_cat != "HiG", ]
+  # Create mapping for overlaid points
+  overlay_data <- data.frame()  
+  for (i in 1:nrow(other_data)) {
+    sample_type <- other_data$sample_type[i]   
+    # Find corresponding HiG position
+    matching_hig <- which(hig_data$sample_type == sample_type)    
+    if (length(matching_hig) > 0) {
+      # If there's a matching HiG sample type, use that position
+      x_pos <- hig_data$x_position[matching_hig[1]]
+    } else {
+      # If no exact match, skip this point or handle differently
+      next
+    }    
+    overlay_data <- rbind(overlay_data, data.frame(
+      sample = other_data$sample[i],
+      value = other_data$value[i],
+      PPI_cat = other_data$PPI_cat[i],
+      sample_type = sample_type,
+      x_position = x_pos
+    ))
+  }  
+  
+  # Create the line plot
+  p1 <- ggplot() +
+    # First, draw line connecting only HiG samples
+    geom_line(data = hig_data, aes(x = x_position, y = value), 
+              color = PPI_color_palette["HiG"], size = 1.2, alpha = 0.8) +
+    # Add HiG points
+    geom_point(data = hig_data, aes(x = x_position, y = value, color = PPI_cat), 
+               size = 3, alpha = 0.9) +
+    # Add overlaid points for other categories
+    geom_point(data = overlay_data, aes(x = x_position, y = value, color = PPI_cat), 
+               size = 3, alpha = 0.9) +
+    labs(
+      title = "cluster_edge_betweenness",
+      subtitle = paste("HiG line (n=", sum(plot_data$PPI_cat == "HiG"), 
+                       ") | HiGCTS dots (n=", sum(plot_data$PPI_cat == "HiGCTS"),
+                       ") | CTS dots (n=", sum(plot_data$PPI_cat == "CTS"), ")", sep = ""),
+      x = "cell clusters, transition states are named",
+      y = "number of communities in PPI",
+      color = "PPI_cat"
+    ) +
+    scale_x_continuous(
+      breaks = 1:nrow(hig_data),
+      labels = hig_data$sample
+    ) +
+    scale_color_manual(values = PPI_color_palette) +
+    theme_minimal() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 9),
+      axis.text.y = element_text(size = 11),
+      plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+      plot.subtitle = element_text(hjust = 0.5, size = 11, color = "gray60"),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.border = element_blank(),
+      legend.position = "bottom",
+      legend.title = element_text(size = 11, face = "bold"),
+      legend.text = element_text(size = 10)
+    )
+  
+  # Create boxplot comparing the three PPI_cat categories**
+  # Filter data to include only the three main categories and only the transition clusters !!
+  boxplot_data <- plot_data[plot_data$PPI_cat %in% c("CTS", "HiGCTS","HiG" ) & 
+				plot_data$sample_type %in% overlay_data$sample_type, ]
+  # Set factor levels to control order
+  boxplot_data$PPI_cat <- factor(boxplot_data$PPI_cat, levels = c("CTS","HiGCTS", "HiG" ))
+  
+  comparisons <- list(c("HiG", "HiGCTS"), c("HiG", "CTS"), c("HiGCTS", "CTS"))
+  # Calculate summary statistics for subtitle
+  summary_stats <- boxplot_data %>%
+      group_by(PPI_cat) %>%
+      summarise(
+        mean_val = round(mean(value),1),
+        median_val = round(median(value), 1),
+        .groups = 'drop'
+    )
+
+  p2 <- ggplot(boxplot_data, aes(x = PPI_cat, y = value, fill = PPI_cat)) +
+    geom_boxplot(alpha = 0.7, outlier.shape = 16, outlier.size = 2) +
+    geom_jitter(aes(color = PPI_cat), width = 0.2, size = 2, alpha = 0.8) +
+    labs(
+      title = paste(method, "test, transition clusters"),
+      subtitle = paste("Mean/Median - CTS:", summary_stats$mean_val[1], "/", summary_stats$median_val[1],
+                       " | HiGCTS:", summary_stats$mean_val[2], "/", summary_stats$median_val[2],
+                       " | HiG:", summary_stats$mean_val[3], "/", summary_stats$median_val[3]),
+      x = "PPI Category",
+      y = "number of communities in PPI"
+    ) +
+    scale_fill_manual(values = PPI_color_palette) +
+    scale_color_manual(values = PPI_color_palette) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+      plot.subtitle = element_text(hjust = 0.5, size = 10, color = "gray60"),
+      axis.text.x = element_text(size = 11, face = "bold"),
+      axis.text.y = element_text(size = 11),
+      legend.position = "none",  # Remove legend since colors match categories
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor = element_blank()
+    ) +
+	stat_compare_means(comparisons = comparisons, 
+                      method = method,
+                      p.adjust.method = 'none',#"bonferroni",
+                      label = "p.signif",
+                      bracket.size = 0.6,
+                      step.increase = 0.1) 
+  
+   return(list(line_plot = p1, boxplot = p2))
 }
