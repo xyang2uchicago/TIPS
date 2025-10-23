@@ -15,6 +15,12 @@ PPI_color_platte <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02"
 
 load(paste0(wd, "data/sce_E8.25_uncorrected.RData"))
 
+celltype_specific_weight_version <- '10'
+BioTIP_version <- '06232025'
+
+source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
+source(paste0('https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/heads/master/R/BioTIP_update_', BioTIP_version, '.R'))
+
 sce
 colnames(colData(sce))
 #  [1] "cell"             "barcode"          "sample"           "pool"
@@ -123,10 +129,7 @@ graphs_with_duplicates <- sapply(graph_list, function(g) {
 # See which graphs have duplicates
 which(graphs_with_duplicates)
 
-source(paste0(wd, "code/celltype_specific_weight_v9.R"))
-source(paste0(wd, "code/BioTIP_update_06162025.R"))
-
-step1 <- TRUE
+step1 <- FALSE
 if (step1) {
     ## calculating co-expression-based specificity scores, runs 1 hour when cores=1, DO NOT repeat !
     ## first, add a meta column to match the graph_list names
@@ -158,7 +161,7 @@ if (step1) {
     # [1] "ratio"    "zscore"   "diff"     "combined"
 }
 
-step2 <- TRUE
+step2 <- FALSE
 if (step2) {
     network_specificity_list <- readRDS("network_specificity_list.rds")
 
@@ -184,20 +187,20 @@ if (step2) {
     # negative positive
     # 40106    51703
 
-    for (s in c("combined", "ratio", "zscore", "diff")) { # , "ratio", "zscore", "diff"
+    for (s in c("combined", "ratio", "zscore", "diff")) {
         weighted_graph_list <- update_network_weights(graph_list,
             network_specificity_list,
             specificity_method = s,
             verbose = TRUE,
-            cores = 4
+            cores = 1
         )
         saveRDS(weighted_graph_list, file = paste0("GSE87038_STRING_graph_perState_simplified_", s, "weighted.rds"))
     }
 
     # double check outputs
     g <- weighted_graph_list[[1]]
-    vertex_attr_names(g) # [1]  "name"   "weight" "FDR"    "size"   "color"
-    edge_attr_names(g) # "weight" "original_weight" "corexp_sign" "coexp_target"
+    vertex_attr_names(g) # "name"   "weight" "FDR"  
+    edge_attr_names(g) # "weight"         "norm_PPI_score" "corexp_sign"    "coexp_target"
 }
 
 ###################################################
@@ -222,8 +225,8 @@ if (step3) {
             graph_list <- readRDS(file = paste0("GSE87038_STRING_graph_perState_simplified_", s, "weighted.rds"))
             g <- graph_list[[net_name]]
             # Safeguard to skip graphs with missing original weights
-            if (is.null(E(g)$original_weight) || length(E(g)$original_weight) == 0) {
-                cat("⚠️  Skipping", net_name, "- no 'original_weight' on edges.\n")
+            if (is.null(E(g)$norm_PPI_score) || length(E(g)$norm_PPI_score) == 0) {
+                cat("⚠️  Skipping", net_name, "- no 'norm_PPI_score' on edges.\n")
                 next
             }
 
@@ -237,7 +240,7 @@ if (step3) {
 
             temp_data <- data.frame(
                 net_name = net_name,
-                original_weight = E(g)$original_weight,
+                norm_PPI_score = E(g)$norm_PPI_score,
                 log_weight = log10(E(g)$weight),
                 method = s,
                 is_isl1 = is_isl1_edge
@@ -246,11 +249,11 @@ if (step3) {
             plot_data <- rbind(plot_data, temp_data)
         }
         if (!is.null(plot_data) && "is_isl1" %in% colnames(plot_data)) {
-            p2 <- ggplot(plot_data, aes(x = original_weight, y = log_weight)) +
+            p2 <- ggplot(plot_data, aes(x = norm_PPI_score, y = log_weight)) +
                 stat_binhex(bins = 50, alpha = 0.7) +
                 geom_point(
                     data = subset(plot_data, is_isl1 == TRUE),
-                    aes(x = original_weight, y = log_weight),
+                    aes(x = norm_PPI_score, y = log_weight),
                     color = "red", size = 1.5
                 ) +
                 scale_fill_viridis_c() +
@@ -258,7 +261,7 @@ if (step3) {
                 theme_minimal() +
                 labs(
                     title = paste("Edge Weight Density -", net_name),
-                    x = "E(g)$original_weight",
+                    x = "E(g)$norm_PPI_score",
                     y = "log10(E(g)$weight)",
                     fill = "Count"
                 ) +
@@ -302,7 +305,7 @@ if (step4) {
 
         temp_data <- data.frame(
             net_name = net_name,
-            original_weight = E(g)$original_weight,
+            norm_PPI_score = E(g)$norm_PPI_score,
             log_weight = log10(E(g)$weight),
             method = s,
             is_isl1 = is_isl1_edge
@@ -314,14 +317,14 @@ if (step4) {
     temp <- subset(plot_data, is_isl1 == TRUE)
     pdf(file = paste0("compare_specificity_method_HiGCTS_8_vs_PPIscores.pdf"))
     print(
-        ggplot(temp, aes(x = original_weight, y = log_weight, color = as.factor(original_weight))) +
+        ggplot(temp, aes(x = norm_PPI_score, y = log_weight, color = as.factor(norm_PPI_score))) +
             geom_point() +
             scale_fill_viridis_c() +
             facet_wrap(~method, scales = "free") +
             theme_minimal() +
             labs(
                 title = paste("Isl1 linkages -", net_name),
-                x = "E(g)$original_weight",
+                x = "E(g)$norm_PPI_score",
                 y = "log10(E(g)$weight)"
             ) +
             theme(legend.position = "bottom")

@@ -39,10 +39,8 @@ p_listoflist <- list()
 # HiGCTS_13 too small, not included here
 for (int in c("HiGCTS_7", "HiGCTS_8", "HiGCTS_8", "HiGCTS_11", "HiGCTS_15", "HiGCTS_16", "HiGCTS_16.1")) {
     g <- graph_list[[int]]
-    (vertex_attr_names(g)) # [1] "name"   "weight" "FDR"    "size"   "color"
-    (edge_attr_names(g))
-    # [1] "combined_score"  "weight"          "width"
-    # [4] "original_weight" "corexp_sign"     "coexp_target"
+    (vertex_attr_names(g)) #  "name"   "weight" "FDR"
+    (edge_attr_names(g)) # "weight"         "norm_PPI_score" "corexp_sign"    "coexp_target"
 
     (V(g)$FDR)
     # [1] 4.493309e-27 7.710597e-13 1.640461e-20 4.920997e-41 4.551240e-31
@@ -75,7 +73,7 @@ for (int in c("HiGCTS_7", "HiGCTS_8", "HiGCTS_8", "HiGCTS_11", "HiGCTS_15", "HiG
         scale_color_manual(values = c(`TRUE` = "red", `FALSE` = "gray70")) +
         scale_edge_color_manual(values = c("positive" = "orange", "negative" = "blue")) +
         scale_size_continuous(range = c(2, 5), name = "|Wilcox score|") +
-        scale_edge_width_continuous(range = c(0.5, 3), name = "log10(E weights)") +
+        scale_edge_width_continuous(range = c(0.1, 3), limits = range(log10(E(g)$weight), na.rm = TRUE), name = "log10(E weights)") +
 
         theme_void() +
         labs(
@@ -145,7 +143,7 @@ for (int in grep("^HiG_", names(graph_list), value = TRUE)) {
         scale_color_manual(values = c(`TRUE` = "red", `FALSE` = "gray70")) +
         scale_edge_color_manual(values = c("positive" = "orange", "negative" = "blue")) +
         scale_size_continuous(range = c(2, 5), name = "|Wilcox score|") +
-        scale_edge_width_continuous(range = c(0.5, 3), name = "log10(E weights)") +
+        scale_edge_width_continuous(range = c(0.1, 3), limits = range(log10(E(g)$weight), na.rm = TRUE), name = "log10(E weights)") +
 
         theme_void() +
         labs(

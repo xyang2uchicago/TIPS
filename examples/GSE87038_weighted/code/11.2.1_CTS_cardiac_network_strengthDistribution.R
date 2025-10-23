@@ -12,6 +12,9 @@ setwd(paste0(wd, "results/"))
 PPI_color_platte <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
 PPI_size_platte <- c("CTS" = 1, "HiGCTS" = 0.75, "HiG" = 0.25)
 
+celltype_specific_weight_version <- '10'
+source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
+
 
 graph_list <- readRDS(file = "GSE87038_STRING_graph_perState_notsimplified.rds")
 (N0 <- sapply(graph_list, vcount))
@@ -132,7 +135,7 @@ g_strength <- ggplot(data = df, aes(x = k, y = x, col = PPI_cat)) +
 # cumulative (normalized= FALSE!!)strength distribution to a power law fit ########################
 # PPI_cat: PPI network category: A: CTS; B: CTS&hiG; C; HiG  ############
 #### normalized = FALSE by default
-source(paste0(wd, "code/celltype_specific_weight_v9.R"))
+
 V_deg_dis <- lapply(graph_list, function(x) strength_distribution(x, normalized = FALSE, cumulative = TRUE)) %>%
     lapply(., function(x) {
         x %>%

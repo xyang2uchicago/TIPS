@@ -8,14 +8,13 @@ library(ggrepel)
 library(ggpubr)
 library(igraph)
 library(rstatix)
-
 library(brainGraph)
-
-PPI_color_platte <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
 
 wd = "/Users/felixyu/Documents/GSE87038_weighted/"
 setwd(paste0(wd, "results/PPI_weight/"))
 inputdir <- paste0(wd, "data/")
+
+PPI_color_platte <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
 
 
 # refer to 11.2.0_weighted_graph_attack_robustness.R

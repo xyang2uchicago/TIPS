@@ -11,8 +11,6 @@ library("SingleCellExperiment")
 
 wd = "/Users/felixyu/Documents/GSE87038_weighted/"
 setwd(paste0(wd, "results/"))
-score_threshold <- "weight"
-PPI_color_platte <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
 
 load("../data/sce_E8.25_uncorrected.RData")
 
@@ -185,20 +183,10 @@ for (i in names(DEG)) {
     # Add edge weights from STRING interaction scores #!!!!!!!!!!!!!!!!!
     # STRING scores are between 0-1000, normalize to 0-1 for better visualization
     E(graph)$weight <- E(graph)$combined_score / 1000
+    graph <- delete_edge_attr(graph, "combined_score") # Remove combined_score as there is no use for it.
 
     # Fix case issues if needed (for mouse genes)
     if (all(mapped$symbol %in% toupper(DEG[[i]]))) V(graph)$name <- DEG[[i]][match(V(graph)$name, toupper(DEG[[i]]))]
-
-    # Optional: Set visual attributes based on weights
-    V(graph)$size <- scales::rescale(V(graph)$weight, to = c(3, 15))
-    E(graph)$width <- scales::rescale(E(graph)$weight, to = c(0.5, 3)) # useless, using weight directly otherwise can't compare across clusters
-    if (!is.null(V(graph)$weight) && length(V(graph)$weight) > 0 && any(is.finite(V(graph)$weight))) {
-        V(graph)$color <- colorRampPalette(c("lightblue", "red"))(100)[
-            cut(V(graph)$weight, breaks = 100)
-        ]
-    } else {
-        V(graph)$color <- "grey" # fallback for empty or NA weights
-    }
 
     graph_list[[i]] <- graph
 }
@@ -236,20 +224,10 @@ for (i in names(CTS)) {
     # Add edge weights from STRING interaction scores #!!!!!!!!!!!!!!!!!
     # STRING scores are between 0-1000, normalize to 0-1 for better visualization
     E(graph)$weight <- E(graph)$combined_score / 1000
+    graph <- delete_edge_attr(graph, "combined_score") # Remove combined_score as there is no use for it.
 
     # Fix case issues if needed (for mouse genes)
     if (all(mapped$symbol %in% toupper(DEG[[i]]))) V(graph)$name <- DEG[[i]][match(V(graph)$name, toupper(DEG[[i]]))]
-
-    # Optional: Set visual attributes based on weights
-    V(graph)$size <- scales::rescale(V(graph)$weight, to = c(3, 15))
-    E(graph)$width <- scales::rescale(E(graph)$weight, to = c(0.5, 3))
-    if (!is.null(V(graph)$weight) && length(V(graph)$weight) > 0 && any(is.finite(V(graph)$weight))) {
-        V(graph)$color <- colorRampPalette(c("lightblue", "red"))(100)[
-            cut(V(graph)$weight, breaks = 100)
-        ]
-    } else {
-        V(graph)$color <- "grey" # fallback for empty or NA weights
-    }
 
     graph_list[[paste0("HiGCTS_", i)]] <- graph
 }
@@ -280,17 +258,7 @@ for (i in names(CTS)) {
     V(graph)$weight <- diff_exp[match(V(graph)$name, diff_exp$symbol), ]$summary.logFC
     V(graph)$FDR <- diff_exp[match(V(graph)$name, diff_exp$symbol), ]$FDR
     E(graph)$weight <- E(graph)$combined_score / 1000
-
-    # Optional: Set visual attributes based on weights
-    V(graph)$size <- scales::rescale(V(graph)$weight, to = c(3, 15))
-    E(graph)$width <- scales::rescale(E(graph)$weight, to = c(0.5, 3))
-    if (!is.null(V(graph)$weight) && length(V(graph)$weight) > 0 && any(is.finite(V(graph)$weight))) {
-        V(graph)$color <- colorRampPalette(c("lightblue", "red"))(100)[
-            cut(V(graph)$weight, breaks = 100)
-        ]
-    } else {
-        V(graph)$color <- "grey" # fallback for empty or NA weights
-    }
+    graph <- delete_edge_attr(graph, "combined_score") # Remove combined_score as there is no use for it.
 
     graph_list[[paste0("CTS_", i)]] <- graph
 }
