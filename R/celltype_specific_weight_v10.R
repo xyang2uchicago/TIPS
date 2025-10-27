@@ -10,6 +10,8 @@ BioTIP_version <- '06232025'
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/heads/master/R/BioTIP_update_', BioTIP_version, '.R'))
 
 ################  The above lines should be removed when submission to Bioconductor !!!###############################
+## version 10 add synthetic_simulation() and more visualization functions
+
 ## version 10 update robustness_MonteCarlo(..., measure = "btwn.cent") to use 1/weight when calling new_centr_betw() and betweenness()  
 ## version 10 add parameter graph_list into update_graph_weights()
 ## version 9 removed invert_weights in update_network_weights()
@@ -937,7 +939,8 @@ robustness_MonteCarlo <- function(g, type = c("vertex", "edge"), measure = c(
 
     # Add graph name if available
     if ("name" %in% graph_attr_names(g)) {
-        out[, `:=`(eval(getOption("bg.group")), g$name)]
+       # out[, `:=`(eval(getOption("bg.group")), g$name)]
+       out[, graph_name := graph_attr(g, "name")]  # v11
     }
 
     return(out)
@@ -1425,3 +1428,339 @@ plot_nEB_ggplot <- function(nEB_data, PPI_color_palette, method=c('t.test', 'wil
   
    return(list(line_plot = p1, boxplot = p2))
 }
+
+
+#' @title Synthetic network simulation and robustness validation
+#'
+#' @description
+#' This function generates synthetic weighted networks (random, scale-free, small-world, and
+#' degree-preserving rewired) matched to an empirical PPIN, assigns edge weights drawn
+#' from the empirical distribution, and evaluates fragmentation resilience under targeted-node
+#' attack using the \code{robustness_MonteCarlo()} function.
+#' It returns area-under-curve (AUC) statistics and publication-ready ggplot objects
+#' summarizing edge-weight distributions, fragmentation curves, and AUC bar plots.
+#'
+#' @param g_real An \code{igraph} object representing the real PPIN.
+#'               Must contain a numeric edge attribute \code{"weight"}.
+#' @param main  Optional character string used as the plot title and ID in the
+#'              output data frame. Defaults to "Network".
+#'
+#' @details
+#' **Workflow**
+#' \enumerate{
+#'   \item Extract the empirical edge-weight distribution from \code{g_real}.
+#'   \item Generate four synthetic topologies with the same node and edge counts:
+#'         \itemize{
+#'           \item Erdős–Rényi random graph via \code{sample_gnp()}.
+#'           \item Scale-free graph via \code{sample_pa()}.
+#'           \item Small-world graph via \code{sample_smallworld()}.
+#'           \item Degree-preserving rewired graph via \code{rewire(..., with = keeping_degseq())}.
+#'         }
+#'   \item Assign edge weights to all synthetic networks by resampling from the empirical
+#'         distribution of \code{E(g_real)$weight}, maintaining overall weight heterogeneity.
+#'   \item Evaluate network fragmentation for each network type using
+#'         \code{robustness_MonteCarlo(type = "vertex", measure = "btwn.cent")}.
+#'   \item Compute the area under the fragmentation curve (AUC) as a measure of
+#'         network resilience using \code{pracma::trapz()}.
+#'   \item Return an AUC summary table and three ggplot objects:
+#'         \enumerate{
+#'           \item \code{p_weights} — histogram/density of edge-weight distributions.
+#'           \item \code{p_line} — fragmentation curves (fraction of vertices removed vs.
+#'                 fraction of largest component remaining).
+#'           \item \code{p_AUC} — bar plot of AUC (higher = more robust).
+#'         }
+#' }
+#'
+#' @return
+#' A named list with the following elements:
+#' \describe{
+#'   \item{\code{auc_summary}}{Data frame of AUC and normalized AUC for each network type.}
+#'   \item{\code{p_weights}}{ggplot histogram/density comparing edge-weight distributions.}
+#'   \item{\code{p_line}}{ggplot line plot of fragmentation curves.}
+#'   \item{\code{p_AUC}}{ggplot bar plot of AUC values.}
+#'	 \item{\code{network_colors}}{named color platte used here.}
+#' }
+#'
+#' @note
+#' The degree-preserving rewired network retains each node's degree but randomizes edge
+#' connections, thereby disrupting modular organization.  If this network collapses even
+#' faster than the real PPIN, it indicates that modular structure confers partial buffering
+#' within the real network.
+#'
+#' @examples
+#' data(graph_CTS_CP.1) 
+#' g_real <- graph_CTS_CP.1  # graph_list[["CTS_CP.1"]]
+#' result <- synthetic_simulation(g_real, main = "CTS_CP.1")
+#' result$auc_summary
+#' result$p_weights + result$p_line + result$p_AUC
+#'
+#' @import igraph data.table ggplot2 pracma
+#' @export
+
+synthetic_simulation = function(g_real, main=NULL){
+	if(is.null(main)) main = 'Network'
+	
+	# g_real = graph_list[["CTS_CP.1"]]
+	################################################
+	# Step 1. Extract empirical weight distribution
+	emp_weights <- E(g_real)$weight
+	summary(emp_weights)
+	#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+	# 0.00008 0.01101 0.01947 0.02692 0.03209 0.41399 
+
+	################################################
+	# step 2: Generate synthetic networks 
+	n_nodes <- vcount(g_real)
+	# approximate density of the real PPIN
+	p_edge  <- ecount(g_real) / choose(n_nodes, 2)
+
+	# 1. random (Erdős–Rényi)
+	g_random <- sample_gnp(n = n_nodes, p = p_edge)
+	# 2. scale-free (preferential attachment)
+	m_links  <- round(ecount(g_real) / n_nodes)  # average edges per new node
+	g_scale_free <- sample_pa(n = n_nodes, m = m_links, directed = FALSE)
+	# 3. small-world
+	g_small_world <- sample_smallworld(dim = 1, size = n_nodes, nei = 3, p = 0.05)
+    # 4. Add degree-preserving randomization control (optional)
+	# This “degree-preserving” null keeps local degree statistics but removes biological wiring patterns and topological coherence
+	g_deg_preserved <- rewire(g_real, with = keeping_degseq(niter = 1e5))
+
+
+	################################################
+	# Step 3 – assign synthetic edge weights using the empirical distribution
+	# Add continuous weights so that your synthetic graphs resemble the real PPIN in weight heterogeneity.
+	# This step ensures your robustness tests and DNB/Ic calculations remain comparable.
+
+	# resample empirical weights
+	E(g_random)$weight     <- sample(emp_weights, ecount(g_random), replace = TRUE)
+	E(g_scale_free)$weight <- sample(emp_weights, ecount(g_scale_free), replace = TRUE)
+	E(g_small_world)$weight <- sample(emp_weights, ecount(g_small_world), replace = TRUE)
+	E(g_deg_preserved)$weight <- sample(emp_weights, ecount(g_deg_preserved), replace = TRUE)
+
+	################################################
+	# Step 4 – verify weight distributions
+
+	# hist(emp_weights, breaks = 100, col = "gray", freq = FALSE,
+		 # main = "Edge-weight distributions", xlab = "Weight")
+	# hist(E(g_random)$weight, breaks = 100, col = rgb(1,0,0,0.3), add = TRUE)
+	# legend("topright", legend = c("Real PPIN", "Random network"), 
+		   # fill = c("gray", rgb(1,0,0,0.3)), bty = "n")
+	# # Combine real and random weights into one data frame
+	df_weights <- data.frame(
+	  weight = c(emp_weights, E(g_random)$weight),
+	  network = rep(c("Real PPIN", "Random network"),
+					times = c(length(emp_weights), ecount(g_random)))
+	)
+
+	# ggplot histogram / density overlay
+	p_weights <- ggplot(df_weights, aes(x = weight, fill = network, color = network)) +
+	  geom_histogram(aes(y = ..density..), position = "identity", alpha = 0.4, bins = 80) +
+	  geom_density(alpha = 0.6) +
+	  scale_fill_manual(values = c("gray50", "#E64B35")) +
+	  scale_color_manual(values = c("gray20", "#E64B35")) +
+	  labs(
+		title = "Edge-weight distribution",
+		x = "Edge weight",
+		y = "Density"
+	  ) +
+	  theme_classic(base_size = 14) +
+	  theme(
+		legend.title = element_blank(),
+		plot.title = element_text(hjust = 0.5, face = "bold")
+	  )		   
+		   
+	################################################
+	# Step 5 – run your robustness_MonteCarlo()
+	graph_attr(g_real, "name") <- "real_PPI"
+	graph_attr(g_random, "name") <- "random_network"
+	graph_attr(g_scale_free, "name") <- "scale_free"
+	graph_attr(g_small_world, "name") <- "small_world"
+	graph_attr(g_deg_preserved, "name") <- "degree_preserving"
+
+	sim_real   <- robustness_MonteCarlo(g_real, type = "vertex", measure = "btwn.cent", N = 100)
+	sim_random <- robustness_MonteCarlo(g_random, type = "vertex", measure = "btwn.cent", N = 100)
+	sim_scale  <- robustness_MonteCarlo(g_scale_free, type = "vertex", measure = "btwn.cent", N = 100)
+	sim_small  <- robustness_MonteCarlo(g_small_world, type = "vertex", measure = "btwn.cent", N = 100)
+	sim_deg <- robustness_MonteCarlo(g_deg_preserved, type="vertex", measure="btwn.cent", N=100)
+	
+	################################################
+	# Step 6 -  compare AUCs 
+
+	auc_real   <- trapz(sim_real$removed.pct,   sim_real$comp.pct)
+	auc_random <- trapz(sim_random$removed.pct, sim_random$comp.pct)
+	auc_scale   <- trapz(sim_scale$removed.pct,   sim_scale$comp.pct)
+	auc_small   <- trapz(sim_small$removed.pct,   sim_small$comp.pct)
+	auc_deg <- trapz(sim_deg$removed.pct, sim_deg$comp.pct)
+
+	#Combine and summarize AUC results
+	auc_summary <- data.frame(
+	  network = c("real_PPIN", "random", "scale_free", "small_world", "deg_preserving"),
+	  AUC = c(auc_real, auc_random, auc_scale, auc_small, auc_deg )
+	)
+
+	auc_summary$normalized_AUC <- auc_summary$AUC / max(auc_summary$AUC)
+	auc_summary
+		  # network       AUC normalized_AUC
+	# 1   real_PPIN 0.2327409      0.2342621
+	# 2      random 0.9935065      1.0000000
+	# 3  scale_free 0.9935065      1.0000000
+	# 4 small_world 0.9935065      1.0000000
+	# 5 deg_preserving 0.1541933      0.1552011
+	auc_summary$ID = main
+	
+	################################################
+	# Step 7 — Visualize fragmentation curves
+
+	# Combine all simulation outputs
+	sim_all <- rbindlist(list(
+	  cbind(sim_real,       network = "real_PPIN"),
+	  cbind(sim_random,     network = "random"),
+	  cbind(sim_scale,      network = "scale_free"),
+	  cbind(sim_small,      network = "small_world"),
+	  cbind(sim_deg,      network = "deg_preserving")
+	), fill = TRUE)
+
+	# Plot
+	network_colors <- c(
+	  "real_PPIN" = "#E64B35FF",
+	  "deg_preserving" = "#D39200FF",
+	  "random" = "#4DBBD5FF",
+	  "scale_free" = "#00A087FF",
+	  "small_world" = "#3C5488FF"
+	)
+	
+	network_levels <- c("real_PPIN", "deg_preserving", "random", "scale_free", "small_world")
+	sim_all$network    <- factor(sim_all$network, levels = network_levels)
+	auc_summary$network <- factor(auc_summary$network, levels = network_levels)
+
+	p_line = ggplot(sim_all, aes(x = removed.pct, y = comp.pct, color = network)) +
+	  geom_line(size = 1.2) +
+	  theme_classic(base_size = 12) +
+	  labs(
+		title = paste(main, "fragmentation under targeted-node attack"),
+		x = "Fraction of vertices removed",
+		y = "Fraction of largest component remaining"
+	  ) +
+	  scale_color_manual(values = network_colors) +
+	  scale_fill_manual(values = network_colors)	
+
+	# Plot AUC summary
+	p_AUC = ggplot(auc_summary, aes(x = network, y = AUC, fill = network)) +
+	  geom_col(width = 0.7) +
+	  theme_minimal(base_size = 12) +
+	  labs(
+		title = paste(main, "resilience (AUC of fragmentation curve)"),
+		x = "Network type",
+		y = "AUC (higher = more robust)"
+	  ) +  
+	  scale_color_manual(values = network_colors) +
+	  scale_fill_manual(values = network_colors)  +	
+	  theme(legend.position = "none", 
+		axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 9))
+  
+
+	################################################
+	# Step 8 — return
+	outputs = list(auc_summary=auc_summary, 
+					p_weights = p_weights,
+					p_line = p_line,
+					p_AUC = p_AUC,
+					network_colors = network_colors)
+
+	return(outputs)
+}
+
+
+#' @title Plot weighted protein–protein interaction (PPIN) network
+#'
+#' @description
+#' Generate a weighted PPIN visualization using ggraph, where
+#' edge width and node size reflect interaction strength.
+#' Positive and negative co-expression edges are colored orange and blue,
+#' and optionally, disease-related (e.g., CHD) genes are highlighted in red.
+#'
+#' @param g An \code{igraph} object containing both vertex and edge attributes.
+#'   Expected attributes include:
+#'   \itemize{
+#'     \item \strong{Vertex attributes:}
+#'       \code{name} (character) — gene identifier for each node;
+#'       \code{weight} (numeric) — node-level score, representing statistical strength (e.g., |Wilcox score|).
+#'     \item \strong{Edge attributes:}
+#'       \code{weight} (numeric) — edge strength, where higher values indicate stronger interactions;
+#'       \code{corexp_sign} (character) — co-expression direction with expected values
+#'       \code{"positive"} and/or \code{"negative"}.
+#'   }
+#' @param layout Character, graph layout algorithm to use.
+#'   Defaults to \code{"fr"} (Fruchterman–Reingold).
+#' @param CHD Optional character vector of gene names to highlight.
+#'
+#' @details
+#' The function removes isolated nodes (degree = 0) before plotting.
+#' Node size corresponds to \code{V(g)$weight}, and edge width corresponds to
+#' \code{E(g)$weight}. Edges are colored by \code{E(g)$corexp_sign}.
+#' Curated CHD genes (if provided) are highlighted in red.
+#'
+#' @return A \code{ggplot} object showing the weighted PPIN.
+#' @examples
+#' plot_weighted_PPIN(graph_list[["HiGCTS_CP.1"]], CHD = CHD_genes)
+#' @import ggraph ggplot2 igraph
+#' @export
+#'
+plot_weighted_PPIN = function(g, layout = "fr", 
+		CHD = NULL, node_size_title = "|Wilcox score|") {
+	# ---- Attribute checks ----
+	if (!"weight" %in% vertex_attr_names(g))
+		stop("Please assign V(g)$weight for plotting node size")
+
+	if (!"weight" %in% edge_attr_names(g))
+		stop("Please assign E(g)$weight for plotting edge width")
+
+	if (!"corexp_sign" %in% edge_attr_names(g))
+		stop("Please assign E(g)$corexp_sign for plotting edge color")
+    # ---- Validate that edge signs include 'positive' and 'negative' ----
+    expected_signs <- c("positive", "negative")
+    missing_signs <- setdiff(expected_signs, unique(E(g)$corexp_sign))
+	if (length(missing_signs) > 1)  
+		stop("Edge attribute 'corexp_sign' does not include expected values: 'positive', 'negative'")
+	
+	# ---- Disease-gene highlight ----
+	if (is.null(CHD)) {
+		warning("No disease genes supplied for highlighting (CHD = NULL)")
+		V(g)$is_CHD <- FALSE
+	  } else {
+		V(g)$is_CHD <- V(g)$name %in% CHD
+	  }
+
+	# ---- Remove isolated nodes ----
+	g_connected <- delete_vertices(g, which(degree(g) == 0))
+		
+	set.seed(1234)  # Use to ensure layout repeatable  
+	layout_coords <- create_layout(g_connected, layout = layout)  
+	
+	p  = ggraph(layout_coords) +  
+	  geom_edge_link(aes(
+		width = weight,                   
+		color = corexp_sign           
+	  ), alpha = 0.7) +	  
+	  geom_node_point(aes(
+		size = weight,    
+		color = is_CHD   
+		#shape = is_CHD
+	  )) +  
+	  geom_node_text(aes(label = name), repel = TRUE, size = 3) +  # <--- Add labels
+	  scale_color_manual(values = c(`TRUE` = "red", `FALSE` = "gray70")) +
+	  scale_edge_color_manual(values = c("positive" = "orange", "negative" = "blue")) +
+	  scale_size_continuous(range = c(2, 5), name = node_size_title) +
+	  scale_edge_width_continuous(range = c(0.1, 1), 
+					limits = range(E(g)$weight, na.rm = TRUE), 
+					name = "E weights") +	 
+	  theme_void() +
+	  labs(
+		 edge_color = "Specific co-exp",
+		 color = "Curated CHD genes"
+	  ) +
+	  theme(legend.position = "right") +
+	  ggtitle(paste0(db, ': ', int, ' ', vcount(g_connected), '/', vcount(g), ' PPI genes'))
+
+	return(p)
+}	
