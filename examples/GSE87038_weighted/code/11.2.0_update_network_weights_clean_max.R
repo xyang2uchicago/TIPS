@@ -11,15 +11,17 @@ library(stringr)
 wd = "/Users/felixyu/Documents/GSE87038_weighted/"
 setwd(paste0(wd, "results/PPI_weight/"))
 
-PPI_color_platte <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
-
-load(paste0(wd, "data/sce_E8.25_uncorrected.RData"))
+db <- "GSE87038"
 
 celltype_specific_weight_version <- '10'
 BioTIP_version <- '06232025'
 
+isl1_cluster <- "HiGCTS_8" # cluster containing ISL1 gene
+
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/heads/master/R/BioTIP_update_', BioTIP_version, '.R'))
+
+load(paste0(wd, "data/sce_E8.25_uncorrected.RData"))
 
 sce
 colnames(colData(sce))
@@ -58,7 +60,7 @@ if (diagnose) {
 }
 
 inputdir <- paste0(wd, "results/")
-graph_list <- readRDS(file = paste0(inputdir, "GSE87038_STRING_graph_perState_notsimplified.rds"))
+graph_list <- readRDS(file = paste0(inputdir, paste0(db, "_STRING_graph_perState_notsimplified.rds")))
 N0 <- sapply(graph_list, vcount)
 
 ########## clean 1) remove name-duplicated Vertex due to inconsistency in STRING.db ###########
@@ -194,7 +196,7 @@ if (step2) {
             verbose = TRUE,
             cores = 1
         )
-        saveRDS(weighted_graph_list, file = paste0("GSE87038_STRING_graph_perState_simplified_", s, "weighted.rds"))
+        saveRDS(weighted_graph_list, file = paste0(db, "_STRING_graph_perState_simplified_", s, "weighted.rds"))
     }
 
     # double check outputs
@@ -217,12 +219,11 @@ if (step3) {
 
     for (net_name in names(network_specificity_list))
     {
-        # net_name = "HiGCTS_8"
         plot_data <- NULL
         par(mfrow = c(2, 2))
 
         for (s in c("combined", "ratio", "zscore", "diff")) {
-            graph_list <- readRDS(file = paste0("GSE87038_STRING_graph_perState_simplified_", s, "weighted.rds"))
+            graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_simplified_", s, "weighted.rds"))
             g <- graph_list[[net_name]]
             # Safeguard to skip graphs with missing original weights
             if (is.null(E(g)$norm_PPI_score) || length(E(g)$norm_PPI_score) == 0) {
@@ -277,11 +278,11 @@ if (step3) {
 
 step4 <- TRUE
 if (step4) {
-    net_name <- "HiGCTS_8"
+    net_name <- isl1_cluster
     plot_data <- NULL
 
     for (s in c("combined", "ratio", "zscore", "diff")) {
-        graph_list <- readRDS(file = paste0("GSE87038_STRING_graph_perState_simplified_", s, "weighted.rds"))
+        graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_simplified_", s, "weighted.rds"))
         g <- graph_list[[net_name]]
 
         graphs_with_duplicates <- sapply(graph_list, function(g) {
@@ -315,7 +316,7 @@ if (step4) {
     }
 
     temp <- subset(plot_data, is_isl1 == TRUE)
-    pdf(file = paste0("compare_specificity_method_HiGCTS_8_vs_PPIscores.pdf"))
+    pdf(file = paste0("compare_specificity_method_", isl1_cluster, "_vs_PPIscores.pdf"))
     print(
         ggplot(temp, aes(x = norm_PPI_score, y = log_weight, color = as.factor(norm_PPI_score))) +
             geom_point() +

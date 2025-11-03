@@ -26,14 +26,22 @@ library(igraph)
 
 wd = "/Users/felixyu/Documents/GSE87038_weighted/"
 setwd(paste0(wd, "results/"))
-source(paste0(wd, "code/celltype_specific_weight_v10.R"))
+
+db <- "GSE87038"
+
+# Use GitHub version of celltype_specific_weight
+celltype_specific_weight_version <- '10'
+source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
+
+cardiac_clusters <- c(paste0("HiG", c(2, 3, 4, 8, 11, 12, 14, 16, 17, 18, 19)))
+CT_id <- c(7, 8, 11, 13, 15, 16, 16.1)
 
 PPI_color_palette = c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
  
  
-graph_list <- readRDS( file= 'GSE87038_STRING_graph_perState_notsimplified.rds')  
+graph_list <- readRDS( file= paste0(db, '_STRING_graph_perState_notsimplified.rds'))  
 (N0 = sapply(graph_list, vcount))
-print(N0)
+(N0)
 #       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6 
 #         303         435         411         304         322         512 
 #       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18 
@@ -55,15 +63,15 @@ for(g_name in unique(correct_n_edges$graph_id)){
 	graph_list[[g_name]] = delete_vertices(graph_list[[g_name]], vertices_to_remove)
 }
 N = sapply(graph_list, vcount)
-print((N0-N)[which(N0-N>0)])
+((N0-N)[which(N0-N>0)])
 # named numeric(0)
 
-graph_list <- lapply(graph_list, simplify) #!!!!!!!!!!!!!!!!!!!
+graph_list <- lapply(graph_list, simplify, edge.attr.comb ='max') #!!!!!!!!!!!!!!!!!!!
 N2 = sapply(graph_list, vcount)
-print(all(N==N2))   # [1] TRUE 
+(all(N==N2))   # [1] TRUE 
 
 
-print(names(graph_list))
+(names(graph_list))
 #  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"      
 #  [6] "HiG_6"       "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"     
 # [11] "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"       "HiG_11"     
@@ -72,7 +80,7 @@ print(names(graph_list))
 # [26] "HiGCTS_8"    "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"     
 # [31] "CTS_16.1"    "CTS_13"      "CTS_8"    
 edge_counts <- sapply(graph_list, ecount)
-print(edge_counts)
+(edge_counts)
 #       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6 
 #        4978        9544        7120        5362        5811       10993 
 #       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18 
@@ -92,7 +100,7 @@ print(edge_counts)
 # NetworkX → R igraph Equivalents:
 # betweenness_centrality() -> betweenness()
 ###############################################################################
-print(is_weighted(graph_list[[1]]))  # [1] TRUE
+(is_weighted(graph_list[[1]]))  # [1] TRUE
 tmp_list = graph_list  #!!!!
 for (i in seq_along(tmp_list)) {
   g = tmp_list[[i]]
@@ -119,8 +127,8 @@ calculate_gene_iqr <- function(BC) {
 
 ## all clusters 
 IQR = calculate_gene_iqr(BC)
-print(range(IQR))  # [1] 0.0000000 0.1720556
-print(table(IQR>0))
+(range(IQR))  # [1] 0.0000000 0.1720556
+(table(IQR>0))
 # FALSE  TRUE 
 #   566  1096
   
@@ -156,13 +164,13 @@ g1 = ggplot(plot_data[1:n,], aes(x = reorder(cell_type, -iqr_value), y = iqr_val
       expand = c(0, 0)
     )  
  
-## cardiac-lineage clusters 
-cardiac = setdiff(names(BC), c("HiG_0" , "HiG_2" , "HiG_7", "HiG_10" , "HiG_11" ))
+## cardiac-lineage clusters
+cardiac = setdiff(names(BC), cardiac_clusters)
 IQR =calculate_gene_iqr(BC[cardiac])
-print(range(IQR))  # [1] 0.0000000 0.1720556
-print(table(IQR>0))
+(range(IQR))  # [1] 0.0000000 0.1644062
+(table(IQR>0))
 # FALSE  TRUE 
-#   648   963 
+#   555   744 
   
 # Sort by IQR value in descending order (like your plot)
 plot_data <- data.frame(
@@ -212,7 +220,7 @@ dev.off()
 ###############################################################################
 # Community structure detection based on edge betweenness, this takes a while
 ## DO NOT repeat ########
-redo= FALSE
+redo = FALSE
 if(redo){
 	EB = sapply(tmp_list, cluster_edge_betweenness, directed=FALSE)
 	class(EB[[1]]) #"communities"
@@ -251,35 +259,34 @@ dev.copy2pdf(file='community_number.pdf', width=10)
 # library(tidyr)
 # library(igraph)
 # library(ggpubr)
-unstable_cluster_ID = c('7','11','15','16','16.1','13','8')
 
 # ==============================================================================
 # MAIN ANALYSIS EXECUTION
 # ==============================================================================
 # Extract edge weight data by PPI category
-edge_data <- extract_edge_weights_by_category(graph_list, PPI_color_palette, unstable_cluster_ID)
-print(head(edge_data, 3))
+edge_data <- extract_edge_weights_by_category(graph_list, PPI_color_palette, as.character(CT_id))
+(head(edge_data, 3))
 #   sample PPI_cat edge_weight num_edges cluster_ID cluster_cat
-# 1  HiG_1     HiG       0.422      4978          1      stable
-# 2  HiG_1     HiG       0.820      4978          1      stable
-# 3  HiG_1     HiG       1.534      4978          1      stable
+# 1  HiG_1     HiG       0.211      4978          1      stable
+# 2  HiG_1     HiG       0.410      4978          1      stable
+# 3  HiG_1     HiG       0.767      4978          1      stable
 
 # Create plots for PPI category analysis
 category_plots <- plot_edge_weight_distributions(edge_data, PPI_color_palette)
 
 # Display all plots
-print("=== EDGE WEIGHT DISTRIBUTIONS BY PPI CATEGORY ===")
-print(category_plots$density_plot)
-print(category_plots$boxplot)
+("=== EDGE WEIGHT DISTRIBUTIONS BY PPI CATEGORY ===")
+(category_plots$density_plot)
+(category_plots$boxplot)
 
 
-print("=== SUMMARY STATISTICS ===") #TODO
+("=== SUMMARY STATISTICS ===")
 # # A tibble: 3 × 4
 #   PPI_cat mean_weight median_weight total_edges
 #   <fct>         <dbl>         <dbl>       <int>
-# 1 CTS           0.874         0.696         993
-# 2 HiGCTS        0.871         0.688         158
-# 3 HiG           0.771         0.604      105283
+# 1 CTS           0.367         0.292         905
+# 2 HiGCTS        0.382         0.322         146
+# 3 HiG           0.366         0.295      150813
 grid.arrange(category_plots$density_plot, category_plots$boxplot, ncol = 2)
 dev.copy2pdf(file='edge_weight.pdf')
 

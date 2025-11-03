@@ -20,12 +20,15 @@ setwd(paste0(wd, "results/PPI_weight/"))
 celltype_specific_weight_version <- '10'
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
-PPI_color_platte <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
-PPI_size_platte <- c("CTS" = 1, "HiGCTS" = 0.75, "HiG" = 0.25)
+PPI_color_palette <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
+PPI_size_palette <- c("CTS" = 1, "HiGCTS" = 0.75, "HiG" = 0.25)
+
+db <- "GSE87038"
 
 # refer to 11.1_CTS_cardiac_network_strengthDistribution.R
 s <- "combined"
-file <- paste0("GSE87038_STRING_graph_perState_simplified_", s, "weighted.rds")
+
+file <- paste0(db, "_STRING_graph_perState_simplified_", s, "weighted.rds")
 graph_list <- readRDS(file)
 (names(graph_list))
 #  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"
@@ -109,8 +112,8 @@ g_attack <- ggplot(
 ) +
     # geom_line(size=ifelse(subset(attack.vertex ,measure == 'strength')$signature=='endothelial.a', 2, 1)) + # uisng this line if highlighting one subtype
     geom_line(aes(group = signature)) + # group ensures each line is drawn independently
-    scale_color_manual(values = PPI_color_platte) +
-    scale_size_manual(values = PPI_size_platte) +
+    scale_color_manual(values = PPI_color_palette) +
+    scale_size_manual(values = PPI_size_palette) +
     geom_abline(slope = -1, intercept = 1, col = "gray", lty = 2) +
     theme(legend.position = "inside", legend.position.inside = c(1, 1), legend.justification = c(1, 1)) +
     ylab("the remaining maximal component size / the initial maximal component size") +
@@ -128,7 +131,7 @@ gsignature_attack <- ggplot(
     geom_line() +
     geom_abline(slope = -1, intercept = 1, col = "gray", lty = 2) +
     theme(legend.position = "inside", legend.position.inside = c(1, 1), legend.justification = c(1, 1)) +
-    scale_size_manual(values = PPI_size_platte) +
+    scale_size_manual(values = PPI_size_palette) +
     ylab("the remaining maximal component size / the initial maximal component size") +
     ggtitle("vertex robustness by betweenness centrality")
 print(gsignature_attack)
@@ -144,8 +147,8 @@ g_attack2 <- ggplot(
 ) +
     # geom_line(size=ifelse(subset(attack.vertex ,measure == 'strength')$signature=='endothelial.a', 2, 1)) + # use this line if highlighting one subtype
     geom_line(aes(group = signature)) + # comment this line if highlighting one subtype
-    scale_color_manual(values = PPI_color_platte) +
-    scale_size_manual(values = PPI_size_platte) +
+    scale_color_manual(values = PPI_color_palette) +
+    scale_size_manual(values = PPI_size_palette) +
     geom_abline(slope = -1, intercept = 1, col = "gray", lty = 2) +
     theme(legend.position = "inside", legend.position.inside = c(1, 1), legend.justification = c(1, 1)) +
     ggtitle("vertex robustness measured by strength")
@@ -159,7 +162,7 @@ gsignature_attack2 <- ggplot(
     )
 ) +
     geom_line(size = 1.2) + # <- thicker lines
-    scale_size_manual(values = PPI_size_platte) +
+    scale_size_manual(values = PPI_size_palette) +
     geom_abline(slope = -1, intercept = 1, col = "gray", lty = 2) +
     theme(
         legend.position = "inside",
@@ -174,7 +177,7 @@ gsignature_attack2 <- ggplot(
     ) +
     ggtitle("Vertex robustness measured by strength")
 
-   pdf(file='vertex_attack_GSE87038.pdf') 
+   pdf(file=paste0('vertex_attack_', db,'.pdf')) 
    print(gridExtra::grid.arrange(g_attack ,  g_attack2 , 
 					gsignature_attack ,  gsignature_attack2 , 
                       ncol = 2, nrow = 2))
@@ -188,7 +191,7 @@ library(data.table)
 library(ggplot2)
 
 # refer to 11.1.1_CTS_cardiac_network_strengthDistribution.R
-file <- "GSE87038_STRING_graph_perState_simplified_combinedweighted.rds"
+file <- paste0(db, "_STRING_graph_perState_simplified_combinedweighted.rds")
 graph_list <- readRDS(file)
 
 (names(graph_list))
@@ -401,7 +404,7 @@ p_attack3 <- ggplot(
     aes(x = removed.pct, y = comp.pct, col = cluster, linetype = PPI_cat, size = PPI_cat)
 ) +
     geom_line(show.legend = TRUE) +
-    scale_size_manual(values = PPI_size_platte, name = "PPI Category") +
+    scale_size_manual(values = PPI_size_palette, name = "PPI Category") +
     facet_wrap(~type) +
     geom_abline(slope = -1, intercept = 1, col = "gray", lty = 2) +
     labs(
@@ -436,8 +439,8 @@ p_attack4 <- ggplot(
     aes(x = removed.pct, y = comp.pct, col = PPI_cat, linetype = PPI_cat, size = PPI_cat)
 ) +
     geom_line(aes(group = signature), show.legend = TRUE) + # Ensure legend is shown
-    scale_color_manual(values = PPI_color_platte, name = "PPI Category") +
-    scale_size_manual(values = PPI_size_platte, name = "PPI Category") +
+    scale_color_manual(values = PPI_color_palette, name = "PPI Category") +
+    scale_size_manual(values = PPI_size_palette, name = "PPI Category") +
     facet_wrap(~type) +
     geom_abline(slope = -1, intercept = 1, col = "gray", lty = 2) +
     theme(
@@ -457,7 +460,7 @@ p_attack4 <- ggplot(
     )
 
 print(p_attack4)
-pdf(file = "attack_GSE87038.pdf", width = 8, height = 7)
+pdf(file = paste0("attack_", db, ".pdf"), width = 8, height = 7)
 plot(p_attack4)
 plot(p_attack3)
 dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -548,8 +551,8 @@ fold_change <- fold_change %>%
 g <- ggplot(robustness.dt, aes(x = type2, y = comp.pct, fill = measure, color = PPI_cat, size = PPI_cat)) +
     geom_boxplot(alpha = 0.5, position = position_dodge(width = 0.75)) +
     facet_wrap(~PPI_cat, ncol = 3) +
-    scale_color_manual(values = PPI_color_platte) +
-    scale_size_manual(values = PPI_size_platte) +
+    scale_color_manual(values = PPI_color_palette) +
+    scale_size_manual(values = PPI_size_palette) +
     scale_fill_manual(values = c("random" = "grey", "btwn.cent" = "white")) +
     theme_minimal(base_size = 14) +
     labs(
@@ -580,7 +583,7 @@ targeted_vertex_data <- targeted_vertex_data[!is.na(targeted_vertex_data$comp.pc
 
 g2 <- ggplot(targeted_vertex_data, aes(x = PPI_cat, y = comp.pct, fill = PPI_cat)) +
     geom_boxplot(alpha = 0.5, position = position_dodge(width = 0.75)) + # Dodge the boxes for each type per PPI_cat
-    scale_fill_manual(values = PPI_color_platte) +
+    scale_fill_manual(values = PPI_color_palette) +
     geom_signif(
         comparisons = list(
             c("CTS", "HiGCTS"), c("HiGCTS", "HiG"), c("CTS", "HiG")
@@ -603,7 +606,7 @@ g2 <- ggplot(targeted_vertex_data, aes(x = PPI_cat, y = comp.pct, fill = PPI_cat
 
 print(g2)
 
-pdf(file = "box_wilcox-test_attack_GSE87038.pdf", width = 12)
+pdf(file = paste0("box_wilcox-test_attack_", db, ".pdf"), width = 12)
 print(g)
 print(g2)
 dev.off()
@@ -721,7 +724,7 @@ g <- ggplot(tmp, aes(x = as.factor(clust), y = -log10(p.adj), color = PPI_cat)) 
         color = "State",
         shape = "State"
     ) +
-    scale_color_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
     scale_shape_manual(values = c("HiG" = 16, "CTS" = 17, "HiGCTS" = 18)) +
     facet_wrap(~type, scales = "free", nrow = 2) + # Split into two rows for edge and node
     theme_minimal() +
@@ -742,14 +745,14 @@ g2 <- ggplot(tmp, aes(x = log10(count), y = -log10(p.adj), color = PPI_cat)) +
         color = "State",
         shape = "State"
     ) +
-    scale_color_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
     scale_shape_manual(values = c("HiG" = 16, "CTS" = 17, "HiGCTS" = 18)) +
     facet_wrap(~type, scales = "free", ncol = 2) + # Split into two rows for edge and node
     theme_minimal() +
     theme(legend.position = "top") +
     ggtitle("Adjusted p-values of Wilcox test comparing targeted attack vs random removal")
 print(g2)
-pdf(file = "line.adjp_wilcox_attack_GSE87038.pdf")
+pdf(file = paste0("line.adjp_wilcox_attack_", db, ".pdf"))
 print(g)
 print(g2)
 dev.off()
@@ -764,7 +767,7 @@ dev.off()
 # for the
 #############################################################
 
-IDs_of_CTS <- c("7", "8", "11", "13", "15", "16", "16.1")
+
 (names(graph_list))
 #  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"
 #  [6] "HiG_6"       "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"
@@ -804,7 +807,7 @@ df_AUC$PPI_cat <- factor(df_AUC$PPI_cat, levels = c("CTS", "HiGCTS", "HiG"))
 
 g3 <- ggplot(df_AUC, aes(x = PPI_cat, y = auc, fill = PPI_cat)) +
     geom_boxplot(alpha = 0.5, position = position_dodge(width = 0.75)) +
-    scale_fill_manual(values = PPI_color_platte) +
+    scale_fill_manual(values = PPI_color_palette) +
     geom_signif(
         comparisons = list(
             c("CTS", "HiGCTS"), c("HiGCTS", "HiG"), c("CTS", "HiG")
@@ -825,7 +828,7 @@ g3 <- ggplot(df_AUC, aes(x = PPI_cat, y = auc, fill = PPI_cat)) +
         plot.title = element_text(hjust = 0.5)
     )
 ggsave(
-    filename = "box_wilcox-test_attack_AUC_GSE87038.pdf",
+    filename = paste0("box_wilcox-test_attack_AUC_", db, ".pdf"),
     plot = g3,
     width = 10,
     height = 7
@@ -936,7 +939,7 @@ for (j in cluster_ids) {
         x_lines,
         lf,
         xlab = "AUC of maximal component size",
-        col = PPI_color_platte,
+        col = PPI_color_palette,
         xlim = xlim_range,
         lwd = 2,
         main = paste0("Cluster ", j)
@@ -946,7 +949,7 @@ for (j in cluster_ids) {
     for (col in obs_cols) {
         if (!is.null(observed_auc_list[[col]])) {
             label <- sub("^(CTS|HiGCTS|HiG)_.*", "\\1", col)
-            abline(v = observed_auc_list[[col]], col = PPI_color_platte[label], lty = 2, lwd = 2)
+            abline(v = observed_auc_list[[col]], col = PPI_color_palette[label], lty = 2, lwd = 2)
         }
     }
 
@@ -969,7 +972,7 @@ for (j in cluster_ids) {
                     "HiGCTS" = 2.5,
                     "HiG" = 4
                 ),
-                col = PPI_color_platte[label]
+                col = PPI_color_palette[label]
             )
         }
     }
@@ -1109,7 +1112,7 @@ for (j in cluster_ids) {
         x_lines,
         lf,
         xlab = "AUC of maximal component size",
-        col = PPI_color_platte,
+        col = PPI_color_palette,
         xlim = xlim_range,
         lwd = 2,
         main = paste0("Cluster ", j)
@@ -1118,7 +1121,7 @@ for (j in cluster_ids) {
     for (col in obs_cols) {
         if (!is.null(observed_auc_list[[col]])) {
             label <- sub("^(CTS|HiGCTS|HiG)_.*", "\\1", col)
-            abline(v = observed_auc_list[[col]], col = PPI_color_platte[label], lty = 2, lwd = 2)
+            abline(v = observed_auc_list[[col]], col = PPI_color_palette[label], lty = 2, lwd = 2)
         }
     }
 
@@ -1140,7 +1143,7 @@ for (j in cluster_ids) {
                     "HiGCTS" = 2.5,
                     "HiG" = 4
                 ),
-                col = PPI_color_platte[label]
+                col = PPI_color_palette[label]
             )
         }
     }

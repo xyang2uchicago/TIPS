@@ -9,17 +9,13 @@ library(ggpubr)
 wd = "/Users/felixyu/Documents/GSE87038_weighted/"
 setwd(paste0(wd, "results/"))
 score_threshold <- "weight"
-PPI_color_platte <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
 
-# Tipping Point Clusters:
-# Cluster 7: Blood Progenitors
-# Cluster 8: Pharyngeal Mesoderm
-# Cluster 11: Allantois
-# Cluster 13: Haematoendothelial Progenitors
-# Cluster 15: Blood Progenitors
-# Cluster 16: Mesenchyme
+db <- "GSE87038"
+db_species <- 10090 # 10090 for mouse, 9606 for human
 
-graph_list <- readRDS(file = "GSE87038_STRING_graph_perState_notsimplified.rds")
+# ATTENTION: MANUAL INPUT REQUIRED AFTER LINE 154
+
+graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_notsimplified.rds"))
 graph_list <- lapply(graph_list, simplify, edge.attr.comb ='max') # !!!!!!!!!!!!!!!!!!! # FIXED
 
 N <- sapply(graph_list, vcount)
@@ -82,7 +78,7 @@ if (length(duplicated_names) > 0) {
 library("STRINGdb")
 packageVersion("STRINGdb") # '2.21.0'
 string_db <- STRINGdb$new(
-    version = "12.0", species = 10090,
+    version = "12.0", species = db_species,
     score_threshold = 200,
     network_type = "full",
     input_directory = "../data/PPIN"
@@ -105,7 +101,7 @@ any(duplicated(DEG[["5"]])) # [1] FALSE
 
 markers.up <- readRDS(paste0(inputDir, "DEG_perState_min.prop0.25_lfc0.6_FDFR0.05.rds"))
 
-graph_list <- readRDS(file = "GSE87038_STRING_graph_perState_notsimplified.rds")
+graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_notsimplified.rds"))
 graph_list <- lapply(graph_list, simplify, edge.attr.comb ='max') # !!!!!!!!!!!!!!!!!!! # FIXED
 
 N <- sapply(graph_list, vcount)
@@ -150,6 +146,7 @@ map_protein_to_gene <- function(string_id) {
     }
 }
 
+# MANUAL INPUT REQUIRED
 for (i in names(which(graphs_with_duplicates))) {
     cat("\n")
     cat("Analyzing", i, "\n")
@@ -261,7 +258,7 @@ unique(unmapped_genes)
 ################################################################
 ## remove duplciated vertex directly from un-simplified graph ##
 ################################################################
-graph_list <- readRDS(file = "GSE87038_STRING_graph_perState_notsimplified.rds")
+graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_notsimplified.rds"))
 
 N <- sapply(graph_list, vcount)
 graphs_with_duplicates <- sapply(graph_list, function(g) {

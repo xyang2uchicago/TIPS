@@ -12,9 +12,12 @@ library("SingleCellExperiment")
 wd = "/Users/felixyu/Documents/GSE87038_weighted/"
 setwd(paste0(wd, "results/"))
 
-load("../data/sce_E8.25_uncorrected.RData")
+db <- "GSE87038"
+
+db_species <- 10090 # 10090 for mouse, 9606 for human
 
 load(file = "../data/BioTIP.res.RData")
+load("../data/sce_E8.25_uncorrected.RData") 
 
 CTS <- res$CTS.candidate[which(res$significant)]
 
@@ -34,7 +37,6 @@ names(CTS)
 ########################
 logFC.cut <- 0.6 # 1
 
-load("../data/sce_E8.25_uncorrected.RData")
 sce
 # class: SingleCellExperiment
 # dim: 10938 7240
@@ -133,7 +135,7 @@ packageVersion("STRINGdb") # '2.21.0'
 library(tibble)
 
 string_db <- STRINGdb$new(
-    version = "12.0", species = 10090, # species= 10090 for mouse
+    version = "12.0", species = db_species, # species= 10090 for mouse
     score_threshold = 200, # !!!!!!!!!!!default is 200
     network_type = "full",
     input_directory = "../data/PPIN"
@@ -318,9 +320,9 @@ df_graph_info <- data.frame(
 # CTS_13           CTS_13     60    294
 # CTS_8             CTS_8     54    330
 
-saveRDS(graph_list, file = "GSE87038_STRING_graph_perState_notsimplified.rds") # !!!!!!!!!!!!!!!!!!!
+saveRDS(graph_list, file = paste0(db, "_STRING_graph_perState_notsimplified.rds")) # !!!!!!!!!!!!!!!!!!!
 
-graph_list <- readRDS(file = "GSE87038_STRING_graph_perState_notsimplified.rds")
+graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_notsimplified.rds"))
 graph_list <- lapply(graph_list, simplify, edge.attr.comb ='max') # !!!!!!!!!!!!!!!!!!! # FIXED
 
 # Check which graphs have duplicate vertex names

@@ -10,10 +10,14 @@ library(igraph)
 
 wd = "/Users/felixyu/Documents/GSE87038_weighted/"
 setwd(paste0(wd, "results/"))
-PPI_color_platte <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
+PPI_color_palette <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
 
+db <- "GSE87038"
 
-graph_list <- readRDS(file = "GSE87038_STRING_graph_perState_notsimplified.rds")
+CT_id <- c(7, 8, 11, 13, 15, 16, 16.1)
+CT_id_formatted <- paste0("_(", paste(CT_id, collapse = "|"), ")")
+
+graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_notsimplified.rds"))
 N0 <- sapply(graph_list, vcount)
 
 # Check which graphs have duplicate vertex names
@@ -131,12 +135,12 @@ df$PPI_cat <- lapply(df$Group.1, function(x) unlist(strsplit(x, "_"))[1]) %>%
     factor(., levels = c("CTS", "HiGCTS", "HiG"))
 
 g_degree <- ggplot(data = df, aes(x = k, y = x, col = PPI_cat)) +
-    scale_color_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
     geom_point(shape = 18, size = 5) +
     xlab("number of nodes per PPI_cat") +
     theme(legend.position = c(1, 1), legend.justification = c(0, 1)) +
     ylab("average GRN normalized degree") +
-    ggtitle("GSE87038")
+    ggtitle(db)
 
 
 
@@ -260,7 +264,7 @@ g_degree_dis2 <- V_deg_nor_dis %>%
     filter(k > 0, nor_degree_cum > 0) %>% # !!!!!!!!! NEW !!!!!!
     ggplot(aes(x = k, y = nor_degree_cum, color = PPI_cat, linetype = PPI_cat)) +
     geom_line(aes(group = signature, linetype = PPI_cat)) +
-    scale_color_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
     xlab("Normalized degree level") +
     ylab("Fraction of nodes having a normalized degree ≥ x") +
     theme(
@@ -296,12 +300,12 @@ g_degree_dis2 <- ggplot(
 ) + #
     geom_line(aes(group = signature, linetype = PPI_cat)) +
     xlab("degree level (x)") +
-    scale_color_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
     ylab("Fraction of nodes having a degree ≥ x") +
     theme(legend.position = c(0.2, 0.75), legend.justification = c(1, 1), legend.text = element_text(size = 5)) +
     coord_trans(x = "log10", y = "log10")
 
-pdf(file = "degree_GSE87038.pdf")
+pdf(file = paste0("degree_", db, ".pdf"))
 print(g_degree)
 print(g_degree_dis2)
 print(g_degree_dis)
@@ -344,13 +348,13 @@ ggplot(V_deg_dis, aes(x = normalized_degree_distribution, fill = PPI_cat)) +
     geom_density(alpha = 0.5) + # Create density plot
     labs(x = "Normalized Degree Distribution", y = "Density", title = "Density Plot: Degree Distribution by Width Category") +
     theme_minimal() +
-    scale_fill_manual(values = PPI_color_platte)
+    scale_fill_manual(values = PPI_color_palette)
 # Boxplot by Categories (NOT USED)
 g1 <- ggplot(V_deg_dis, aes(x = factor(PPI_cat), y = normalized_degree_distribution, fill = PPI_cat)) +
     geom_boxplot() +
     labs(x = "PPIN Category", y = "Normalized Degree Distribution", title = "PPINs for all clusters") +
     theme_minimal() +
-    scale_fill_manual(values = PPI_color_platte) +
+    scale_fill_manual(values = PPI_color_palette) +
     stat_compare_means(
         method = "wilcox",
         comparisons = list(c("CTS", "HiGCTS"), c("CTS", "HiG"), c("HiGCTS", "HiG")),
@@ -359,13 +363,13 @@ g1 <- ggplot(V_deg_dis, aes(x = factor(PPI_cat), y = normalized_degree_distribut
     )
 # Boxplot by Categories (NEW,  USED)
 g2 <- ggplot(
-    subset(V_deg_dis, grepl("_7|_11|_15|_16|_16.1|_13|_8", signature)),
+    subset(V_deg_dis, grepl(CT_id_formatted, signature)),
     aes(x = factor(PPI_cat), y = normalized_degree_distribution, fill = PPI_cat)
 ) +
     geom_boxplot() +
     labs(x = "PPIN Category", y = "Normalized Degree Distribution", title = "PPINs for transition clusters") +
     theme_minimal() +
-    scale_fill_manual(values = PPI_color_platte) +
+    scale_fill_manual(values = PPI_color_palette) +
     stat_compare_means(
         method = "wilcox",
         comparisons = list(c("CTS", "HiGCTS"), c("CTS", "HiG"), c("HiGCTS", "HiG")),
@@ -375,9 +379,9 @@ g2 <- ggplot(
 
 
 combined <- g1 + g2
-ggsave("boxplot_normalized_degree_GSE87038.pdf", combined, width = 12, height = 4)
+ggsave(paste0("boxplot_normalized_degree_", db, ".pdf"), combined, width = 12, height = 4)
 
-tmp <- subset(V_deg_dis, grepl("_7|_11|_15|_16|_16.1|_13|_8", signature))
+tmp <- subset(V_deg_dis, grepl(CT_id_formatted, signature))
 
 table(V_deg_dis$PPI_cat)
 #    CTS HiGCTS    HiG

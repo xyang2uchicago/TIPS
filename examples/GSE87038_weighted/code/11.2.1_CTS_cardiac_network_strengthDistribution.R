@@ -9,14 +9,19 @@ library(igraph)
 
 wd = "/Users/felixyu/Documents/GSE87038_weighted/"
 setwd(paste0(wd, "results/"))
-PPI_color_platte <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
-PPI_size_platte <- c("CTS" = 1, "HiGCTS" = 0.75, "HiG" = 0.25)
+PPI_color_palette <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
+PPI_size_palette <- c("CTS" = 1, "HiGCTS" = 0.75, "HiG" = 0.25)
+
+db <- "GSE87038"
 
 celltype_specific_weight_version <- '10'
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
+CT_id <- c(7, 8, 11, 13, 15, 16)
+CT_id_formatted <- paste0("_(", paste(CT_id, collapse = "|"), ")")
 
-graph_list <- readRDS(file = "GSE87038_STRING_graph_perState_notsimplified.rds")
+
+graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_notsimplified.rds"))
 (N0 <- sapply(graph_list, vcount))
 #       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6
 #         303         435         411         304         322         512
@@ -123,12 +128,12 @@ df$PPI_cat <- lapply(df$Group.1, function(x) unlist(strsplit(x, "_"))[1]) %>%
     factor(., levels = c("CTS", "HiGCTS", "HiG"))
 
 g_strength <- ggplot(data = df, aes(x = k, y = x, col = PPI_cat)) +
-    scale_color_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
     geom_point(shape = 18, size = 5) +
     xlab("number of nodes per PPI_cat") +
     theme(legend.position = c(1, 1), legend.justification = c(0, 1)) +
     ylab("average GRN normalized strength") +
-    ggtitle("GSE87038")
+    ggtitle(db)
 
 
 
@@ -171,7 +176,7 @@ g_strength_dis <- ggplot(
 ) + #
     geom_line(aes(linetype = PPI_cat)) +
     xlab("cumulative  strength distribution") +
-    scale_size_manual(values = PPI_size_platte) + # Set line width
+    scale_size_manual(values = PPI_size_palette) + # Set line width
     geom_text( # data=V_deg_dis_text,
         aes(label = n_nodes, color = cluster), # interaction(PPI_cat, cluster)),
         hjust = 1.1, vjust = 0.5, check_overlap = TRUE, size = 3
@@ -231,7 +236,7 @@ g_strength_dis <- V_deg_nor_dis %>%
     filter(k > 0, nor_strength_cum > 0) %>% # !!!!!!!!! NEW !!!!!!
     ggplot(aes(x = k, y = nor_strength_cum, color = cluster, linetype = PPI_cat, size = PPI_cat)) +
     geom_line() +
-    scale_size_manual(values = PPI_size_platte) + # Set line width
+    scale_size_manual(values = PPI_size_palette) + # Set line width
     xlab("Normalized strength level") +
     ylab("cumulative normalized  strength distribution") +
     geom_text(aes(label = n_nodes), hjust = 1.1, vjust = 0.5, check_overlap = TRUE, size = 3) +
@@ -247,8 +252,8 @@ g_strength_dis2 <- V_deg_nor_dis %>%
     filter(k > 0, nor_strength_cum > 0) %>% # !!!!!!!!! NEW !!!!!!
     ggplot(aes(x = k, y = nor_strength_cum, color = PPI_cat, linetype = PPI_cat, size = PPI_cat)) +
     geom_line(aes(group = signature, linetype = PPI_cat)) +
-    scale_color_manual(values = PPI_color_platte) +
-    scale_size_manual(values = PPI_size_platte) + # Set line width
+    scale_color_manual(values = PPI_color_palette) +
+    scale_size_manual(values = PPI_size_palette) + # Set line width
     xlab("Normalized strength level") +
     ylab("Fraction of nodes having a normalized strength ≥ x") +
     theme(
@@ -274,7 +279,7 @@ g_strength_dis <- ggplot(
 ) + #
     geom_line(aes(linetype = PPI_cat)) +
     xlab(" strength level (x)") +
-    scale_size_manual(values = PPI_size_platte) + # Set line width
+    scale_size_manual(values = PPI_size_palette) + # Set line width
     ylab("Fraction of nodes having a strength ≥ x") +
     theme(legend.position = c(0.2, 0.75), legend.justification = c(1, 1), legend.text = element_text(size = 5)) +
     coord_trans(x = "log10", y = "log10")
@@ -286,14 +291,14 @@ g_strength_dis2 <- ggplot(
 ) + #
     geom_line(aes(group = signature, linetype = PPI_cat)) +
     xlab(" strength level (x)") +
-    scale_color_manual(values = PPI_color_platte) +
-    scale_size_manual(values = PPI_size_platte) + # Set line width
+    scale_color_manual(values = PPI_color_palette) +
+    scale_size_manual(values = PPI_size_palette) + # Set line width
     ylab("Fraction of nodes having a strength ≥ x") +
     theme(legend.position = c(0.2, 0.75), legend.justification = c(1, 1), legend.text = element_text(size = 5)) +
     coord_trans(x = "log10", y = "log10")
 print(g_strength_dis2)
 
-pdf(file = "strength_GSE87038.pdf")
+pdf(file = paste0("strength_", db, ".pdf"))
 print(g_strength)
 print(g_strength_dis2)
 print(g_strength_dis)
@@ -319,13 +324,13 @@ ggplot(V_deg_dis, aes(x = normalized_strength_distribution, fill = PPI_cat)) +
     geom_density(alpha = 0.5) + # Create density plot
     labs(x = "Normalized strength Distribution", y = "Density", title = "Density Plot: strength Distribution by Width Category") +
     theme_minimal() +
-    scale_fill_manual(values = PPI_color_platte)
+    scale_fill_manual(values = PPI_color_palette)
 # Boxplot by Categories (NOT USED)
 g1 <- ggplot(V_deg_dis, aes(x = factor(PPI_cat), y = normalized_strength_distribution, fill = PPI_cat)) +
     geom_boxplot() +
     labs(x = "PPIN Category", y = "Normalized strength Distribution", title = "PPINs for all clusters") +
     theme_minimal() +
-    scale_fill_manual(values = PPI_color_platte) +
+    scale_fill_manual(values = PPI_color_palette) +
     stat_compare_means(
         method = "wilcox",
         comparisons = list(c("CTS", "HiGCTS"), c("CTS", "HiG"), c("HiGCTS", "HiG")),
@@ -334,13 +339,13 @@ g1 <- ggplot(V_deg_dis, aes(x = factor(PPI_cat), y = normalized_strength_distrib
     )
 # Boxplot by Categories (NEW,  USED)
 g2 <- ggplot(
-    subset(V_deg_dis, grepl("_7|_8|_11|_13|_15|_16", signature)),
+    subset(V_deg_dis, grepl(CT_id_formatted, signature)),
     aes(x = factor(PPI_cat), y = normalized_strength_distribution, fill = PPI_cat)
 ) +
     geom_boxplot() +
     labs(x = "PPIN Category", y = "Normalized strength Distribution", title = "PPINs for transition clusters") +
     theme_minimal() +
-    scale_fill_manual(values = PPI_color_platte) +
+    scale_fill_manual(values = PPI_color_palette) +
     stat_compare_means(
         method = "wilcox",
         comparisons = list(c("CTS", "HiGCTS"), c("CTS", "HiG"), c("HiGCTS", "HiG")),
@@ -348,11 +353,11 @@ g2 <- ggplot(
         label = "p.signif"
     )
 library(gridExtra)
-pdf(file = "boxplot_normalized_strength_GSE87038.pdf", height = 4)
+pdf(file = paste0("boxplot_normalized_strength_", db, ".pdf"), height = 4)
 print(grid.arrange(g1, g2, ncol = 2))
 dev.off()
 
-tmp <- subset(V_deg_dis, grepl("_7|_8|_11|_13|_15|_16", signature))
+tmp <- subset(V_deg_dis, grepl(CT_id_formatted, signature))
 
 print(table(V_deg_dis$PPI_cat))
 #    CTS HiGCTS    HiG 

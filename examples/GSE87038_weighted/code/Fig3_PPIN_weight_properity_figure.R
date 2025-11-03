@@ -23,13 +23,19 @@ signature_levels = c(
   "CTS_16.1", "CTS_13", "CTS_8", "HiGCTS_13"
 )
 
+db <- "GSE87038"
+
+CT_id = c(7, 8, 11, 13, 15, 16, 16.1)
+CT_id_formatted <- paste0("_(", paste(CT_id, collapse = "|"), ")")
+
+
 setwd(paste0(wd, 'results/PPI_weight/'))
 inputdir = "../../data/"
 
 
 # refer to 11.2.0_weighted_graph_attack_robustness.R
 s = "combined"
-file = paste0('GSE87038_STRING_graph_perState_simplified_',s,'weighted.rds')
+file = paste0(db, '_STRING_graph_perState_simplified_',s,'weighted.rds')
 graph_list <- readRDS(file)  
 	
 (names(graph_list))
@@ -89,8 +95,8 @@ top_genes <- df %>%
   	
 # subset the CHD genes within top 5 
 top_genes_CHD = subset(top_genes, PCGC_AllCurated==TRUE)
-(dim(top_genes))  # [1] 165  18
-(dim(top_genes_CHD))  # [1] 12 18
+(dim(top_genes))  # [1] 160  18
+(dim(top_genes_CHD))  # [1] 0 18
 
 df$PPI_cat = lapply(df$signature %>% as.vector, function(x) unlist(strsplit(x, split='_'))[1]) %>% unlist 
 df$PPI_cat = factor(df$PPI_cat,levels=c('CTS', 'HiGCTS', 'HiG')) 				
@@ -140,7 +146,7 @@ V_deg_dis$PPI_cat = lapply(V_deg_dis$signature, function(x) unlist(strsplit(x , 
 
 (table(V_deg_dis$PPI_cat))
 #    CTS HiGCTS    HiG 
-#    145     53   4370
+#    145     47   4370
 V_deg_dis$cluster = lapply(V_deg_dis$signature, function(x) unlist(strsplit(x , '_'))[2]) %>% unlist 
 
 all(V_deg_dis$signature %in% names(graph_list))
@@ -151,7 +157,7 @@ for(i in seq_along(graph_list)){
 	}
 V_deg_dis$normalized_degree_distribution =  V_deg_dis$degree_distribution / (V_deg_dis$n_nodes-1)
  
-boxplot_transition_degree = ggplot(subset(V_deg_dis, grepl("_7|_8|_11|_13|_15|_16|_16.1",signature)), 
+boxplot_transition_degree = ggplot(subset(V_deg_dis, grepl(CT_id_formatted,signature)), 
 				aes(x = factor(PPI_cat), y = normalized_degree_distribution, fill = PPI_cat)) + 
 		  geom_boxplot() +
 		  labs(x = "PPIN Category", y = "Normalized Degree Distribution", title = "PPINs for all transition clusters") +
@@ -166,7 +172,7 @@ vertex(boxplot_transition_degree)
 
 V_deg_dis$normalized_strength_distribution =  V_deg_dis$strength_distribution / (V_deg_dis$n_nodes-1)
 
-boxplot_transition_strength = ggplot(subset(V_deg_dis, grepl("_7|_8|_11|_13|_15|_16|_16.1",signature)), 
+boxplot_transition_strength = ggplot(subset(V_deg_dis, grepl(CT_id_formatted,signature)), 
 				aes(x = factor(PPI_cat), y = normalized_strength_distribution, fill = PPI_cat)) + 
 		  geom_boxplot() +
 		  labs(x = "PPIN Category", y = "Normalized Strength Distribution", title = "PPINs for all transition clusters") +
@@ -195,9 +201,9 @@ colnames(V_deg_dis)[1:2]=c('signature','strength_distribution')
 V_deg_dis$PPI_cat = lapply(V_deg_dis$signature, function(x) unlist(strsplit(x , '_'))[1]) %>% unlist %>%
 		factor(.,levels=c('CTS', 'HiGCTS', 'HiG')) 
 
-table(V_deg_dis$PPI_cat)
- # CTS HiGCTS    HiG 
-# 400    132   1214
+(table(V_deg_dis$PPI_cat))
+#    CTS HiGCTS    HiG 
+#    578    176   1900
 V_deg_dis$cluster = lapply(V_deg_dis$signature, function(x) unlist(strsplit(x , '_'))[2]) %>% unlist 
 
 all(V_deg_dis$signature %in% names(graph_list)) #T
@@ -208,7 +214,7 @@ for(i in seq_along(graph_list)){
 	}
 V_deg_dis$normalized_strength_distribution =  V_deg_dis$strength_distribution / (V_deg_dis$n_nodes-1)
  
-boxplot_transition_strength = ggplot(subset(V_deg_dis, grepl("_7|_8|_11|_13|_15|_16|_16.1",signature)), 
+boxplot_transition_strength = ggplot(subset(V_deg_dis, grepl(CT_id_formatted,signature)), 
 				aes(x = factor(PPI_cat), y = normalized_strength_distribution, fill = PPI_cat)) + 
 		  geom_boxplot() +
 		  labs(x = "PPIN Category", y = "Normalized Strength Distribution", title = "PPINs for all transition clusters") +
@@ -222,7 +228,7 @@ vertex(boxplot_transition_strength)
 }
 
 ###################################################
-# Fig C) boxplopt of median PageRAnk per category
+# Fig C) boxplot of median PageRank per category
 # original code: 11.3_CTS_cardiac_network_ANND_pagerank.R
 # original pdf: PageRank_GSE870383_v2.pdf
 ################################################################
@@ -267,77 +273,88 @@ vertex(violin_median_pagerank)
 # original pdf: box_wilcox-test_attack_GSE87038.pdf
 ################################################################
 {
-   attack.edge.btwn = readRDS(file='attack.edge.btwn.rds')
-   attack.vertex.btwn = readRDS( file='attack.vertex.btwn.rds')
-   failure.vertex = readRDS(paste0('failure.vertex_100_simplified_',s,'weighted.rds') )
+# Choose what to plot: "vertex", "edge", or "both"
+plot_mode <- "both"  # change this to "edge" or "both" as needed
 
-   failure.edge = readRDS(paste0('failure.edge_100_simplified_',s,'weighted.rds')) 
-   failure.dt <- rbind(failure.edge, failure.vertex)   
- 
-   colnames(failure.dt)[1] ='signature'
-   colnames(attack.vertex.btwn)[1] = 'signature'
-   (dim(failure.dt))  #[1] 160135      6
-   
-   robustness.dt <- rbind(failure.dt, attack.vertex.btwn, attack.edge.btwn)  
-   (dim(robustness.dt))  #[1] 320270      6
-   robustness.dt$PPI_cat = lapply(robustness.dt$signature, function(x) unlist(strsplit(x , '_'))[1]) %>% unlist %>%
-			factor(.,levels=c('CTS', 'HiGCTS', 'HiG')) 
- 
-    robustness.dt$experiment = ifelse(grepl('edge', robustness.dt$type), 'edge', 'vertex')
-	robustness.dt$measure= factor(robustness.dt$measure, levels = c("random" ,  "btwn.cent"))
+# Load data as before
+attack.edge.btwn = readRDS(file='attack.edge.btwn.rds')
+attack.vertex.btwn = readRDS(file='attack.vertex.btwn.rds')
+failure.vertex = readRDS(paste0('failure.vertex_100_simplified_', s, 'weighted.rds'))
+failure.edge = readRDS(paste0('failure.edge_100_simplified_', s, 'weighted.rds'))
+failure.dt <- rbind(failure.edge, failure.vertex)   
 
-    (table(robustness.dt$type, robustness.dt$measure))
-    #                          random btwn.cent
-    #   Random edge removal    151870         0
-    #   Random vertex removal    8245         0
-    #   Targeted edge attack        0    151870
-    #   Targeted vertex attack      0      8245
+colnames(failure.dt)[1] ='signature'
+colnames(attack.vertex.btwn)[1] = 'signature'
 
+robustness.dt <- rbind(failure.dt, attack.vertex.btwn, attack.edge.btwn)
+robustness.dt$PPI_cat = lapply(robustness.dt$signature, function(x) unlist(strsplit(x, '_'))[1]) %>%
+  unlist() %>%
+  factor(levels = c('CTS', 'HiGCTS', 'HiG'))
 
-   robustness.dt$type = factor(robustness.dt$type,
-			levels = c("Random edge removal" , "Targeted edge attack"  ,  "Random vertex removal" , "Targeted vertex attack") ) 
-   robustness.dt$cluster = lapply(robustness.dt$signature, function(x) unlist(strsplit(x , '_'))[2]) %>% unlist 
-                              
+robustness.dt$experiment = ifelse(grepl('edge', robustness.dt$type), 'edge', 'vertex')
+robustness.dt$measure = factor(robustness.dt$measure, levels = c("random", "btwn.cent"))
+robustness.dt$type = factor(robustness.dt$type,
+                            levels = c("Random edge removal", "Targeted edge attack",
+                                       "Random vertex removal", "Targeted vertex attack"))
+robustness.dt$cluster = lapply(robustness.dt$signature, function(x) unlist(strsplit(x, '_'))[2]) %>% unlist()
 
-## then, Plot the Wilcox results for visualization and manually add fold chagnes !!!
+# Filter by plot_mode
+if (plot_mode == "vertex") {
+  robustness.sub <- subset(robustness.dt, experiment == "vertex")
+} else if (plot_mode == "edge") {
+  robustness.sub <- subset(robustness.dt, experiment == "edge")
+} else {
+  robustness.sub <- robustness.dt  # "both"
+}
+
+# Dynamically select comparisons based on what’s in the filtered data
+comparisons_list <- list()
+if ("Random vertex removal" %in% robustness.sub$type &&
+    "Targeted vertex attack" %in% robustness.sub$type) {
+  comparisons_list <- append(comparisons_list, list(c("Random vertex removal", "Targeted vertex attack")))
+}
+if ("Random edge removal" %in% robustness.sub$type &&
+    "Targeted edge attack" %in% robustness.sub$type) {
+  comparisons_list <- append(comparisons_list, list(c("Random edge removal", "Targeted edge attack")))
+}
+
+# Boxplot
 boxplot_remained_fraction = ggplot(
-  robustness.dt,
+  robustness.sub,
   aes(
-    x = type, 
+    x = type,
     y = comp.pct,
     fill = measure,
-    color = PPI_cat,   # keep color
-    size = experiment  # bold vs thin outline
+    color = PPI_cat,
+    size = experiment
   )
 ) +
   geom_boxplot(alpha = 0.5, position = position_dodge(width = 0.8)) +
   facet_wrap(~ PPI_cat, ncol = 3) +
-  scale_color_manual(values = PPI_color_palette, guide = "none") +  # keep color but hide legend
+  scale_color_manual(values = PPI_color_palette, guide = "none") +
   scale_fill_manual(values = c("random" = "grey", "btwn.cent" = "white")) +
   scale_size_manual(values = c("edge" = 1.2, "vertex" = 0.4), name = "Experiment") +
   geom_signif(
-    comparisons = list(
-      c("Random edge removal", "Targeted edge attack"),
-      c("Random vertex removal", "Targeted vertex attack")
-    ),
+    comparisons = comparisons_list,
     map_signif_level = TRUE,
-    step_increase = 0.1,  # Adjusts spacing between the lines
+    step_increase = 0.1,
     aes(group = type),
-    test = "wilcox.test"  # Perform a t-test to calculate significance
+    test = "wilcox.test"
   ) +
   theme_minimal() +
   labs(
-    title = "Comparison of Robustness Measures by Type and State",
-    x = "PPI Category", 
+    title = paste0("Comparison of Robustness Measures (", plot_mode, " only)"),
+    x = "PPI Category",
     y = "Component Percentage Remaining"
   ) +
-  theme(legend.position = "top",
-    axis.text.x = element_blank(),   # remove x-axis tick labels
-    axis.ticks.x = element_blank(),  # remove x-axis ticks
+  theme(
+    legend.position = "top",
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
     strip.text = element_text(face = "bold")
   )
 
-vertex(boxplot_remained_fraction)
+print(boxplot_remained_fraction)
 
 ## finally, manually add the threshold of fold changes  ###############
 robustness.dt <- robustness.dt %>%
@@ -359,24 +376,24 @@ fold_change <- robustness.dt %>%
 (fold_change)
 #   PPI_cat fold_change_edge fold_change_vertex
 #   <fct>              <dbl>              <dbl>
-# 1 CTS                1.06                1.54
-# 2 HiGCTS             0.991               1.50
-# 3 HiG                0.964               1.04
+# 1 CTS                1.04                1.66
+# 2 HiGCTS             1.00                1.68
+# 3 HiG                0.913               1.09
 
 # TODO: significant if >1.5
 
 
 ### additionally, wilcox-test the between-group changes among observed PPINs
 tmp = subset(robustness.dt,measure=='btwn.cent')
-dim(tmp) #[1] 4604    9
+dim(tmp) #[1] 8245    9
 wilcox.test(subset(tmp,PPI_cat=='HiG')$comp.pct, subset(tmp,PPI_cat=='CTS')$comp.pct)
-# W = 138842816, p-value < 2.2e-16
+# W = 1961908, p-value < 2.2e-16
 
 wilcox.test(subset(tmp,PPI_cat=='HiG')$comp.pct, subset(tmp,PPI_cat=='HiGCTS')$comp.pct)
-# W = 30162248, p-value < 2.2e-16
+# W = 623754, p-value = 1.008e-09
 
 wilcox.test(subset(tmp,PPI_cat=='HiGCTS')$comp.pct, subset(tmp,PPI_cat=='CTS')$comp.pct)
-# W = 151165, p-value = 0.001761
+# W = 25486, p-value = 0.1847
 }
 
 ###################################################
@@ -433,8 +450,6 @@ vertex(p_attack4)
 {
 library(MLmetrics)
 library(sm)
-
-IDs_of_CTS = c('7', '8', '11', '13', '15', '16', '16.1')
 
 observed_auc_list = list()
 for(j in names(graph_list)){
@@ -525,10 +540,8 @@ plot(violin_median_bc_wilcox)
 # grid.arrange(plots$line_plot, plots$boxplot, ncol = 2)
 # dev.copy2pdf(file='community_number.pdf', width=10)
 
-unstable_cluster_ID = c('7', '8', '11', '13', '15', '16', '16.1')
-
 # Extract edge weight data by PPI category
-edge_data <- extract_edge_weights_by_category(graph_list, PPI_color_palette, unstable_cluster_ID)
+edge_data <- extract_edge_weights_by_category(graph_list, PPI_color_palette, as.character(CT_id))
 (head(edge_data, 3))
 #   sample PPI_cat edge_weight num_edges cluster_ID cluster_cat
 # 1  HiG_1     HiG 0.007203960      4978          1      stable
@@ -636,7 +649,7 @@ tb = df5[, c('signature','gene','PPI_cat','rank_by_PR','PCGC_AllCurated')]
 write.table(tb, file= 'table_top5_pagerank_perPPI.tsv', sep='\t', row.names=F)
  	  
 df5_CHD = subset(df5, PCGC_AllCurated==TRUE)
-(dim(df5_CHD))  # [1] 13 18
+(dim(df5_CHD))  # [1] 15 18
 
 boxplot_pagerank = ggplot(df, aes(x = signature,y = PageRank, colour = PPI_cat)) +
 			  geom_boxplot(show.legend = TRUE) +  # Enable legend for the boxplot

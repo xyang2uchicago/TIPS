@@ -9,6 +9,8 @@ library(MLmetrics)
 wd = "/project/xyang2/felixy/GSE87038_weighted/"
 setwd(paste0(wd, "results/"))
 
+db <- "GSE87038"
+
 celltype_specific_weight_version <- '10'
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
@@ -30,7 +32,7 @@ outputDir <- "PPI_weight/"
 
 # refer to 11.2.0_weighted_graph_attack_robustness.R
 s <- "combined"
-file <- paste0(inputDir, "GSE87038_STRING_graph_perState_simplified_", s, "weighted.rds")
+file <- paste0(inputDir, paste0(db, "_STRING_graph_perState_simplified_", s, "weighted.rds"))
 graph_list <- readRDS(file)
 
 failureAnalysis <- TRUE
@@ -43,6 +45,7 @@ if (failureAnalysis) {
         } else {
             tmp[[j]] <- robustness_MonteCarlo(graph_list[[j]], "edge", "random", N = 1e2)
         }
+        break
     }
     names(tmp) <- names(graph_list)
     failure.edge <- rbindlist(tmp, idcol = names(graph_list))

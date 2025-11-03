@@ -1,0 +1,169 @@
+require(dplyr)
+library(ggplot2)
+library(igraph)
+library(tidygraph)
+library(ggraph)
+library(scales)  # for color gradient
+library(patchwork)  # to arrange plots
+library(gridExtra)  # to arrange plots
+library(pracma)
+library(data.table)
+library(ggpubr)
+ 
+
+wd = "/Users/felixyu/Documents/GSE87038_weighted/"
+setwd(paste0(wd, "results/PPI_weight/"))
+
+# Use GitHub version of celltype_specific_weight
+celltype_specific_weight_version <- '10'
+source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
+
+db <- 'GSE87038'
+
+CT_id <- c(7, 8, 13, 11, 15, 16, 16.1)
+
+# refer to 11.2.0_weighted_graph_attack_robustness.R
+s = "combined"
+file = paste0(db, '_STRING_graph_perState_simplified_',s,'weighted.rds')
+graph_list <- readRDS( file)  
+	
+print(names(graph_list))
+#  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"      
+#  [6] "HiG_6"       "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"     
+# [11] "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"       "HiG_11"     
+# [16] "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"   
+# [21] "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_8"   
+# [26] "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"      "CTS_16.1"   
+# [31] "CTS_13"      "CTS_8" 
+
+
+g_real = graph_list[["CTS_8"]]
+
+pdf(file='simulation.pdf', width=15, height=5)
+df = NULL
+for(i in seq_along(graph_list)){
+	g_real = graph_list[[i]]
+	res = synthetic_simulation(g_real, main= names(graph_list)[i])
+	grid.arrange(res$p_weights, res$p_line, res$p_AUC, ncol = 3)
+	df = rbind(df,res$auc_summary) 
+}
+dev.off()
+
+write.csv(df, "Simulation_AUC_summary.csv", row.names = FALSE)
+network_colors = res$network_colors
+
+# The real_PPİN is fragile — but still somewhat buffered by biological modularity.
+# The degree-preserving null loses that structure and becomes pathologically brittle.
+
+## wilcox test by category for all clusters ###
+df$category = lapply(df$ID, function(x) unlist(strsplit(x, split='_'))[1]) %>% unlist
+df$cluster = lapply(df$ID, function(x) unlist(strsplit(x, split='_'))[2]) %>% unlist
+
+
+df_summary <- df %>%
+  group_by(category, network) %>%
+  summarise(
+    mean_AUC = mean(normalized_AUC, na.rm = TRUE),
+    sd_AUC   = sd(normalized_AUC, na.rm = TRUE),
+    n        = n(),
+    se_AUC   = sd_AUC / sqrt(n)
+  )
+  
+p1 <- ggplot(df, aes(x = network, y = normalized_AUC, fill = network)) +
+  geom_boxplot(alpha = 0.6) +
+  facet_wrap(~category, scales = "free_x") +
+  #stat_compare_means(method = "anova", label.y = 1.1) +
+  stat_compare_means(
+    method = "wilcox.test",
+    label = "p.signif",
+    comparisons = list(c("real_PPIN", "random"), 
+						c("real_PPIN", "deg_preserving"),
+						c("real_PPIN", "scale_free"),
+						c("real_PPIN", "small_world")),
+    label.y = c(1.05, 1.0)
+  ) +
+  labs(
+    title = "Comparison of normalized AUC across networks within each category",
+    x = "synthetic simulated network",
+    y = "Normalized AUC"
+  ) +
+  scale_color_manual(values = network_colors) +
+	  scale_fill_manual(values = network_colors)  +	
+  theme_classic(base_size = 13) +
+  theme(legend.position = "none",
+      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 9))
+  
+ggsave("bar_normalized_AUC_across_simulatedNetworks_Per_category.pdf", plot = p1, width = 10, height = 6)
+
+### pairwise test for only transition clusters ##
+df_summary <- df %>% 
+  filter(cluster %in% as.character(CT_id)) %>%
+  group_by(category, network) %>%
+  summarise(
+    mean_AUC = mean(normalized_AUC, na.rm = TRUE),
+    sd_AUC   = sd(normalized_AUC, na.rm = TRUE),
+    n        = n(),
+    se_AUC   = sd_AUC / sqrt(n),
+    .groups = "drop"   # <— this removes grouping and silences the message
+  )  
+
+df_plot <- df %>%
+  filter(cluster %in% as.character(CT_id))
+
+p2 <- ggplot(df_plot, aes(x = network, y = normalized_AUC, fill = network)) +
+  geom_boxplot(alpha = 0.3, width = 0.6, outlier.shape = NA) +
+  geom_line(aes(group = ID), color = "gray60", alpha = 0.6, linewidth = 0.6) +
+  geom_point(size = 2.5, shape = 21, color = "black", 
+             aes(fill = network), position = position_dodge(width = 0.4)) +
+  facet_wrap(~category, scales = "free_x") +
+  stat_compare_means(
+    method = "t.test",
+    paired = TRUE,  alternative='greater', 
+    label = "p.signif",
+    comparisons = list(c("real_PPIN", "random"),
+                       c("real_PPIN", "deg_preserving"),
+                       c("real_PPIN", "scale_free"),
+                       c("real_PPIN", "small_world")),
+    label.y = c(1.05, 1.0)
+  ) +
+  labs(
+    title = "Comparison of normalized AUC for CT clusters",
+    x = "Synthetic simulated network",
+    y = "Normalized AUC"
+  ) +
+  scale_fill_manual(values = network_colors) +
+   theme_classic(base_size = 13) +
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 9)
+  )
+ ggsave("bar_normalized_AUC_across_simulatedNetworks_CTonly.pdf", plot = p2, width = 10, height = 6)
+
+ 
+#   ## manually check ##
+  
+# HiG category
+df_subset <- df_plot %>% filter(category == "HiG", network %in% c("real_PPIN", "deg_preserving")) %>% arrange(ID)
+vals1 <- df_subset$normalized_AUC[df_subset$network == "real_PPIN"]
+vals2 <- df_subset$normalized_AUC[df_subset$network == "deg_preserving"]
+t.test(vals1, vals2, paired = TRUE, alternative = "greater") # p-value = 4.203e-06
+
+# CTS category
+df_subset <- df_plot %>% filter(category == "CTS", network %in% c("real_PPIN", "deg_preserving")) %>% arrange(ID)
+vals1 <- df_subset$normalized_AUC[df_subset$network == "real_PPIN"]
+vals2 <- df_subset$normalized_AUC[df_subset$network == "deg_preserving"]
+t.test(vals1, vals2, paired = TRUE, alternative = "greater") # p-value = 0.03232
+
+# HiGCTS category
+df_subset <- df_plot %>% filter(category == "HiGCTS", network %in% c("real_PPIN", "deg_preserving")) %>% arrange(ID)
+vals1 <- df_subset$normalized_AUC[df_subset$network == "real_PPIN"]
+vals2 <- df_subset$normalized_AUC[df_subset$network == "deg_preserving"]
+t.test(vals1, vals2, paired = TRUE, alternative = "greater") # p-value = 0.2913
+
+# All categories together
+df_subset <- df_plot %>% filter(network %in% c("real_PPIN", "deg_preserving")) %>% arrange(ID)
+vals1 <- df_subset$normalized_AUC[df_subset$network == "real_PPIN"]
+vals2 <- df_subset$normalized_AUC[df_subset$network == "deg_preserving"]
+t.test(vals1, vals2, paired = TRUE, alternative = "greater") # p-value = 0.001185
+t.test(vals1, vals2, paired = TRUE) # p-value = 0.00237
+wilcox.test(vals1, vals2, paired = TRUE) # p-value = 0.005156
