@@ -85,8 +85,7 @@ string_db <- STRINGdb$new(
 )
 string_db
 
-inputDir <- "../data/"
-DEG <- readRDS(paste0(inputDir, "DEG_perState_min.prop0.25_lfc0.6_FDFR0.05.rds"))
+DEG <- readRDS(paste0("../data/DEG_perState_min.prop0.25_lfc0.6_FDFR0.05.rds"))
 
 DEG <- lapply(DEG, function(x) data.frame(names = x, stringsAsFactors = FALSE))
 
@@ -99,7 +98,7 @@ any(duplicated(DEG[["5"]])) # [1] FALSE
 
 ## build PPIN again and track back the correct number of edges for the duplicated gene ##
 
-markers.up <- readRDS(paste0(inputDir, "DEG_perState_min.prop0.25_lfc0.6_FDFR0.05.rds"))
+markers.up <- readRDS(paste0("../data/DEG_perState_min.prop0.25_lfc0.6_FDFR0.05.rds"))
 
 graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_notsimplified.rds"))
 graph_list <- lapply(graph_list, simplify, edge.attr.comb ='max') # !!!!!!!!!!!!!!!!!!! # FIXED
