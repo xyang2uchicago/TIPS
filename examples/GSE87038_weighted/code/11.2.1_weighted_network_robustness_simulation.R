@@ -45,7 +45,6 @@ if (failureAnalysis) {
         } else {
             tmp[[j]] <- robustness_MonteCarlo(graph_list[[j]], "edge", "random", N = 1e2)
         }
-        break
     }
     names(tmp) <- names(graph_list)
     failure.edge <- rbindlist(tmp, idcol = names(graph_list))
