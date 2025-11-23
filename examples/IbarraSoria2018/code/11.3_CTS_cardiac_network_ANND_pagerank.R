@@ -10,15 +10,22 @@ library(igraph)
 library(rstatix)
 library(brainGraph)
 
+########## BEGINNING OF USER INPUT ##########
+
 wd = "/Users/felixyu/Documents/IbarraSoria2018/"
+
 setwd(paste0(wd, "results/PPI_weight/"))
 inputdir <- paste0(wd, "data/")
 
-PPI_color_platte <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
+PPI_color_palette <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
 
-# refer to 11.2.0_weighted_graph_attack_robustness.R
-s <- "combined"
-file <- paste0("2018_STRING_graph_perState_simplified_", s, "weighted.rds")
+db <- "IbarraSoria2018"
+
+s <- "combined" # specificity method
+
+########## END OF USER INPUT ##########
+
+file <- paste0(db, "_STRING_graph_perState_simplified_", s, "weighted.rds")
 graph_list <- readRDS(file)
 
 (names(graph_list))
@@ -140,10 +147,10 @@ for (i in names(graph_list)) {
         pr_P[[i]][j] <- length(which(subset(tmp, gene == j)$PageRank >= page[[i]][j])) / N
     }
 }
-saveRDS(pr_P, file = "IbarraSoria2018_PageRank_Pvalue_by_rewiring.rds")
+saveRDS(pr_P, file = paste0(db, "_PageRank_Pvalue_by_rewiring.rds"))
 
 
-pr_P <- readRDS(file = "IbarraSoria2018_PageRank_Pvalue_by_rewiring.rds")
+pr_P <- readRDS(file = paste0(db, "_PageRank_Pvalue_by_rewiring.rds"))
 tmp <- lapply(pr_P, function(x) data.frame(p.PageRank = x, gene = names(x))) %>%
     rbindlist(., idcol = names(.))
 colnames(tmp)[1] <- "signature"
@@ -247,9 +254,9 @@ for (i in names(graph_list)) {
         annd_P[[i]][j] <- length(which(subset(tmp, gene == j)$knn >= annd_observed[[i]][j])) / N
     }
 }
-saveRDS(annd_P, file = "IbarraSoria2018_annd_Pvalue_by_rewiring.rds")
+saveRDS(annd_P, file = paste0(db, "_annd_Pvalue_by_rewiring.rds"))
 
-annd_P <- readRDS(file = "IbarraSoria2018_annd_Pvalue_by_rewiring.rds")
+annd_P <- readRDS(file = paste0(db, "_annd_Pvalue_by_rewiring.rds"))
 
 (unique(df$PPI_cat)) # CTS    HiGCTS HiG
 
@@ -429,7 +436,7 @@ pr <- ggplot(df_BC, aes(x = signature, y = log10(BetweennessCentrality + 1), col
         legend.justification = c(1, 1), # Place legend at top-right corner
         axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)
     ) +
-    scale_color_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
     geom_text(data = df5_CHD, aes(label = gene), size = 2, hjust = -0.1, vjust = 0, check_overlap = TRUE) + # Adjust text labels
     labs(color = "PPI cat") # Optional: label for the color legend
 pr_repel <- ggplot(df_BC, aes(x = signature, y = log10(BetweennessCentrality + 1), colour = PPI_cat)) +
@@ -456,8 +463,8 @@ pr_repel <- ggplot(df_BC, aes(x = signature, y = log10(BetweennessCentrality + 1
 
 density_bc_plot <- ggplot(df_BC, aes(x = log10(BetweennessCentrality + 1), color = PPI_cat, fill = PPI_cat)) +
     geom_density(alpha = 0.3) + # Density lines with transparency
-    scale_color_manual(values = PPI_color_platte) +
-    scale_fill_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
+    scale_fill_manual(values = PPI_color_palette) +
     theme_minimal() +
     theme(legend.position = "none", axis.text.y = element_blank(), axis.title.y = element_blank()) +
     coord_flip() + # Flip the axes to rotate the density plot
@@ -467,8 +474,8 @@ density_bc_plot <- ggplot(df_BC, aes(x = log10(BetweennessCentrality + 1), color
 # Violin plot with statistical comparisons
 violin_wilcox <- ggplot(df_BC, aes(x = PPI_cat, y = log10(BetweennessCentrality + 1), color = PPI_cat, fill = PPI_cat)) +
     geom_violin(alpha = 0.3) + # Violin plot with transparency
-    scale_color_manual(values = PPI_color_platte) +
-    scale_fill_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
+    scale_fill_manual(values = PPI_color_palette) +
     theme_minimal() +
     theme(legend.position = "none") + # , axis.text.y = element_blank(), axis.title.y = element_blank()) +
     labs(x = "PPI category") + # Label the axes
@@ -486,8 +493,8 @@ violin_wilcox <- ggplot(df_BC, aes(x = PPI_cat, y = log10(BetweennessCentrality 
 
 violin_t <- ggplot(df_BC, aes(x = PPI_cat, y = log10(BetweennessCentrality + 1), color = PPI_cat, fill = PPI_cat)) +
     geom_violin(alpha = 0.3) + # Violin plot with transparency
-    scale_color_manual(values = PPI_color_platte) +
-    scale_fill_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
+    scale_fill_manual(values = PPI_color_palette) +
     theme_minimal() +
     theme(legend.position = "none") + # , axis.text.y = element_blank(), axis.title.y = element_blank()) +
     labs(x = "PPI category") + # Label the axes
@@ -530,8 +537,8 @@ t.test(df_median$bc.median[b], df_median$bc.median[c]) # p-value = NAN
 
 density_median_bc_plot <- ggplot(df_median, aes(x = log10(bc.median), color = PPI_cat, fill = PPI_cat)) +
     geom_density(alpha = 0.3) + # Density lines with transparency
-    scale_color_manual(values = PPI_color_platte) +
-    scale_fill_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
+    scale_fill_manual(values = PPI_color_palette) +
     theme_minimal() +
     theme(legend.position = "none", axis.text.y = element_blank(), axis.title.y = element_blank()) +
     labs(x = "Density of the median of BetweennessCentralitys per PPI", y = "")
@@ -541,8 +548,8 @@ x <- which(df_median$bc.median == 0) # 5
 
 violin_median_bc_wilcox <- ggplot(df_median, aes(x = PPI_cat, y = bc.median, color = PPI_cat, fill = PPI_cat)) +
     geom_violin(alpha = 0.3, drop = FALSE) + # Violin plot with transparency
-    scale_color_manual(values = PPI_color_platte) +
-    scale_fill_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
+    scale_fill_manual(values = PPI_color_palette) +
     theme_minimal() +
     theme(legend.position = "none") + # , axis.text.y = element_blank(), axis.title.y = element_blank()) +
     labs(x = "PPI category", y = "median of BC per PPI") + # Label the axes
@@ -561,8 +568,8 @@ violin_median_bc_wilcox <- ggplot(df_median, aes(x = PPI_cat, y = bc.median, col
 
 violin_median_bc_wilcox_ln <- ggplot(df_median, aes(x = PPI_cat, y = log10(bc.median + 1), color = PPI_cat, fill = PPI_cat)) +
     geom_violin(alpha = 0.3, drop = FALSE) + # Violin plot with transparency
-    scale_color_manual(values = PPI_color_platte) +
-    scale_fill_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
+    scale_fill_manual(values = PPI_color_palette) +
     theme_minimal() +
     theme(legend.position = "none") + # , axis.text.y = element_blank(), axis.title.y = element_blank()) +
     labs(x = "PPI category", y = "log10(median of BC per PPI +1)") + # Label the axes
@@ -580,7 +587,7 @@ violin_median_bc_wilcox_ln <- ggplot(df_median, aes(x = PPI_cat, y = log10(bc.me
     ggtitle("wilcox-test, median BC+1")
 
 # Combine the boxplot and density plot
-pdf(file = "BetweennessCentrality_GSE87038_v2.pdf", height = 10)
+pdf(file = paste0("BetweennessCentrality_", db,"_v2.pdf"), height = 10)
 print(grid.arrange(pr_repel, density_median_bc_plot + coord_flip(), ncol = 2, widths = c(3, 1)))
 print(grid.arrange(violin_median_bc_wilcox, pr, nrow = 2, heights = c(3, 3)))
 print(grid.arrange(violin_wilcox, pr, nrow = 2, heights = c(3, 3)))
@@ -679,7 +686,7 @@ df5_CHD <- subset(df5, PCGC_AllCurated == TRUE)
 df$signature <- factor(df$signature, levels = levels(df_BC$signature))
 pr <- ggplot(df, aes(x = signature, y = PageRank, colour = PPI_cat)) +
     geom_boxplot(show.legend = TRUE) + # Enable legend for the boxplot
-    scale_color_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
     geom_text(
         data = df5_CHD, aes(label = gene), # data=df5
         size = 2, # Adjust the size of the text labels
@@ -695,7 +702,7 @@ pr <- ggplot(df, aes(x = signature, y = PageRank, colour = PPI_cat)) +
     labs(color = "PPI cat") # Optional: label for the color legend
 pr_repel <- ggplot(df, aes(x = signature, y = PageRank, colour = PPI_cat)) +
     geom_boxplot(show.legend = TRUE) + # Enable legend for the boxplot
-    scale_color_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
     geom_text_repel(
         data = df5_CHD, # df5
         aes(label = gene),
@@ -717,8 +724,8 @@ pr_repel <- ggplot(df, aes(x = signature, y = PageRank, colour = PPI_cat)) +
 
 density_page_plot <- ggplot(df, aes(x = PageRank, color = PPI_cat, fill = PPI_cat)) +
     geom_density(alpha = 0.3) + # Density lines with transparency
-    scale_color_manual(values = PPI_color_platte) +
-    scale_fill_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
+    scale_fill_manual(values = PPI_color_palette) +
     theme_minimal() +
     theme(legend.position = "none", axis.text.y = element_blank(), axis.title.y = element_blank()) +
     coord_flip() + # Flip the axes to rotate the density plot
@@ -727,8 +734,8 @@ density_page_plot <- ggplot(df, aes(x = PageRank, color = PPI_cat, fill = PPI_ca
 # Violin plot with statistical comparisons
 violin_wilcox <- ggplot(df, aes(x = PPI_cat, y = PageRank, color = PPI_cat, fill = PPI_cat)) +
     geom_violin(alpha = 0.3) + # Violin plot with transparency
-    scale_color_manual(values = PPI_color_platte) +
-    scale_fill_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
+    scale_fill_manual(values = PPI_color_palette) +
     theme_minimal() +
     theme(legend.position = "none") + # , axis.text.y = element_blank(), axis.title.y = element_blank()) +
     labs(x = "PPI category", y = "PageRank") + # Label the axes
@@ -746,8 +753,8 @@ violin_wilcox <- ggplot(df, aes(x = PPI_cat, y = PageRank, color = PPI_cat, fill
 
 violin_t <- ggplot(df, aes(x = PPI_cat, y = PageRank, color = PPI_cat, fill = PPI_cat)) +
     geom_violin(alpha = 0.3) + # Violin plot with transparency
-    scale_color_manual(values = PPI_color_platte) +
-    scale_fill_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
+    scale_fill_manual(values = PPI_color_palette) +
     theme_minimal() +
     theme(legend.position = "none") + # , axis.text.y = element_blank(), axis.title.y = element_blank()) +
     labs(x = "PPI category", y = "PageRank") + # Label the axes
@@ -785,8 +792,8 @@ df_median <- data.frame(
 df_median$PPI_cat <- factor(df_median$PPI_cat, levels = c("CTS", "HiGCTS", "HiG"))
 density_median_page_plot <- ggplot(df_median, aes(x = pg.median, color = PPI_cat, fill = PPI_cat)) +
     geom_density(alpha = 0.3) + # Density lines with transparency
-    scale_color_manual(values = PPI_color_platte) +
-    scale_fill_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
+    scale_fill_manual(values = PPI_color_palette) +
     theme_minimal() +
     theme(legend.position = "none", axis.text.y = element_blank(), axis.title.y = element_blank()) +
     labs(x = "Density of the median of PageRanks per PPI", y = "")
@@ -794,8 +801,8 @@ density_median_page_plot <- ggplot(df_median, aes(x = pg.median, color = PPI_cat
 
 violin_median_page_wilcox <- ggplot(df_median, aes(x = PPI_cat, y = pg.median, color = PPI_cat, fill = PPI_cat)) +
     geom_violin(alpha = 0.3) + # Violin plot with transparency
-    scale_color_manual(values = PPI_color_platte) +
-    scale_fill_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
+    scale_fill_manual(values = PPI_color_palette) +
     theme_minimal() +
     theme(legend.position = "none") + # , axis.text.y = element_blank(), axis.title.y = element_blank()) +
     labs(x = "PPI category", y = "median of PageRanks per PPI") + # Label the axes
@@ -813,7 +820,7 @@ violin_median_page_wilcox <- ggplot(df_median, aes(x = PPI_cat, y = pg.median, c
 
 
 # Combine the boxplot and density plot
-pdf(file = "PageRank_IbarraSoria2018_v2.pdf", height = 10)
+pdf(file = paste0("PageRank_", db, "_v2.pdf"), height = 10)
 print(grid.arrange(pr, density_median_page_plot + coord_flip(), ncol = 2, widths = c(3, 1)))
 print(grid.arrange(violin_median_page_wilcox, pr, nrow = 2, heights = c(3, 3)))
 print(grid.arrange(violin_wilcox, pr, nrow = 2, heights = c(3, 3)))
@@ -864,7 +871,7 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # Step 2: Create ggplot with boxplot and labels for top 5 genes
     pr <- ggplot(df[!is.na(df$annd), ], aes(x = signature, y = annd, colour = PPI_cat)) +
         geom_boxplot(show.legend = TRUE) + # Enable legend for the boxplot
-        scale_color_manual(values = PPI_color_platte) +
+        scale_color_manual(values = PPI_color_palette) +
         # Use ggrepel to avoid overlap and label top 5 genes based on annd
         geom_text_repel(
             data = top_genes_CHD, # Label only the top 5 genes
@@ -904,16 +911,16 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     df_median$PPI_cat <- factor(df_median$PPI_cat, levels = c("CTS", "HiGCTS", "HiG"))
     density_median_annd_wilcox <- ggplot(df_median, aes(x = annd.median, color = PPI_cat, fill = PPI_cat)) +
         geom_density(alpha = 0.3) + # Density lines with transparency
-        scale_color_manual(values = PPI_color_platte) +
-        scale_fill_manual(values = PPI_color_platte) +
+        scale_color_manual(values = PPI_color_palette) +
+        scale_fill_manual(values = PPI_color_palette) +
         theme_minimal() +
         theme(legend.position = "none", axis.text.y = element_blank(), axis.title.y = element_blank()) +
         labs(x = "Density of the median of ANND per PPI", y = "")
     # Add statistical comparisons using stat_compare_means manyally
     violin_median_annd_plot <- ggplot(df_median, aes(x = PPI_cat, y = annd.median, color = PPI_cat, fill = PPI_cat)) +
         geom_violin(alpha = 0.3) + # Violin plot with transparency
-        scale_color_manual(values = PPI_color_platte) +
-        scale_fill_manual(values = PPI_color_platte) +
+        scale_color_manual(values = PPI_color_palette) +
+        scale_fill_manual(values = PPI_color_palette) +
         theme_minimal() +
         theme(legend.position = "none") +
         labs(x = "PPI category", y = "median of ANND per PPI") + # Label the axes
@@ -930,7 +937,7 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         ggtitle("wilcox test, median ANND")
 
     # Combine the boxplot and density plot
-    pdf(file = "annd_IbarraSoria2018_v2.pdf", height = 10)
+    pdf(file = paste0("annd_", db, "_v2.pdf"), height = 10)
     print(grid.arrange(pr, density_median_annd_wilcox + coord_flip(), ncol = 2, widths = c(3, 1)))
     print(grid.arrange(violin_median_annd_plot, pr, nrow = 2, heights = c(3, 3)))
 
@@ -973,8 +980,8 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # Violin plot with statistical comparisons
     violin_wilcox <- ggplot(df, aes(x = PPI_cat, y = log10(normalized.strength), color = PPI_cat, fill = PPI_cat)) +
         geom_violin(alpha = 0.3) + # Violin plot with transparency
-        scale_color_manual(values = PPI_color_platte) +
-        scale_fill_manual(values = PPI_color_platte) +
+        scale_color_manual(values = PPI_color_palette) +
+        scale_fill_manual(values = PPI_color_palette) +
         theme_minimal() +
         theme(legend.position = "none") + # , axis.text.y = element_blank(), axis.title.y = element_blank()) +
         labs(x = "PPI category", y = "log10 normalized.strength") + # Label the axes
@@ -992,8 +999,8 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     violin_t <- ggplot(df, aes(x = PPI_cat, y = log10(normalized.strength), color = PPI_cat, fill = PPI_cat)) +
         geom_violin(alpha = 0.3) + # Violin plot with transparency
-        scale_color_manual(values = PPI_color_platte) +
-        scale_fill_manual(values = PPI_color_platte) +
+        scale_color_manual(values = PPI_color_palette) +
+        scale_fill_manual(values = PPI_color_palette) +
         theme_minimal() +
         theme(legend.position = "none") + # , axis.text.y = element_blank(), axis.title.y = element_blank()) +
         labs(x = "PPI category", y = "normalized.strength") + # Label the axes
@@ -1012,7 +1019,7 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # Step 2: Create ggplot with boxplot and labels for top 5 genes
     pr <- ggplot(df, aes(x = signature, y = log10(normalized.strength), colour = PPI_cat)) +
         geom_boxplot(show.legend = TRUE) + # Enable legend for the boxplot
-        scale_color_manual(values = PPI_color_platte) +
+        scale_color_manual(values = PPI_color_palette) +
         # Use ggrepel to avoid overlap and label top 5 genes based on normalized.strength
         geom_text_repel(
             data = top_genes_CHD, # Label only the top 5 genes
@@ -1055,8 +1062,8 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         color = PPI_cat, fill = PPI_cat
     )) +
         geom_density(alpha = 0.3) + # Density lines with transparency
-        scale_color_manual(values = PPI_color_platte) +
-        scale_fill_manual(values = PPI_color_platte) +
+        scale_color_manual(values = PPI_color_palette) +
+        scale_fill_manual(values = PPI_color_palette) +
         theme_minimal() +
         theme(legend.position = "none", axis.text.y = element_blank(), axis.title.y = element_blank()) +
         labs(x = "Density of the median of normalzied node strength per PPI", y = "")
@@ -1067,8 +1074,8 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         y = log10(median_normalized_strength), color = PPI_cat, fill = PPI_cat
     )) +
         geom_violin(alpha = 0.3) + # Violin plot with transparency
-        scale_color_manual(values = PPI_color_platte) +
-        scale_fill_manual(values = PPI_color_platte) +
+        scale_color_manual(values = PPI_color_palette) +
+        scale_fill_manual(values = PPI_color_palette) +
         theme_minimal() +
         theme(legend.position = "none") + # , axis.text.y = element_blank(), axis.title.y = element_blank()) +
         labs(x = "PPI category", y = "log10. median of normalized node strength per PPI") + # Label the axes
@@ -1085,7 +1092,7 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         ggtitle("wilcox, medina nr_strength")
 
     # Combine the boxplot and density plot
-    pdf(file = "normalized.node.strength_IbarraSoria2018_v2.pdf", height = 10)
+    pdf(file = paste0("normalized.node.strength_", db, "_v2.pdf"), height = 10)
     print(grid.arrange(pr, density_median_normalized.strength_plot + coord_flip(), ncol = 2, widths = c(3, 1)))
     print(grid.arrange(violin_median_normalized.strength_wilcox, pr, nrow = 2, heights = c(3, 3)))
     print(grid.arrange(violin_wilcox, pr, nrow = 2, heights = c(3, 3)))
@@ -1122,7 +1129,7 @@ df_compare$PPI_cat <- lapply(df_compare$signature, function(x) unlist(strsplit(x
     factor(., levels = c("CTS", "HiGCTS", "HiG"))
 ggplot(df_compare, aes(x = n_sig.pagerank, y = n_sig.annd)) +
     geom_point(aes(shape = PPI_cat, colour = PPI_cat), show.legend = FALSE) +
-    scale_color_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
     geom_text_repel(aes(label = signature), hjust = -0.1, vjust = 0) +
     theme(legend.position = c(0, 0), legend.justification = c(0, 0))
 

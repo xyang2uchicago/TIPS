@@ -6,6 +6,8 @@ library("gridExtra")
 library(ggrepel)
 library(ggpubr)
 
+########## BEGINNING OF USER INPUT ##########
+
 wd = "/Users/felixyu/Documents/GSE87038_weighted/"
 setwd(paste0(wd, "results/"))
 score_threshold <- "weight"
@@ -14,6 +16,8 @@ db <- "GSE87038"
 db_species <- 10090 # 10090 for mouse, 9606 for human
 
 # ATTENTION: MANUAL INPUT REQUIRED AFTER LINE 154
+
+########## END OF USER INPUT ##########
 
 graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_notsimplified.rds"))
 graph_list <- lapply(graph_list, simplify, edge.attr.comb ='max') # !!!!!!!!!!!!!!!!!!! # FIXED

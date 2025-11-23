@@ -6,7 +6,9 @@ library(foreach)
 library(doParallel)
 library(MLmetrics)
 
-wd = "/project/xyang2/felixy/GSE87038_weighted/"
+########## BEGINNING OF USER INPUT ##########
+
+wd = "/project/xyang2/felixy/GSE87038_weighted/" # Run on HPC
 setwd(paste0(wd, "results/"))
 
 db <- "GSE87038"
@@ -14,6 +16,18 @@ db <- "GSE87038"
 celltype_specific_weight_version <- '10'
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
+inputDir <- "PPI_weight/"
+outputDir <- "PPI_weight/"
+
+s <- "combined" # specificity method
+failureAnalysis <- TRUE
+V_attack <- TRUE # Targeted vertex attack
+E_attack <- TRUE # Targeted edge attack
+
+N_vertex <- 1000 # Number of targeted vertex attack simulations per network
+N_edge <- 100 # Number of targeted vertex attack simulations per network
+
+########## END OF USER INPUT ##########
 
 ### method 1 -- Random Protein failures in the same condition #######################################
 # Think of it like: Testing how the same patient's cells respond to 100 different random genetic damages
@@ -27,15 +41,9 @@ source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/
 # interpretation: higher score -> genes are consistent resilient in this network
 ####################################################
 
-inputDir <- "PPI_weight/"
-outputDir <- "PPI_weight/"
-
 # refer to 11.2.0_weighted_graph_attack_robustness.R
-s <- "combined"
 file <- paste0(inputDir, paste0(db, "_STRING_graph_perState_simplified_", s, "weighted.rds"))
 graph_list <- readRDS(file)
-
-failureAnalysis <- TRUE
 if (failureAnalysis) {
     cat('failureAnalysis in progress \n')
     tmp <- list()
@@ -53,9 +61,8 @@ if (failureAnalysis) {
 
     failure.vertex <- rbindlist(lapply(graph_list, robustness_MonteCarlo, "vertex", measure = "random", N = 1e2), idcol = names(graph_list))
     saveRDS(failure.vertex, file = paste0(outputDir, "failure.vertex_100_simplified_", s, "weighted.rds"))
+    cat("failureAnalysis done \n")
 }
-#### calcualte empritical p-values on midway3
-## refer to
 
 vn <- pn <- array(dim = length(graph_list))
 names(vn) <- names(pn) <- names(graph_list)
@@ -63,9 +70,6 @@ for (j in names(vn)) {
     vn[j] <- length(V(graph_list[[j]])) #  counts the number of vertices).
     pn[j] <- (graph_list[[j]] %>% degree() %>% mean()) / vn[j] # the average degree of the vertices in each graph, normalized by the number of vertices in the graph.
 }
-cat("failureAnalysis done \n")
-
-N <- 1000
 
 ### method 2 Targeted Drug Attack on 100 Network Variants ###################################
 # Think of it like: Testing how 100 different patients respond to the same precision cancer drug
@@ -79,9 +83,9 @@ N <- 1000
 # interpretation: higher score -> genes are connected in a vulnerable structure
 ####################################################
 
-V_attack <- TRUE
 if (V_attack) {
     cat('V_attack simulation in progress \n')
+    N = N_vertex
     set.seed(1234)
     attac_V_random <- matrix(nrow = N, ncol = length(graph_list))
     colnames(attac_V_random) <- names(graph_list)
@@ -98,13 +102,12 @@ if (V_attack) {
         }
     }
     saveRDS(attac_V_random, file = paste0(outputDir, "AUC_compt.pct_attac_V_random_", N, "runs_", s, "weighted.RDS"))
+    cat("V_attack done \n")
 }
-cat("V_attack done \n")
 
-E_attack <- TRUE
 if (E_attack) {
     cat('E_attack simulation in progress \n')
-    N <- 100
+    N = N_edge
     # To save the results
     attac_E_random <- matrix(nrow = N, ncol = length(graph_list))
     colnames(attac_E_random) <- names(graph_list)
@@ -129,7 +132,6 @@ if (E_attack) {
         }
     }
 
-
     saveRDS(attac_E_random, file = paste0(outputDir, "AUC_compt.pct_attac_E_random_", N, "runs_", s, "weighted.RDS"))
+    cat("E_attack done \n")
 }
-cat("E_attack done \n")

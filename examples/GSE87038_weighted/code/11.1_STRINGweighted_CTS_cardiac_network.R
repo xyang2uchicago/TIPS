@@ -9,6 +9,8 @@ library(scran)
 packageVersion("scran") # 1.37.0
 library("SingleCellExperiment")
 
+########## BEGINNING OF USER INPUT ##########
+
 wd = "/Users/felixyu/Documents/GSE87038_weighted/"
 setwd(paste0(wd, "results/"))
 
@@ -19,8 +21,11 @@ db_species <- 10090 # 10090 for mouse, 9606 for human
 load(file = "../data/BioTIP.res.RData")
 load("../data/sce_E8.25_uncorrected.RData") 
 
+########## END OF USER INPUT ##########
+
 CTS <- res$CTS.candidate[which(res$significant)]
 
+# Find subclusters
 if (any(duplicated(names(CTS)))) cat('renamed duplicated CTS by extended with ".x" and reorder!')
 ## manually rename
 names(CTS)[7] <- "16.1"
@@ -95,8 +100,15 @@ markers.up <- findMarkers(sce,
     direction = "up"
 ) # , block=mnn.all$sample)
 DEG <- list()
+
 unique_CTS_ID <- names(CTS)
-if (any(grepl(".", names(CTS), fixed = T))) unique_CTS_ID <- unique_CTS_ID[-which(grepl(".", names(CTS), fixed = T))]
+
+# Subclusters are labeled numerically as <cluster_name.subcluster_number>
+# remove only if the part AFTER the '.' is numeric
+unique_CTS_ID <- unique_CTS_ID[ !(
+    grepl("\\.", unique_CTS_ID) &
+    grepl("^[0-9]+$", sub("^[^.]*\\.", "", unique_CTS_ID))
+)]
 
 for (i in c(setdiff(names(markers.up), names(CTS)), unique_CTS_ID)) {
     interesting.up <- markers.up[[i]]
@@ -198,7 +210,8 @@ names(graph_list) <- paste0("HiG_", names(DEG))
 # build for (up-regulated_marker intersecting CTS)
 # HiGCTS
 for (i in names(CTS)) {
-    if (grepl(".", i, fixed = T)) j <- unlist(strsplit(i, split = ".", fixed = T))[1] else j <- i
+    # Get unique cluster ids for clusters containing subclusters labeled by numerical id
+    j <- if (grepl("\\.", i) && grepl("^[0-9]+$", sub("^[^.]*\\.", "", i))) sub("\\..*$", "", i) else i
 
     # Get the full marker table for that cluster
     deg_table <- markers.up[[j]]
@@ -240,7 +253,7 @@ markers.up_all <- readRDS("../data/markers.up_all_ttest.rds")
 
 # CTS
 for (i in names(CTS)) {
-    if (grepl(".", i, fixed = T)) j <- unlist(strsplit(i, split = ".", fixed = T))[1] else j <- i
+    j <- if (grepl("\\.", i) && grepl("^[0-9]+$", sub("^[^.]*\\.", "", i))) sub("\\..*$", "", i) else i
     diff_exp <- markers.up_all[[j]][CTS[[i]], ]
     diff_exp$symbol <- rownames(diff_exp)
     mapped <- string_db$map(diff_exp, "symbol", removeUnmappedRows = TRUE)

@@ -11,17 +11,25 @@ library(brainGraph)
 library(MLmetrics)
 library(sm)
 
-wd = "/Users/felixyu/Documents/IbarraSoria2018/"
-source(paste0(wd, "code/celltype_specific_weight_v9.R"))
+########## BEGINNING OF USER INPUT ##########
 
-PPI_color_platte <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
-PPI_size_platte <- c("CTS" = 1, "HiGCTS" = 0.75, "HiG" = 0.25)
+wd = "/Users/felixyu/Documents/IbarraSoria2018/"
 
 setwd(paste0(wd, "/results/PPI_weight/"))
 
-# refer to 11.1_CTS_cardiac_network_strengthDistribution.R
-s <- "combined"
-file <- paste0("2018_STRING_graph_perState_simplified_", s, "weighted.rds")
+celltype_specific_weight_version <- '10'
+source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
+
+PPI_color_palette <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
+PPI_size_palette <- c("CTS" = 1, "HiGCTS" = 0.75, "HiG" = 0.25)
+
+db <- "IbarraSoria2018"
+
+s <- "combined" # specificity method
+
+########## END OF USER INPUT ##########
+
+file <- paste0(db, "_STRING_graph_perState_simplified_", s, "weighted.rds")
 graph_list <- readRDS(file)
 (names(graph_list))
 #  [1] "HiG_extraembryonicMesoderm" "HiG_endothelial.a"         
@@ -117,8 +125,8 @@ g_attack <- ggplot(
 ) +
     # geom_line(size=ifelse(subset(attack.vertex ,measure == 'strength')$signature=='endothelial.a', 2, 1)) + # uisng this line if highlighting one subtype
     geom_line(aes(group = signature)) + # group ensures each line is drawn independently
-    scale_color_manual(values = PPI_color_platte) +
-    scale_size_manual(values = PPI_size_platte) +
+    scale_color_manual(values = PPI_color_palette) +
+    scale_size_manual(values = PPI_size_palette) +
     geom_abline(slope = -1, intercept = 1, col = "gray", lty = 2) +
     theme(legend.position = "inside", legend.position.inside = c(1, 1), legend.justification = c(1, 1)) +
     ylab("the remaining maximal component size / the initial maximal component size") +
@@ -136,7 +144,7 @@ gsignature_attack <- ggplot(
     geom_line() +
     geom_abline(slope = -1, intercept = 1, col = "gray", lty = 2) +
     theme(legend.position = "inside", legend.position.inside = c(1, 1), legend.justification = c(1, 1)) +
-    scale_size_manual(values = PPI_size_platte) +
+    scale_size_manual(values = PPI_size_palette) +
     ylab("the remaining maximal component size / the initial maximal component size") +
     ggtitle("vertex robustness by betweenness centrality")
 print(gsignature_attack)
@@ -152,8 +160,8 @@ g_attack2 <- ggplot(
 ) +
     # geom_line(size=ifelse(subset(attack.vertex ,measure == 'strength')$signature=='endothelial.a', 2, 1)) + # use this line if highlighting one subtype
     geom_line(aes(group = signature)) + # comment this line if highlighting one subtype
-    scale_color_manual(values = PPI_color_platte) +
-    scale_size_manual(values = PPI_size_platte) +
+    scale_color_manual(values = PPI_color_palette) +
+    scale_size_manual(values = PPI_size_palette) +
     geom_abline(slope = -1, intercept = 1, col = "gray", lty = 2) +
     theme(legend.position = "inside", legend.position.inside = c(1, 1), legend.justification = c(1, 1)) +
     ggtitle("vertex robustness measured by strength")
@@ -167,7 +175,7 @@ gsignature_attack2 <- ggplot(
     )
 ) +
     geom_line(size = 1.2) + # <- thicker lines
-    scale_size_manual(values = PPI_size_platte) +
+    scale_size_manual(values = PPI_size_palette) +
     geom_abline(slope = -1, intercept = 1, col = "gray", lty = 2) +
     theme(
         legend.position = "inside",
@@ -195,7 +203,7 @@ library(data.table)
 library(ggplot2)
 
 # refer to 11.1.1_CTS_cardiac_network_strengthDistribution.R
-file <- "2018_STRING_graph_perState_simplified_combinedweighted.rds"
+file <- paste0(db, "_STRING_graph_perState_simplified_combinedweighted.rds")
 graph_list <- readRDS(file)
 
 (names(graph_list))
@@ -213,12 +221,14 @@ graph_list <- readRDS(file)
 
 attack.vertex.btwn <- rbindlist(lapply(graph_list, robustness_MonteCarlo, "vertex", "btwn.cent"), idcol = names(graph_list))
 colnames(attack.vertex.btwn)[1] <- "signature"
-(head(attack.vertex.btwn, 3))
+(head(attack.vertex.btwn, 5))
 #                     signature                   type   measure comp.size comp.pct removed.pct
 #                        <char>                 <char>    <char>     <num>    <num>       <num>
 # 1: HiG_extraembryonicMesoderm Targeted vertex attack btwn.cent       409 1.000000 0.000000000
 # 2: HiG_extraembryonicMesoderm Targeted vertex attack btwn.cent       408 0.997555 0.002415459
 # 3: HiG_extraembryonicMesoderm Targeted vertex attack btwn.cent       407 0.995110 0.004830918
+# 4: HiG_extraembryonicMesoderm Targeted vertex attack btwn.cent       406 0.992665 0.007246377
+# 5: HiG_extraembryonicMesoderm Targeted vertex attack btwn.cent       405 0.990220 0.009661836
 
 (dim(attack.vertex.btwn)) #  8135    6
 saveRDS(attack.vertex.btwn, file = "attack.vertex.btwn.rds")
@@ -254,26 +264,34 @@ saveRDS(attack.edge.btwn, file = "attack.edge.btwn.rds")
 
 
 (sapply(graph_list, vcount))
-#              CTS_cardiac.a          CTS_endothelial.b                  HiG_blood              HiG_cardiac.a 
-#                         80                         83                      11725                       6609 
-#              HiG_cardiac.b              HiG_cardiac.c          HiG_endothelial.a          HiG_endothelial.b 
-#                      12913                      12913                       6744                       6609 
-#          HiG_endothelial.c          HiG_endothelial.d HiG_extraembryonicMesoderm    HiG_mesodermProgenitors 
-#                      15248                      15248                       6744                      11725 
-#        HiG_mixedMesoderm.a        HiG_mixedMesoderm.b     HiG_pharyngealMesoderm   HiG_presomiticMesoderm.a 
-#                      20603                       7558                       7558                      12663 
-#   HiG_presomiticMesoderm.b        HiG_somiticMesoderm           HiGCTS_cardiac.a       HiGCTS_endothelial.b 
-#                      12663                      20603                         29                         21 
-# HiG_extraembryonicMesoderm          HiG_endothelial.a          HiG_endothelial.c          HiG_endothelial.d 
-#                        414                        414                        573                        573 
-#                  HiG_blood    HiG_mesodermProgenitors   HiG_presomiticMesoderm.b   HiG_presomiticMesoderm.a 
-#                        559                        559                        537                        537 
-#        HiG_somiticMesoderm        HiG_mixedMesoderm.a     HiG_pharyngealMesoderm        HiG_mixedMesoderm.b 
-#                        552                        552                        432                        432 
-#              HiG_cardiac.b              HiG_cardiac.c          HiG_endothelial.b              HiG_cardiac.a 
-#                        549                        549                        392                        392 
-#       HiGCTS_endothelial.b           HiGCTS_cardiac.a          CTS_endothelial.b              CTS_cardiac.a 
-#                         16                         13                         33                         37
+#              CTS_cardiac.a          CTS_endothelial.b                  HiG_blood 
+#                         80                         83                      11725 
+#              HiG_cardiac.a              HiG_cardiac.b              HiG_cardiac.c 
+#                       6609                      12913                      12913 
+#          HiG_endothelial.a          HiG_endothelial.b          HiG_endothelial.c 
+#                       6744                       6609                      15248 
+#          HiG_endothelial.d HiG_extraembryonicMesoderm    HiG_mesodermProgenitors 
+#                      15248                       6744                      11725 
+#        HiG_mixedMesoderm.a        HiG_mixedMesoderm.b     HiG_pharyngealMesoderm 
+#                      20603                       7558                       7558 
+#   HiG_presomiticMesoderm.a   HiG_presomiticMesoderm.b        HiG_somiticMesoderm 
+#                      12663                      12663                      20603 
+#           HiGCTS_cardiac.a       HiGCTS_endothelial.b 
+#                         29                         21 
+# HiG_extraembryonicMesoderm          HiG_endothelial.a          HiG_endothelial.c 
+#                        414                        414                        573 
+#          HiG_endothelial.d                  HiG_blood    HiG_mesodermProgenitors 
+#                        573                        559                        559 
+#   HiG_presomiticMesoderm.b   HiG_presomiticMesoderm.a        HiG_somiticMesoderm 
+#                        537                        537                        552 
+#        HiG_mixedMesoderm.a     HiG_pharyngealMesoderm        HiG_mixedMesoderm.b 
+#                        552                        432                        432 
+#              HiG_cardiac.b              HiG_cardiac.c          HiG_endothelial.b 
+#                        549                        549                        392 
+#              HiG_cardiac.a       HiGCTS_endothelial.b           HiGCTS_cardiac.a 
+#                        392                         16                         13 
+#          CTS_endothelial.b              CTS_cardiac.a 
+#                         33                         37 
 
 attack.edge.btwn <- readRDS(file = "attack.edge.btwn.rds")
 attack.vertex.btwn <- readRDS(file = "attack.vertex.btwn.rds")
@@ -391,7 +409,7 @@ p_attack3 <- ggplot(
     aes(x = removed.pct, y = comp.pct, col = cluster, linetype = PPI_cat, size = PPI_cat)
 ) +
     geom_line(show.legend = TRUE) +
-    scale_size_manual(values = PPI_size_platte, name = "PPI Category") +
+    scale_size_manual(values = PPI_size_palette, name = "PPI Category") +
     facet_wrap(~type) +
     geom_abline(slope = -1, intercept = 1, col = "gray", lty = 2) +
     labs(
@@ -426,8 +444,8 @@ p_attack4 <- ggplot(
     aes(x = removed.pct, y = comp.pct, col = PPI_cat, linetype = PPI_cat, size = PPI_cat)
 ) +
     geom_line(aes(group = signature), show.legend = TRUE) + # Ensure legend is shown
-    scale_color_manual(values = PPI_color_platte, name = "PPI Category") +
-    scale_size_manual(values = PPI_size_platte, name = "PPI Category") +
+    scale_color_manual(values = PPI_color_palette, name = "PPI Category") +
+    scale_size_manual(values = PPI_size_palette, name = "PPI Category") +
     facet_wrap(~type) +
     geom_abline(slope = -1, intercept = 1, col = "gray", lty = 2) +
     theme(
@@ -478,15 +496,15 @@ normality_tests <- robustness.dt %>%
 (normality_tests)
 #    experiment PPI_cat   measure shapiro_test      p_value
 # 1        edge     CTS    random c(W = 0..... 1.505201e-08
-# 2        edge     CTS btwn.cent c(W = 0..... 2.501683e-06
+# 2        edge     CTS btwn.cent c(W = 0..... 6.508599e-10
 # 3        edge  HiGCTS    random c(W = 0..... 4.524175e-04
-# 4        edge  HiGCTS btwn.cent c(W = 0..... 2.634337e-03
+# 4        edge  HiGCTS btwn.cent c(W = 0..... 2.446155e-05
 # 5        edge     HiG    random           NA           NA
 # 6        edge     HiG btwn.cent           NA           NA
-# 7      vertex     CTS    random c(W = 0..... 3.336774e-04
-# 8      vertex     CTS btwn.cent c(W = 0..... 5.054868e-08
-# 9      vertex  HiGCTS    random c(W = 0..... 6.787811e-02
-# 10     vertex  HiGCTS btwn.cent c(W = 0..... 1.073263e-04
+# 7      vertex     CTS    random c(W = 0..... 3.823367e-04
+# 8      vertex     CTS btwn.cent c(W = 0..... 1.310484e-08
+# 9      vertex  HiGCTS    random c(W = 0..... 6.260321e-02
+# 10     vertex  HiGCTS btwn.cent c(W = 0..... 2.558545e-04
 # 11     vertex     HiG    random           NA           NA
 # 12     vertex     HiG btwn.cent           NA           NA
 
@@ -522,9 +540,9 @@ fold_change <- robustness.dt %>%
 (fold_change)
 #   PPI_cat fold_change_edge fold_change_vertex
 #   <fct>              <dbl>              <dbl>
-# 1 CTS                1.05                1.36
-# 2 HiGCTS             1.01                1.34
-# 3 HiG                0.956               1.04
+# 1 CTS                0.957               1.40
+# 2 HiGCTS             0.956               1.33
+# 3 HiG                0.925               1.03
 
 # Add annotation label and y-position to fold_change table
 fold_change <- fold_change %>%
@@ -539,8 +557,8 @@ fold_change <- fold_change %>%
 g <- ggplot(robustness.dt, aes(x = type2, y = comp.pct, fill = measure, color = PPI_cat, size = PPI_cat)) +
     geom_boxplot(alpha = 0.5, position = position_dodge(width = 0.75)) +
     facet_wrap(~PPI_cat, ncol = 3) +
-    scale_color_manual(values = PPI_color_platte) +
-    scale_size_manual(values = PPI_size_platte) +
+    scale_color_manual(values = PPI_color_palette) +
+    scale_size_manual(values = PPI_size_palette) +
     scale_fill_manual(values = c("random" = "grey", "btwn.cent" = "white")) +
     theme_minimal(base_size = 14) +
     labs(
@@ -571,7 +589,7 @@ targeted_vertex_data <- targeted_vertex_data[!is.na(targeted_vertex_data$comp.pc
 
 g2 <- ggplot(targeted_vertex_data, aes(x = PPI_cat, y = comp.pct, fill = PPI_cat)) +
     geom_boxplot(alpha = 0.5, position = position_dodge(width = 0.75)) + # Dodge the boxes for each type per PPI_cat
-    scale_fill_manual(values = PPI_color_platte) +
+    scale_fill_manual(values = PPI_color_palette) +
     geom_signif(
         comparisons = list(
             c("CTS", "HiGCTS"), c("HiGCTS", "HiG"), c("CTS", "HiG")
@@ -604,19 +622,19 @@ wilcox.test(
     targeted_vertex_data$comp.pct[which(targeted_vertex_data$PPI_cat == "CTS")],
     targeted_vertex_data$comp.pct[which(targeted_vertex_data$PPI_cat == "HiGCTS")]
 )
-# W = 990, p-value = 0.366
+# W = 1017, p-value = 0.4781
 
 wilcox.test(
     targeted_vertex_data$comp.pct[which(targeted_vertex_data$PPI_cat == "CTS")],
     targeted_vertex_data$comp.pct[which(targeted_vertex_data$PPI_cat == "HiG")]
 )
-# W = 209550, p-value = 5.632e-05
+# W = 201346, p-value = 8.879e-06
 
 wilcox.test(
     targeted_vertex_data$comp.pct[which(targeted_vertex_data$PPI_cat == "HiGCTS")],
     targeted_vertex_data$comp.pct[which(targeted_vertex_data$PPI_cat == "HiG")]
 )
-# W = 93293, p-value = 0.01586
+# W = 90983, p-value = 0.009576
 
 ## finally, manually add the threshold of fold changes  ###############
 robustness.dt <- robustness.dt %>%
@@ -657,23 +675,23 @@ df$node_p <- Hub_effect
 df$node_p.adj <- p.adjust(df$node_p, method = "bonferroni")
 
 (df[which(df$edge_p.adj < 0.05), ])
-#                                  edge_p   edge_p.adj    node_p node_p.adj
-# HiG_extraembryonicMesoderm 1.395868e-18 2.791735e-17 0.1409423          1
-# HiG_endothelial.a          1.039399e-15 2.078797e-14 0.1538366          1
-# HiG_endothelial.c          1.983482e-44 3.966964e-43 0.3560730          1
-# HiG_endothelial.d          1.285423e-46 2.570847e-45 0.3404282          1
-# HiG_blood                  6.022794e-31 1.204559e-29 0.3069206          1
-# HiG_mesodermProgenitors    6.039746e-32 1.207949e-30 0.2672300          1
-# HiG_presomiticMesoderm.b   3.298374e-36 6.596748e-35 0.3866887          1
-# HiG_presomiticMesoderm.a   6.683827e-42 1.336765e-40 0.2701798          1
-# HiG_somiticMesoderm        1.787474e-47 3.574947e-46 0.4347686          1
-# HiG_mixedMesoderm.a        6.914545e-54 1.382909e-52 0.4030829          1
-# HiG_pharyngealMesoderm     5.026050e-40 1.005210e-38 0.1429150          1
-# HiG_mixedMesoderm.b        8.289912e-37 1.657982e-35 0.1841956          1
-# HiG_cardiac.b              1.945315e-42 3.890630e-41 0.2279994          1
-# HiG_cardiac.c              7.699959e-52 1.539992e-50 0.2917282          1
-# HiG_endothelial.b          1.381454e-23 2.762908e-22 0.2490499          1
-# HiG_cardiac.a              3.647988e-19 7.295975e-18 0.2035765          1
+#                                   edge_p    edge_p.adj    node_p node_p.adj
+# HiG_extraembryonicMesoderm  1.070554e-24  2.141108e-23 0.1668555          1
+# HiG_endothelial.a           1.245490e-17  2.490980e-16 0.1756896          1
+# HiG_endothelial.c          3.462630e-173 6.925260e-172 0.3650503          1
+# HiG_endothelial.d          8.880381e-192 1.776076e-190 0.3978719          1
+# HiG_blood                   3.965026e-18  7.930053e-17 0.3831300          1
+# HiG_mesodermProgenitors     6.902748e-21  1.380550e-19 0.4062669          1
+# HiG_presomiticMesoderm.b   9.863181e-160 1.972636e-158 0.3066822          1
+# HiG_presomiticMesoderm.a   1.687754e-169 3.375507e-168 0.3394737          1
+# HiG_somiticMesoderm         0.000000e+00  0.000000e+00 0.5251495          1
+# HiG_mixedMesoderm.a         0.000000e+00  0.000000e+00 0.5249043          1
+# HiG_pharyngealMesoderm      2.120386e-66  4.240772e-65 0.4636087          1
+# HiG_mixedMesoderm.b         4.381902e-64  8.763803e-63 0.4383208          1
+# HiG_cardiac.b              5.239606e-120 1.047921e-118 0.3400736          1
+# HiG_cardiac.c              7.594448e-115 1.518890e-113 0.3300341          1
+# HiG_endothelial.b           7.947633e-34  1.589527e-32 0.3743199          1
+# HiG_cardiac.a               5.126556e-34  1.025311e-32 0.4504188          1
 
 (df[which(df$node_p.adj < 0.05), ]) # No networks had significant hub effects at the node level
 # [1] edge_p     edge_p.adj node_p     node_p.adj
@@ -706,7 +724,7 @@ g <- ggplot(tmp, aes(x = as.factor(clust), y = -log10(p.adj), color = PPI_cat)) 
         color = "State",
         shape = "State"
     ) +
-    scale_color_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
     scale_shape_manual(values = c("HiG" = 16, "CTS" = 17, "HiGCTS" = 18)) +
     facet_wrap(~type, scales = "free", nrow = 2) + # Split into two rows for edge and node
     theme_minimal() +
@@ -727,7 +745,7 @@ g2 <- ggplot(tmp, aes(x = log10(count), y = -log10(p.adj), color = PPI_cat)) +
         color = "State",
         shape = "State"
     ) +
-    scale_color_manual(values = PPI_color_platte) +
+    scale_color_manual(values = PPI_color_palette) +
     scale_shape_manual(values = c("HiG" = 16, "CTS" = 17, "HiGCTS" = 18)) +
     facet_wrap(~type, scales = "free", ncol = 2) + # Split into two rows for edge and node
     theme_minimal() +
@@ -765,16 +783,20 @@ for (j in names(graph_list)) {
     )
 }
 (observed_auc_list %>% unlist())
-# HiG_extraembryonicMesoderm          HiG_endothelial.a          HiG_endothelial.c          HiG_endothelial.d 
-#                  0.4608064                  0.4616981                  0.4790393                  0.4785429 
-#                  HiG_blood    HiG_mesodermProgenitors   HiG_presomiticMesoderm.b   HiG_presomiticMesoderm.a 
-#                  0.4738400                  0.4720769                  0.4776363                  0.4736443 
-#        HiG_somiticMesoderm        HiG_mixedMesoderm.a     HiG_pharyngealMesoderm        HiG_mixedMesoderm.b 
-#                  0.4812117                  0.4801168                  0.4621463                  0.4656023 
-#              HiG_cardiac.b              HiG_cardiac.c          HiG_endothelial.b              HiG_cardiac.a 
-#                  0.4728770                  0.4752303                  0.4668530                  0.4644586 
-#       HiGCTS_endothelial.b           HiGCTS_cardiac.a          CTS_endothelial.b              CTS_cardiac.a 
-#                  0.3096591                  0.3461538                  0.2983683                  0.3396396 
+# HiG_extraembryonicMesoderm          HiG_endothelial.a          HiG_endothelial.c 
+#                  0.4626844                  0.4640900                  0.4792525 
+#          HiG_endothelial.d                  HiG_blood    HiG_mesodermProgenitors 
+#                  0.4801541                  0.4759899                  0.4769376 
+#   HiG_presomiticMesoderm.b   HiG_presomiticMesoderm.a        HiG_somiticMesoderm 
+#                  0.4754162                  0.4766322                  0.4836940 
+#        HiG_mixedMesoderm.a     HiG_pharyngealMesoderm        HiG_mixedMesoderm.b 
+#                  0.4837861                  0.4775982                  0.4771493 
+#              HiG_cardiac.b              HiG_cardiac.c          HiG_endothelial.b 
+#                  0.4773610                  0.4767992                  0.4721704 
+#              HiG_cardiac.a       HiGCTS_endothelial.b           HiGCTS_cardiac.a 
+#                  0.4748910                  0.2755682                  0.3846154 
+#          CTS_endothelial.b              CTS_cardiac.a 
+#                  0.3146853                  0.3072072 
 
 df_AUC <- data.frame(
     auc = observed_auc_list %>% unlist(),
@@ -785,7 +807,7 @@ df_AUC$PPI_cat <- factor(df_AUC$PPI_cat, levels = c("CTS", "HiGCTS", "HiG"))
 
 g3 <- ggplot(df_AUC, aes(x = PPI_cat, y = auc, fill = PPI_cat)) +
     geom_boxplot(alpha = 0.5, position = position_dodge(width = 0.75)) + # Dodge the boxes for each type per PPI_cat
-    scale_fill_manual(values = PPI_color_platte) +
+    scale_fill_manual(values = PPI_color_palette) +
     geom_signif(
         comparisons = list(
             c("CTS", "HiGCTS"), c("HiGCTS", "HiG"), c("CTS", "HiG")
@@ -816,18 +838,20 @@ for (j in names(vn)) {
     pn[j] <- igraph::strength(graph_list[[j]], weights = E(graph_list[[j]])$weight) %>% mean() / vn[j]
 }
 (vn)
-# HiG_extraembryonicMesoderm          HiG_endothelial.a          HiG_endothelial.c          HiG_endothelial.d                  HiG_blood    HiG_mesodermProgenitors   HiG_presomiticMesoderm.b 
-#                  0.4608064                  0.4616981                  0.4790393                  0.4785429                  0.4738400                  0.4720769                  0.4776363 
-#   HiG_presomiticMesoderm.a        HiG_somiticMesoderm        HiG_mixedMesoderm.a     HiG_pharyngealMesoderm        HiG_mixedMesoderm.b              HiG_cardiac.b              HiG_cardiac.c 
-#                  0.4736443                  0.4812117                  0.4801168                  0.4621463                  0.4656023                  0.4728770                  0.4752303 
-#          HiG_endothelial.b              HiG_cardiac.a       HiGCTS_endothelial.b           HiGCTS_cardiac.a          CTS_endothelial.b              CTS_cardiac.a 
-#                  0.4668530                  0.4644586                  0.3096591                  0.3461538                  0.2983683                  0.3396396 
-# HiG_extraembryonicMesoderm          HiG_endothelial.a          HiG_endothelial.c          HiG_endothelial.d                  HiG_blood    HiG_mesodermProgenitors   HiG_presomiticMesoderm.b 
-#                        414                        414                        573                        573                        559                        559                        537 
-#   HiG_presomiticMesoderm.a        HiG_somiticMesoderm        HiG_mixedMesoderm.a     HiG_pharyngealMesoderm        HiG_mixedMesoderm.b              HiG_cardiac.b              HiG_cardiac.c 
-#                        537                        552                        552                        432                        432                        549                        549 
-#          HiG_endothelial.b              HiG_cardiac.a       HiGCTS_endothelial.b           HiGCTS_cardiac.a          CTS_endothelial.b              CTS_cardiac.a 
-#                        392                        392                         16                         13                         33                         37 
+# HiG_extraembryonicMesoderm          HiG_endothelial.a          HiG_endothelial.c 
+#                        414                        414                        573 
+#          HiG_endothelial.d                  HiG_blood    HiG_mesodermProgenitors 
+#                        573                        559                        559 
+#   HiG_presomiticMesoderm.b   HiG_presomiticMesoderm.a        HiG_somiticMesoderm 
+#                        537                        537                        552 
+#        HiG_mixedMesoderm.a     HiG_pharyngealMesoderm        HiG_mixedMesoderm.b 
+#                        552                        432                        432 
+#              HiG_cardiac.b              HiG_cardiac.c          HiG_endothelial.b 
+#                        549                        549                        392 
+#              HiG_cardiac.a       HiGCTS_endothelial.b           HiGCTS_cardiac.a 
+#                        392                         16                         13 
+#          CTS_endothelial.b              CTS_cardiac.a 
+#                         33                         37 
 
 
 (sum(vn[grep("^HiG_", names(vn))]))     # 8016
@@ -913,7 +937,7 @@ for (j in cluster_ids) {
         x_lines,
         lf,
         xlab = "AUC of maximal component size",
-        col = PPI_color_platte,
+        col = PPI_color_palette,
         xlim = xlim_range,
         lwd = 2,
         main = paste0("Cluster ", j)
@@ -923,7 +947,7 @@ for (j in cluster_ids) {
     for (col in obs_cols) {
         if (!is.null(observed_auc_list[[col]])) {
             label <- sub("^(CTS|HiGCTS|HiG)_.*", "\\1", col)
-            abline(v = observed_auc_list[[col]], col = PPI_color_platte[label], lty = 2, lwd = 2)
+            abline(v = observed_auc_list[[col]], col = PPI_color_palette[label], lty = 2, lwd = 2)
         }
     }
 
@@ -946,7 +970,7 @@ for (j in cluster_ids) {
                     "HiGCTS" = 2.5,
                     "HiG" = 4
                 ),
-                col = PPI_color_platte[label]
+                col = PPI_color_palette[label]
             )
         }
     }
@@ -968,16 +992,20 @@ for (j in names(graph_list)) {
     )
 }
 (observed_auc_list %>% unlist())
-# HiG_extraembryonicMesoderm          HiG_endothelial.a          HiG_endothelial.c          HiG_endothelial.d 
-#                  0.6925460                  0.6909190                  0.7079443                  0.7094227 
-#                  HiG_blood    HiG_mesodermProgenitors   HiG_presomiticMesoderm.b   HiG_presomiticMesoderm.a 
-#                  0.6988889                  0.6998049                  0.6997179                  0.7023177 
-#        HiG_somiticMesoderm        HiG_mixedMesoderm.a     HiG_pharyngealMesoderm        HiG_mixedMesoderm.b 
-#                  0.7053271                  0.7075465                  0.7206489                  0.7177318 
-#              HiG_cardiac.b              HiG_cardiac.c          HiG_endothelial.b              HiG_cardiac.a 
-#                  0.6967657                  0.6999990                  0.6972624                  0.6929412 
-#       HiGCTS_endothelial.b           HiGCTS_cardiac.a          CTS_endothelial.b              CTS_cardiac.a 
-#                  0.6113636                  0.7023810                  0.6308630                  0.6126582 
+# HiG_extraembryonicMesoderm          HiG_endothelial.a          HiG_endothelial.c 
+#                  0.6977043                  0.6924836                  0.7372527 
+#          HiG_endothelial.d                  HiG_blood    HiG_mesodermProgenitors 
+#                  0.7399896                  0.6906394                  0.6922637 
+#   HiG_presomiticMesoderm.b   HiG_presomiticMesoderm.a        HiG_somiticMesoderm 
+#                  0.7353527                  0.7370738                  0.7535221 
+#        HiG_mixedMesoderm.a     HiG_pharyngealMesoderm        HiG_mixedMesoderm.b 
+#                  0.7538551                  0.7308660                  0.7305803 
+#              HiG_cardiac.b              HiG_cardiac.c          HiG_endothelial.b 
+#                  0.7202522                  0.7188259                  0.7029198 
+#              HiG_cardiac.a       HiGCTS_endothelial.b           HiGCTS_cardiac.a 
+#                  0.7034605                  0.7022727                  0.7023810 
+#          CTS_endothelial.b              CTS_cardiac.a 
+#                  0.6688555                  0.7008439 
 
 en <- mn <- numeric(length(graph_list)) # safer than array(dim=)
 names(en) <- names(mn) <- names(graph_list)
@@ -1003,16 +1031,20 @@ for (j in names(graph_list)) {
 }
 options(scipen = 999)
 (mn)
-# HiG_extraembryonicMesoderm          HiG_endothelial.a          HiG_endothelial.c          HiG_endothelial.d 
-#                   8.665859                   7.146630                  28.794115                  28.121675 
-#                  HiG_blood    HiG_mesodermProgenitors   HiG_presomiticMesoderm.b   HiG_presomiticMesoderm.a 
-#                  17.625680                  16.383867                  30.028392                  29.370176 
-#        HiG_somiticMesoderm        HiG_mixedMesoderm.a     HiG_pharyngealMesoderm        HiG_mixedMesoderm.b 
-#                  48.241201                  48.712559                  17.298067                  17.401475 
-#              HiG_cardiac.b              HiG_cardiac.c          HiG_endothelial.b              HiG_cardiac.a 
-#                  26.305750                  27.133499                  12.910587                  12.530216 
-#       HiGCTS_endothelial.b           HiGCTS_cardiac.a          CTS_endothelial.b              CTS_cardiac.a 
-#                   1.359660                   1.187108                   1.566885                   1.129949  
+# HiG_extraembryonicMesoderm          HiG_endothelial.a          HiG_endothelial.c 
+#                   8.665859                   7.146630                  28.794115 
+#          HiG_endothelial.d                  HiG_blood    HiG_mesodermProgenitors 
+#                  28.121675                  17.625680                  16.383867 
+#   HiG_presomiticMesoderm.b   HiG_presomiticMesoderm.a        HiG_somiticMesoderm 
+#                  30.028392                  29.370176                  48.241201 
+#        HiG_mixedMesoderm.a     HiG_pharyngealMesoderm        HiG_mixedMesoderm.b 
+#                  48.712559                  17.298067                  17.401475 
+#              HiG_cardiac.b              HiG_cardiac.c          HiG_endothelial.b 
+#                  26.305750                  27.133499                  12.910587 
+#              HiG_cardiac.a       HiGCTS_endothelial.b           HiGCTS_cardiac.a 
+#                  12.530216                   1.359660                   1.187108 
+#          CTS_endothelial.b              CTS_cardiac.a 
+#                   1.566885                   1.129949 
 
 options(scipen = 0)
 
@@ -1080,7 +1112,7 @@ for (j in cluster_ids) {
         x_lines,
         lf,
         xlab = "AUC of maximal component size",
-        col = PPI_color_platte,
+        col = PPI_color_palette,
         xlim = xlim_range,
         lwd = 2,
         main = paste0("Cluster ", j)
@@ -1089,7 +1121,7 @@ for (j in cluster_ids) {
     for (col in obs_cols) {
         if (!is.null(observed_auc_list[[col]])) {
             label <- sub("^(CTS|HiGCTS|HiG)_.*", "\\1", col)
-            abline(v = observed_auc_list[[col]], col = PPI_color_platte[label], lty = 2, lwd = 2)
+            abline(v = observed_auc_list[[col]], col = PPI_color_palette[label], lty = 2, lwd = 2)
         }
     }
 
@@ -1111,7 +1143,7 @@ for (j in cluster_ids) {
                     "HiGCTS" = 2.5,
                     "HiG" = 4
                 ),
-                col = PPI_color_platte[label]
+                col = PPI_color_palette[label]
             )
         }
     }

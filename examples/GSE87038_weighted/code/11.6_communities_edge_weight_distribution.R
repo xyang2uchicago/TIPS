@@ -23,20 +23,24 @@ library(ggrepel)
 library(ggpubr) # resuired by stat_compare_means()
 library(igraph)
 
+########## BEGINNING OF USER INPUT ##########
 
 wd = "/Users/felixyu/Documents/GSE87038_weighted/"
 setwd(paste0(wd, "results/"))
 
 db <- "GSE87038"
 
-# Use GitHub version of celltype_specific_weight
 celltype_specific_weight_version <- '10'
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
-cardiac_clusters <- c(paste0("HiG", c(2, 3, 4, 8, 11, 12, 14, 16, 17, 18, 19)))
-CT_id <- c(7, 8, 11, 13, 15, 16, 16.1)
+cardiac_clusters <- c("2", "3", "4", "8", "11", "12", "14", "16", "17", "18", "19")
+CT_id <- c("7", "8", "11", "13", "15", "16", "16.1") # critical transition clusters
+
+redo = FALSE # compute edge-betweenness communities. Only needed once!
 
 PPI_color_palette = c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
+
+########## END OF USER INPUT ##########
  
  
 graph_list <- readRDS( file= paste0(db, '_STRING_graph_perState_notsimplified.rds'))  
@@ -165,7 +169,7 @@ g1 = ggplot(plot_data[1:n,], aes(x = reorder(cell_type, -iqr_value), y = iqr_val
     )  
  
 ## cardiac-lineage clusters
-cardiac = setdiff(names(BC), cardiac_clusters)
+cardiac = setdiff(names(BC), paste0("HiG_", cardiac_clusters))
 IQR =calculate_gene_iqr(BC[cardiac])
 (range(IQR))  # [1] 0.0000000 0.1644062
 (table(IQR>0))
@@ -220,7 +224,6 @@ dev.off()
 ###############################################################################
 # Community structure detection based on edge betweenness, this takes a while
 ## DO NOT repeat ########
-redo = FALSE
 if(redo){
 	EB = sapply(tmp_list, cluster_edge_betweenness, directed=FALSE)
 	class(EB[[1]]) #"communities"
@@ -279,14 +282,20 @@ category_plots <- plot_edge_weight_distributions(edge_data, PPI_color_palette)
 (category_plots$density_plot)
 (category_plots$boxplot)
 
-
 ("=== SUMMARY STATISTICS ===")
+edge_data %>% 
+    group_by(PPI_cat) %>% 
+    summarise(
+        mean_weight = mean(edge_weight),
+        median_weight = median(edge_weight),
+        total_edges = sum(num_edges)
+    )
 # # A tibble: 3 × 4
 #   PPI_cat mean_weight median_weight total_edges
 #   <fct>         <dbl>         <dbl>       <int>
-# 1 CTS           0.367         0.292         905
-# 2 HiGCTS        0.382         0.322         146
-# 3 HiG           0.366         0.295      150813
+# 1 CTS           0.367         0.292      146303
+# 2 HiGCTS        0.382         0.322        4672
+# 3 HiG           0.366         0.295  1265162595
 grid.arrange(category_plots$density_plot, category_plots$boxplot, ncol = 2)
 dev.copy2pdf(file='edge_weight.pdf')
 

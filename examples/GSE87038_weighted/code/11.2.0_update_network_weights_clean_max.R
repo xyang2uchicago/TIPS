@@ -8,20 +8,33 @@ library(igraph)
 require(psych)
 library(stringr)
 
+########## BEGINNING OF USER INPUT ##########
+
 wd = "/Users/felixyu/Documents/GSE87038_weighted/"
 setwd(paste0(wd, "results/PPI_weight/"))
 
 db <- "GSE87038"
 
-celltype_specific_weight_version <- '10'
-BioTIP_version <- '06232025'
+specificity_methods <- c("combined", "ratio", "zscore", "diff")
 
 isl1_cluster <- "HiGCTS_8" # cluster containing ISL1 gene
+
+core_count <- 1 # number of cores used for parallel processing in steps 1 and 2. Use core_count = 1 if on Windows.
+
+step1 <- TRUE # calculate gene correlations and specificity
+step2 <- TRUE # update network edge weights
+step3 <- TRUE # graph comparing specificity methods for all clusters
+step4 <- TRUE # graph comparing specificity methods for isl1_cluster
+
+celltype_specific_weight_version <- '10'
+BioTIP_version <- '06232025'
 
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/heads/master/R/BioTIP_update_', BioTIP_version, '.R'))
 
 load(paste0(wd, "data/sce_E8.25_uncorrected.RData"))
+
+########## END OF USER INPUT ##########
 
 sce
 colnames(colData(sce))
@@ -59,13 +72,12 @@ if (diagnose) {
     range(E(graph_list[[1]])$weight) # [1]  0.200 0.999
 }
 
-inputdir <- paste0(wd, "results/")
-graph_list <- readRDS(file = paste0(inputdir, paste0(db, "_STRING_graph_perState_notsimplified.rds")))
+graph_list <- readRDS(file = paste0(paste0("../", db, "_STRING_graph_perState_notsimplified.rds")))
 N0 <- sapply(graph_list, vcount)
 
 ########## clean 1) remove name-duplicated Vertex due to inconsistency in STRING.db ###########
 ## refer to 11.1.0_correct_vertex_duplication.R
-correct_n_edges <- readRDS(paste0(inputdir, "correct_n_edges_HiG_STRING2.14.0.rds"))
+correct_n_edges <- readRDS(paste0("../correct_n_edges_HiG_STRING2.14.0.rds"))
 for (g_name in unique(correct_n_edges$graph_id)) {
     # Subset the rows for this graph
     rows <- subset(correct_n_edges, graph_id == g_name)
@@ -131,9 +143,7 @@ graphs_with_duplicates <- sapply(graph_list, function(g) {
 # See which graphs have duplicates
 which(graphs_with_duplicates)
 
-step1 <- FALSE
 if (step1) {
-    ## calculating co-expression-based specificity scores, runs 1 hour when cores=1, DO NOT repeat !
     ## first, add a meta column to match the graph_list names
     colData(sce)$cluster <- colData(sce)$label
 
@@ -142,9 +152,9 @@ if (step1) {
         assayName,
         celltype_col = "cluster",
         method = "pearson",
-        cores = 4,
+        cores = core_count,
         shrink = TRUE,
-        verbose = TRUE
+        verbose = FALSE
     )
     saveRDS(network_specificity_list, "network_specificity_list.rds")
     names(network_specificity_list)
@@ -163,14 +173,13 @@ if (step1) {
     # [1] "ratio"    "zscore"   "diff"     "combined"
 }
 
-step2 <- FALSE
 if (step2) {
     network_specificity_list <- readRDS("network_specificity_list.rds")
 
     library(data.table)
 
     for (net in names(network_specificity_list)) {
-        cat("Analyzing: ", net)
+        cat("Analyzing: ", net, "\n")
         spec_data <- network_specificity_list[[net]]
         corexp_named <- spec_data$corexp_sign
 
@@ -189,11 +198,11 @@ if (step2) {
     # negative positive
     # 40106    51703
 
-    for (s in c("combined", "ratio", "zscore", "diff")) {
+    for (s in specificity_methods) {
         weighted_graph_list <- update_network_weights(graph_list,
             network_specificity_list,
             specificity_method = s,
-            verbose = TRUE,
+            verbose = FALSE,
             cores = 1
         )
         saveRDS(weighted_graph_list, file = paste0(db, "_STRING_graph_perState_simplified_", s, "weighted.rds"))
@@ -209,7 +218,6 @@ if (step2) {
 ## compare weights methods
 ## check new weights for ISL1 in "HiGCTS_8"
 #####################################################
-step3 <- TRUE
 library(ggplot2)
 library(hexbin)
 
@@ -222,7 +230,7 @@ if (step3) {
         plot_data <- NULL
         par(mfrow = c(2, 2))
 
-        for (s in c("combined", "ratio", "zscore", "diff")) {
+        for (s in specificity_methods) {
             graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_simplified_", s, "weighted.rds"))
             g <- graph_list[[net_name]]
             # Safeguard to skip graphs with missing original weights
@@ -276,12 +284,11 @@ if (step3) {
     dev.off()
 }
 
-step4 <- TRUE
 if (step4) {
     net_name <- isl1_cluster
     plot_data <- NULL
 
-    for (s in c("combined", "ratio", "zscore", "diff")) {
+    for (s in specificity_methods) {
         graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_simplified_", s, "weighted.rds"))
         g <- graph_list[[net_name]]
 
@@ -303,6 +310,10 @@ if (step4) {
             isl1_edges <- incident(g, isl1_vertex, mode = "all")
             is_isl1_edge[isl1_edges] <- TRUE
         }
+        else{
+            print(paste0("No ISL1 found in ", isl1_cluster))
+            break
+        }
 
         temp_data <- data.frame(
             net_name = net_name,
@@ -315,21 +326,23 @@ if (step4) {
         plot_data <- rbind(plot_data, temp_data)
     }
 
-    temp <- subset(plot_data, is_isl1 == TRUE)
-    pdf(file = paste0("compare_specificity_method_", isl1_cluster, "_vs_PPIscores.pdf"))
-    print(
-        ggplot(temp, aes(x = norm_PPI_score, y = log_weight, color = as.factor(norm_PPI_score))) +
-            geom_point() +
-            scale_fill_viridis_c() +
-            facet_wrap(~method, scales = "free") +
-            theme_minimal() +
-            labs(
-                title = paste("Isl1 linkages -", net_name),
-                x = "E(g)$norm_PPI_score",
-                y = "log10(E(g)$weight)"
-            ) +
-            theme(legend.position = "bottom")
-    )
+    if (length(isl1_vertex) > 0) {
+        temp <- subset(plot_data, is_isl1 == TRUE)
+        pdf(file = paste0("compare_specificity_method_", isl1_cluster, "_vs_PPIscores.pdf"))
+        print(
+            ggplot(temp, aes(x = norm_PPI_score, y = log_weight, color = as.factor(norm_PPI_score))) +
+                geom_point() +
+                scale_fill_viridis_c() +
+                facet_wrap(~method, scales = "free") +
+                theme_minimal() +
+                labs(
+                    title = paste("Isl1 linkages -", net_name),
+                    x = "E(g)$norm_PPI_score",
+                    y = "log10(E(g)$weight)"
+                ) +
+                theme(legend.position = "bottom")
+        )
 
-    dev.off()
+        dev.off()
+    }
 }

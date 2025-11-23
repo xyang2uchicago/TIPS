@@ -10,24 +10,26 @@ library(pracma)
 library(data.table)
 library(ggpubr)
  
+########## BEGINNING OF USER INPUT ##########
 
 wd = "/Users/felixyu/Documents/GSE87038_weighted/"
 setwd(paste0(wd, "results/PPI_weight/"))
 
-# Use GitHub version of celltype_specific_weight
 celltype_specific_weight_version <- '10'
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
 db <- 'GSE87038'
 
-CT_id <- c(7, 8, 13, 11, 15, 16, 16.1)
+CT_id <- c("7", "8", "13", "11", "15", "16", "16.1") # critical transition clusters
 
-# refer to 11.2.0_weighted_graph_attack_robustness.R
-s = "combined"
+s = "combined" # specificity method
+
+########## END OF USER INPUT ##########
+
 file = paste0(db, '_STRING_graph_perState_simplified_',s,'weighted.rds')
 graph_list <- readRDS( file)  
 	
-print(names(graph_list))
+(names(graph_list))
 #  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"      
 #  [6] "HiG_6"       "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"     
 # [11] "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"       "HiG_11"     
@@ -35,9 +37,6 @@ print(names(graph_list))
 # [21] "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_8"   
 # [26] "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"      "CTS_16.1"   
 # [31] "CTS_13"      "CTS_8" 
-
-
-g_real = graph_list[["CTS_8"]]
 
 pdf(file='simulation.pdf', width=15, height=5)
 df = NULL

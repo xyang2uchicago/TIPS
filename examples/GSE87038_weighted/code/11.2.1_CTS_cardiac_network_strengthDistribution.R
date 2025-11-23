@@ -7,6 +7,8 @@ library(ggrepel)
 library(ggpubr)
 library(igraph)
 
+########## BEGINNING OF USER INPUT ##########
+
 wd = "/Users/felixyu/Documents/GSE87038_weighted/"
 setwd(paste0(wd, "results/"))
 PPI_color_palette <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
@@ -17,8 +19,10 @@ db <- "GSE87038"
 celltype_specific_weight_version <- '10'
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
-CT_id <- c(7, 8, 11, 13, 15, 16)
-CT_id_formatted <- paste0("_(", paste(CT_id, collapse = "|"), ")")
+CT_id <- c("7", "8", "11", "13", "15", "16") # critical transition clusters
+CT_id_formatted <- paste0("(_", CT_id, ")") %>% paste(collapse="|")
+
+########## END OF USER INPUT ##########
 
 
 graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_notsimplified.rds"))

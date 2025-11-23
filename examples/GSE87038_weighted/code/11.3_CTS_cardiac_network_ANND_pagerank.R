@@ -10,6 +10,8 @@ library(igraph)
 library(rstatix)
 library(brainGraph)
 
+########## BEGINNING OF USER INPUT ##########
+
 wd = "/Users/felixyu/Documents/GSE87038_weighted/"
 setwd(paste0(wd, "results/PPI_weight/"))
 inputdir <- paste0(wd, "data/")
@@ -18,8 +20,9 @@ PPI_color_palette <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02
 
 db <- "GSE87038"
 
-# refer to 11.2.0_weighted_graph_attack_robustness.R
-s <- "combined"
+s <- "combined" # specificity method
+
+########## END OF USER INPUT ##########
 
 file <- paste0(db, "_STRING_graph_perState_simplified_", s, "weighted.rds")
 graph_list <- readRDS(file)

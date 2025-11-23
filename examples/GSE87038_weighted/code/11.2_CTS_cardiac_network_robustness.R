@@ -13,6 +13,8 @@ library(brainGraph)
 library(MLmetrics)
 library(sm)
 
+########## BEGINNING OF USER INPUT ##########
+
 wd = "/Users/felixyu/Documents/GSE87038_weighted/"
 
 setwd(paste0(wd, "results/PPI_weight/"))
@@ -25,8 +27,9 @@ PPI_size_palette <- c("CTS" = 1, "HiGCTS" = 0.75, "HiG" = 0.25)
 
 db <- "GSE87038"
 
-# refer to 11.1_CTS_cardiac_network_strengthDistribution.R
-s <- "combined"
+s <- "combined"  # specificity method
+
+########## END OF USER INPUT ##########
 
 file <- paste0(db, "_STRING_graph_perState_simplified_", s, "weighted.rds")
 graph_list <- readRDS(file)
@@ -38,6 +41,7 @@ graph_list <- readRDS(file)
 # [21] "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_8"
 # [26] "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"      "CTS_16.1"
 # [31] "CTS_13"      "CTS_8"       "HiGCTS_13"
+    
 edge_counts <- sapply(graph_list, ecount)
 (edge_counts)
 #       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6 
