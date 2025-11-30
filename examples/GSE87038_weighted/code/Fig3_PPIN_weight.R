@@ -2,13 +2,12 @@ library(gplots)
 require(dplyr)
 library(data.table)
 library(ggplot2)
-library(ggpubr)  # ggarrange()
-library("gridExtra")
-library(ggrepel)
 library(ggpubr)
+library(ggrepel)
 library(igraph)
 library(rstatix)
-library(brainGraph)
+library(scales)
+library(pracma)
 
 ########## BEGINNING OF USER INPUT ##########
 
@@ -49,8 +48,6 @@ graph_list <- readRDS(file)
 
 signature_levels = c(names(graph_list))
 
-CHD = readRDS( file=paste0(inputdir, 'CHD_Cilia_Genelist.rds'))
-
 ###################################################
 # Fig A ) normalized node strength analysis
 # original code: 11.3_CTS_cardiac_network_ANND_pagerank.R
@@ -63,6 +60,8 @@ df = rbind(subset(df, PPI_cat=='CTS'),
 					subset(df, PPI_cat=='HiG')
 					)
 df$label=df$gene
+
+CHD = readRDS( file=paste0(inputdir, 'CHD_Cilia_Genelist.rds'))
 
 ## Fig A top) boxplot of normalized strength ########
 df_median = df %>% group_by(signature) %>%
