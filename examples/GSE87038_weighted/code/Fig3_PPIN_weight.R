@@ -8,6 +8,8 @@ library(igraph)
 library(rstatix)
 library(scales)
 library(pracma)
+library(MLmetrics)
+library(sm)
 
 ########## BEGINNING OF USER INPUT ##########
 
@@ -130,7 +132,6 @@ boxplot_strength = ggplot(df, aes(x = signature, y = log10(normalized.strength),
 	  labs(color = "PPI cat")   # Optional: label for the color legend
     
 vertex(boxplot_strength)
-
 }
 
 ###################################################
@@ -455,9 +456,6 @@ sig_results_ppi <- lapply(ppi_comparisons, function(cmp) {
 # original pdf: attack_GSE87038.pdf
 ################################################################
 {  
-# failure.vertex = readRDS(file=paste0('failure.vertex_100_simplified_',s,'weighted.rds'))  
-# failure.edge = readRDS(paste0('failure.edge_100_simplified_',s,'weighted.rds'))
-# failure.dt <- rbind(failure.edge, failure.vertex)   
 failure.dt = readRDS(file=paste0('failure.vertex_100_simplified_',s,'weighted.rds'))  
 colnames(failure.dt)[1] ='signature'
 
@@ -542,8 +540,19 @@ plot(violin_median_bc_wilcox)
 # original pdf: box_wilcox-test_attack_AUC_GSE87038.pdf
 ################################################################
 {
-library(MLmetrics)
-library(sm)
+failure.dt = readRDS(file=paste0('failure.vertex_100_simplified_', s, 'weighted.rds'))
+colnames(failure.dt)[1] = 'signature'
+
+attack.vertex.btwn = readRDS('attack.vertex.btwn.rds')
+colnames(attack.vertex.btwn)[1] = 'signature'
+
+robustness.dt <- rbind(failure.dt, attack.vertex.btwn[,1:6])
+robustness.dt$PPI_cat = lapply(robustness.dt$signature, function(x) unlist(strsplit(x , '_'))[1]) %>% unlist %>%
+    factor(.,levels=c('CTS', 'HiGCTS', 'HiG'))
+
+robustness.dt = subset(robustness.dt ,measure != 'degree')
+robustness.dt$type = factor(robustness.dt$type,
+    levels = c("Random edge removal","Targeted edge attack","Random vertex removal","Targeted vertex attack"))
 
 observed_auc_list = list()
 for(j in names(graph_list)){
