@@ -260,7 +260,7 @@ signature_levels = c(names(graph_list))</code></pre>
 <p>
     HiG networks generally show <strong>lower normalized strength</strong>, indicating weaker weighted
     connectivity. CTS and HiGCTS PPINs tend to contain more strongly connected genes, suggesting
-    more stable functional wiring.
+    <p style="color: #ff0000">TBD</p>
 </p>
 
 <h3><strong>Inputs</strong></h3>
@@ -409,8 +409,7 @@ vertex(boxplot_strength)
 
 <h3><strong>Interpretation</strong></h3>
 <p>
-    Weaker normalized strength in HiG transition clusters suggests reduced redundancy or
-    decreased interaction density during lineage transitions.
+    Weaker normalized strength in HiG transition clusters suggests <p style="color: #ff0000">TBD</p>
 </p>
 
 <h3><strong>Inputs</strong></h3>
@@ -487,8 +486,8 @@ print(boxplot_transition_strength)
 
 <h3><strong>Interpretation</strong></h3>
 <p>
-    Lower medians in HiG suggest a hub-dominated structure.
-    Higher medians indicate more evenly distributed influence.
+    Lower medians in HiG suggest a <p style="color: #ff0000">TBD</p>.
+    Higher medians indicate <p style="color: #ff0000">TBD</p>.
 </p>
 
 <h3><strong>Inputs</strong></h3>
@@ -784,8 +783,8 @@ sig_results_ppi <- lapply(ppi_comparisons, function(cmp) {
 <p>
   <strong>Low AUC → fragile networks</strong> that collapse early under targeted attacks.<br>
   <strong>High AUC → robust networks</strong> that maintain connectivity longer.<br><br>
-  HiG PPINs typically show significantly lower AUC, indicating heightened vulnerability to the removal
-  of influential nodes and fewer redundant paths relative to CTS or HiGCTS networks.
+  HiGCTS and CTS PPINs typically show significantly lower AUC, indicating heightened vulnerability to the removal
+  of influential nodes and fewer redundant paths relative to HiG networks.
 </p>
 
 <h3><strong>Inputs</strong></h3>
@@ -939,7 +938,7 @@ vertex(boxplot_AUC_vertex_attack)
 <h3><strong>Interpretation</strong></h3>
 <p>
     Real CTS and HiG PPINs show earlier fragmentation compared to scale-free and small-world networks,
-    indicating dependence on bottleneck nodes with high betweenness.  
+    indicating dependence on <p style="color: #ff0000">TBD</p>.  
     Degree-preserving models partially recapitulate the observed fragility, suggesting the degree distribution
     contributes but does not fully determine robustness.  
     Overall, biological PPINs exhibit unique architectural constraints that elevate their susceptibility to perturbation.
@@ -1000,7 +999,7 @@ print(plot_simulation)
 
 <h3><strong>Interpretation</strong></h3>
 <p>
-    Lower medians in HiG suggest fewer bottleneck nodes or greater redundancy in pathways.
+    Lower medians in CTS and CTS&HiG suggest fewer bottleneck nodes and less redundancy in pathways.
 </p>
 
 <h3><strong>Inputs</strong></h3>
@@ -1077,8 +1076,7 @@ plot(violin_median_bc_wilcox)
 
 <h3><strong>Interpretation</strong></h3>
 <p>
-    CHD-risk genes with high betweenness may act as critical bottlenecks whose removal can
-    fragment the network.
+    <p style="color: #ff0000">TBD</p>
 </p>
 
 <h3><strong>Inputs</strong></h3>
@@ -1165,7 +1163,7 @@ vertex(boxplot_bc_log10)
 
 <h3><strong>Interpretation</strong></h3>
 <p>
-    CHD genes with high PageRank may represent globally influential, dosage-sensitive regulators.
+    <p style="color: #ff0000">TBD</p>
 </p>
 
 <h3><strong>Inputs</strong></h3>
