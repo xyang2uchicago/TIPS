@@ -22,6 +22,8 @@ db <- "IbarraSoria2018"
 PPI_color_palette = c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
 PPI_size_palette = c("CTS" = 1, "HiGCTS" = 0.75, "HiG" = 0.25)
 
+CT_id = c("cardiac.a", "endothelial.b")
+CT_id_formatted <- paste0("_(", paste(CT_id, collapse = "|"), ")")
 
 # For Figure E
 # Choose what to plot: "vertex", "edge", or "both"
@@ -59,7 +61,6 @@ df = rbind(subset(df, PPI_cat=='CTS'),
 					)
 df$label=df$gene
 
-## Fig A top) boxplot of normalized strength ########
 df_median = df %>% group_by(signature) %>%
 					summarise(median_normalized_strength = median(normalized.strength, na.rm = TRUE))
 df_median$PPI_cat = lapply(df_median$signature, function(x) unlist(strsplit(x, split='_'))[1]) %>% unlist 
@@ -84,53 +85,10 @@ violin_median_normalized.strength_wilcox = ggplot(df_median, aes(x = PPI_cat, y 
 	  ) + 
 ggtitle('wilcox, median nor_strength')
 vertex(violin_median_normalized.strength_wilcox)
-
-##  Fig A bottom) violin plot of median of normalized strength per category	
-################################################################
-df$PCGC_AllCurated = df$gene %in% unlist(CHD[c('Griffin2023_PCGC_AllCurated')])
- 
-top_genes <- df %>%
-  group_by(signature) %>%
-  arrange(desc(normalized.strength)) %>%   # Sort in descending order of normalized.strength
-  slice_head(n = 5)  # Take the top 5 rows for each signature
-  	
-# subset the CHD genes within top 5 
-top_genes_CHD = subset(top_genes, PCGC_AllCurated==TRUE)
-(dim(top_genes))  # [1] 100  18
-(dim(top_genes_CHD))  # [1] 0 18
-
-df$PPI_cat = lapply(df$signature %>% as.vector, function(x) unlist(strsplit(x, split='_'))[1]) %>% unlist 
-df$PPI_cat = factor(df$PPI_cat,levels=c('CTS', 'HiGCTS', 'HiG')) 				
-# df$signature = factor(df$signature, levels = signature_levels)  
-
-boxplot_strength = ggplot(df, aes(x = signature, y = log10(normalized.strength), colour = PPI_cat)) + 
-	  geom_boxplot(show.legend = TRUE) +  # Enable legend for the boxplot
-	  scale_color_manual(values = PPI_color_palette) +
-	  # Use ggrepel to avoid overlap and label top 5 genes based on normalized.strength
-	  geom_text_repel(
-		data = top_genes_CHD,  # Label only the top 5 genes
-		aes(label = gene),
-		size = 2 ,  # Adjust the size of the text labels
-		box.padding = 0.5,  # Add space between the text and the data points
-		point.padding = 0.5,  # Add space between the text and the points
-		segment.color = 'grey50',  # Color for the line connecting the text to the points
-		max.overlaps = 20,  # Max number of overlaps before labels stop being placed
-		show.legend = FALSE  # Do not show text labels in the legend
-	  ) +
-	  theme(
-		legend.position = 'none', # c(1, 1), 
-		#legend.justification = c(0, 1),  # Place legend at top-right corner
-		axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)
-	  ) +
-	  scale_x_discrete(limits = signature_levels) + # Ensure x-axis respects the order of 'signature'
-	  labs(color = "PPI cat")   # Optional: label for the color legend
-    
-vertex(boxplot_strength)
-
 }
 
 ###################################################
-# Fig B. degree) boxplot of normalized strength for only transition clusters per category
+# Fig B. degree) boxplot of normalized strength for all transition clusters per category
 # original code: 11.3_CTS_cardiac_network_ANND_pagerank.R
 # original pdf: normalized.node.strength_GSE87038_v2.pdf
 ################################################################
@@ -237,7 +195,7 @@ print(boxplot_transition_strength)
 }
 
 ###################################################
-# Fig D) boxplot of median PageRank per category
+# Fig D) violin plot of median PageRank per category
 # original code: 11.3_CTS_cardiac_network_ANND_pagerank.R
 # original pdf: PageRank_IbarraSoria20183_v2.pdf
 ################################################################
@@ -405,6 +363,8 @@ fold_change <- robustness.dt %>%
 # 2 HiGCTS             0.956               1.33
 # 3 HiG                0.915               1.09
 
+# HiG vertex too low, nonsignificant
+
 
 ### additionally, wilcox-test the between-group changes among observed PPINs
 tmp = subset(robustness.dt,measure=='btwn.cent')
@@ -494,7 +454,7 @@ vertex(p_attack4)
 
 ###################################################
 # Fig G) violin plot of median betweenness per category
-# original code: Code: 11.3_CTS_cardiac_network_ANND_pagerank.R ??
+# original code: Code: 11.3_CTS_cardiac_network_ANND_pagerank.R
 # original pdf: BetweennessCentrality_IbarraSoria2018_v2.pdf
 ################################################################
 {
@@ -535,7 +495,7 @@ plot(violin_median_bc_wilcox)
 
 
 ###################################################
-# Fig H) Boxplot of AUC for vertex attack
+# Fig H) boxplot of AUC for vertex attack
 # original code: 11.2_CTS_cardiac_network_robustness.R
 # original pdf: box_wilcox-test_attack_AUC_IbarraSoria2018.pdf
 ################################################################

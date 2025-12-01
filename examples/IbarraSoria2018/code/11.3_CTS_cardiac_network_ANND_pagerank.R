@@ -82,7 +82,6 @@ graphs_with_duplicates <- sapply(graph_list, function(g) {
 ## It’s especially useful in scenarios where link direction is important:
 #
 # https://igraph.org/r/doc/page_rank.html
-CTS.ID <- c("endothelial.b", "cardiac.a")
 
 page <- lapply(graph_list, function(x) page_rank(x, directed = FALSE, weights = E(x)$weight)$vector)
 
