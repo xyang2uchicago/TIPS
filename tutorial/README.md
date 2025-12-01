@@ -1,0 +1,1 @@
+The TIPS tutorial on analysis of 2019 E8.25 dataset can be viewed [here](https://htmlpreview.github.io/?https://github.com/xyang2uchicago/TIPS/blob/main/tutorial/TIPS.html)
