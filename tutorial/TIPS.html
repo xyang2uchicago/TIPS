@@ -244,14 +244,14 @@ signature_levels = c(names(graph_list))</code></pre>
     <strong>Normalized node strength</strong> reflects the sum of all weighted interactions per gene,
     adjusted for network size. These panels describe both the <strong>typical strength</strong>
     (medians) and the <strong>full distribution</strong> across categories
-    (CTS, HiGCTS, HiG).
+    (CTS, CTS&HiG, HiG).
 </p>
 
 <h3><strong>What this Panel Shows</strong></h3>
 <ul>
     <li><strong>Top:</strong> Median normalized node strength (violin plot). Each point is a PPIN’s median.</li>
     <li>Violin shapes show the distribution of medians within each category.</li>
-    <li>Wilcoxon tests compare CTS vs HiGCTS, HiGCTS vs HiG, CTS vs HiG.</li>
+    <li>Wilcoxon tests compare CTS vs CTS&HiG, CTS&HiG vs HiG, CTS vs HiG.</li>
     <li><strong>Bottom:</strong> Boxplot of normalized node strength for all genes (log₁₀ scale).
         CHD-risk genes labeled if top 5 strongest.</li>
 </ul>
@@ -259,7 +259,7 @@ signature_levels = c(names(graph_list))</code></pre>
 <h3><strong>Interpretation</strong></h3>
 <p>
     HiG networks generally show <strong>lower normalized strength</strong>, indicating weaker weighted
-    connectivity. CTS and HiGCTS PPINs tend to contain more strongly connected genes, suggesting
+    connectivity. CTS and CTS&HiG PPINs tend to contain more strongly connected genes, suggesting
     <p style="color: #ff0000">TBD</p>
 </p>
 
@@ -403,7 +403,7 @@ vertex(boxplot_strength)
 <h3><strong>What this Panel Shows</strong></h3>
 <ul>
     <li>A boxplot of <strong>normalized node strength</strong> for PPINs from transition clusters,
-        grouped into CTS, HiGCTS, and HiG categories.</li>
+        grouped into CTS, CTS&HiG, and HiG categories.</li>
     <li>Wilcoxon tests quantify pairwise differences.</li>
 </ul>
 
@@ -481,7 +481,7 @@ print(boxplot_transition_strength)
 
 <h3><strong>What this Panel Shows</strong></h3>
 <ul>
-    <li>A violin plot of the median <strong>PageRank</strong> per PPIN across CTS, HiGCTS, and HiG.</li>
+    <li>A violin plot of the median <strong>PageRank</strong> per PPIN across CTS, CTS&HiG, and HiG.</li>
 </ul>
 
 <h3><strong>Interpretation</strong></h3>
@@ -558,7 +558,7 @@ vertex(violin_median_pagerank)
 <ul>
     <li>Boxplots of the remaining fraction of the <strong>largest connected component</strong>
         under random vs targeted removal.</li>
-    <li>Faceted by CTS / HiGCTS / HiG.</li>
+    <li>Faceted by CTS / CTS&HiG / HiG.</li>
     <li>Wilcoxon tests compare severity of collapse.</li>
 </ul>
 
@@ -783,7 +783,7 @@ sig_results_ppi <- lapply(ppi_comparisons, function(cmp) {
 <p>
   <strong>Low AUC → fragile networks</strong> that collapse early under targeted attacks.<br>
   <strong>High AUC → robust networks</strong> that maintain connectivity longer.<br><br>
-  HiGCTS and CTS PPINs typically show significantly lower AUC, indicating heightened vulnerability to the removal
+  CTS&HiG and CTS PPINs typically show significantly lower AUC, indicating heightened vulnerability to the removal
   of influential nodes and fewer redundant paths relative to HiG networks.
 </p>
 
