@@ -1,15 +1,15 @@
 # TIPS: an R-package for Characterization of Biological Tipping Points
 ### What is TIPS?
-
+For Holly
 
 <!-- <img src="https://github.com/xyang2uchicago/BioTIP/blob/master/results/Fig1_BioTIP_github.jpg">  -->
 
 ### Why TIPS?
-
+For Holly
 
 #### 3 Case Studies
 
-We applied BioTIP to six datasets and compared BioTIP's performance with other existing tools (see [examples](https://github.com/xyang2uchicago/BioTIP/blob/master/examples)). The six datasets are as following:
+We applied TIPS to three datasets (see [examples](https://github.com/xyang2uchicago/TIPS/tree/main/examples)). The three datasets are as follows:
 
 1. Dataset 1 consists of 96 selected genes in 929 human embryonic stem cells (hESCs) of predefined 9 clusters ([Bargaje et al., 2017](https://pubmed.ncbi.nlm.nih.gov/28167799/)). 
 2. Dataset 2 consists of 10.9k genes of 7,240 developing mesoderm cells collected at embryonic day (E) 8.25 when precursor cells of major organs have been formed ([Pijuan-Sala et al., 2019](https://pubmed.ncbi.nlm.nih.gov/30787436/)). 
@@ -17,7 +17,7 @@ We applied BioTIP to six datasets and compared BioTIP's performance with other e
 
 
 ### Where to apply TIPS?
-
+For Holly
 
 ### How to use TIPS analysis? 
 
@@ -29,6 +29,7 @@ We applied BioTIP to six datasets and compared BioTIP's performance with other e
 ### How to install?
 To use the newest TIPS package, either clone/download this repository, or you can install TIPS with:
 
+Will add when Bioconductor Package is created
 <!-- ```r
 library("devtools")
 devtools::install_github("xyang2uchicago/TIPS")
