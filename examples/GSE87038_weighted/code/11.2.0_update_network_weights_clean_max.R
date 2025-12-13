@@ -15,7 +15,7 @@ setwd(paste0(wd, "results/PPI_weight/"))
 
 db <- "GSE87038"
 
-specificity_methods <- c("combined", "ratio", "zscore", "diff")
+specificity_methods <- c("combined") # Other methods: "ratio", "zscore", "diff"
 
 isl1_cluster <- "HiGCTS_8" # cluster containing ISL1 gene
 

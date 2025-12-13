@@ -366,8 +366,6 @@ fold_change <- robustness.dt %>%
 # 2 HiGCTS             1.00                1.68
 # 3 HiG                0.913               1.09
 
-# HiG vertex too low, nonsignificant
-
 ### additionally, wilcox-test the between-group changes among observed PPINs
 tmp = subset(robustness.dt,measure=='btwn.cent')
 dim(tmp) #[1] 8245    9
@@ -658,17 +656,74 @@ g_real <- graph_list[[CP_CTS]]
 res <- synthetic_simulation(g_real, main = CP_CTS)
 
 # Combine into a single plot object
-plot_simulation <- grid.arrange(
-    res$p_weights,
-    res$p_line,
-    res$p_AUC,
-    ncol = 3
-)
+plot_simulation <- res$p_line
 
 print(plot_simulation)
 }
 
 
+###################################################
+# Fig L) Edge weight density
+# original code: 11.6_communities_edge_weight_distribution.R
+# original pdf: edge_weight.pdf
+###################################################
+{
+graph_list_notsimplified <- readRDS( file= paste0('../', db, '_STRING_graph_perState_notsimplified.rds'))
+
+# Remove duplicate vertices
+correct_n_edges = readRDS('../correct_n_edges_HiG_STRING2.14.0.rds')
+for(g_name in unique(correct_n_edges$graph_id)){
+	vertices_to_remove = subset(correct_n_edges, graph_id == g_name)$vetex_index_to_remove
+	if(any(is.na(vertices_to_remove))) vertices_to_remove = vertices_to_remove[!is.na(vertices_to_remove)]
+	graph_list[[g_name]] = delete_vertices(graph_list_notsimplified[[g_name]], vertices_to_remove)
+}
+N = sapply(graph_list_notsimplified, vcount)
+((N0-N)[which(N0-N>0)])
+# named numeric(0)
+
+graph_list_notsimplified <- lapply(graph_list_notsimplified, simplify, edge.attr.comb ='max') #!!!!!!!!!!!!!!!!!!!
+N2 = sapply(graph_list_notsimplified, vcount)
+(all(N==N2))   # [1] TRUE 
+
+edge_data <- extract_edge_weights_by_category(graph_list, PPI_color_palette, CT_id)
+(head(edge_data, 3))
+#   sample PPI_cat edge_weight num_edges cluster_ID cluster_cat
+# 1  HiG_1     HiG       0.211      4978          1      stable
+# 2  HiG_1     HiG       0.410      4978          1      stable
+# 3  HiG_1     HiG       0.767      4978          1      stable
+
+# Create plots for PPI category analysis
+category_plots <- plot_edge_weight_distributions(edge_data, PPI_color_palette)
+
+plot_density <- category_plots$density_plot
+
+edge_counts <- edge_data %>%
+  group_by(PPI_cat) %>%
+  summarise(
+    edge_count = n(),
+    .groups = "drop"
+  )
+
+(edge_counts)
+#   PPI_cat edge_count
+#   <fct>        <int>
+# 1 CTS            905
+# 2 HiGCTS         137
+# 3 HiG         184731
+
+pairwise_pvals <- edge_data %>%
+  pairwise_wilcox_test(
+    formula = edge_weight ~ PPI_cat,
+    p.adjust.method = "BH"
+  )
+
+(pairwise_pvals)
+#   .y.         group1 group2    n1     n2 statistic        p   p.adj p.adj.signif
+# * <chr>       <chr>  <chr>  <int>  <int>     <dbl>    <dbl>   <dbl> <chr>       
+# 1 edge_weight CTS    HiGCTS   905    137     45708  7.03e-7 2.11e-6 ****        
+# 2 edge_weight CTS    HiG      905 184731  80746929  7.7 e-2 7.7 e-2 ns          
+# 3 edge_weight HiGCTS HiG      137 184731  14062139  2.4 e-2 3.6 e-2 *   
+}
 
 ### Save Plots to Folder
 plots <- list(
@@ -682,7 +737,8 @@ plots <- list(
     boxplot_AUC_vertex_attack, # H
     boxplot_bc_log10, # I
     boxplot_pagerank, # J
-    plot_simulation # K
+    plot_simulation, # K
+    plot_density # L
 )
 
 sizes <- list(
@@ -696,7 +752,8 @@ sizes <- list(
   c(2, 3), # H
   c(7, 4), # I
   c(7, 4), # J
-  c(15, 5) # K
+  c(5, 5), # K
+  c(5, 5) # L
 )
 
 # Dynamically adjust size for plot E (boxplot_remained_fraction)

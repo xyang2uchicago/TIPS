@@ -11,8 +11,8 @@
         <a href="#introduction">Introduction</a>
         <a href="#figure">Figure</a>
         <a href="#setup">Setup</a>
-        <a href="#panel-a">Panel A</a>
-        <a href="#panel-b">Panel B</a>
+        <a href="#panel-ab">Panel A</a>
+        <a href="#panel-ab">Panel B</a>
         <a href="#panel-c">Panel C</a>
         <a href="#panel-d">Panel D</a>
         <a href="#panel-e">Panel E</a>
@@ -20,6 +20,7 @@
         <a href="#panel-g">Panel G</a>
         <a href="#panel-h">Panel H</a>
         <a href="#panel-i">Panel I</a>
+        <a href="#panel-j">Panel J</a>
         <a href="#appendix">Appendix</a>
     </div>
 </nav>
@@ -233,10 +234,10 @@ signature_levels = c(names(graph_list))</code></pre>
 </div>
 
 
-<!-- Panel A -->
-<div class="panel" id="panel-a" style="background:#fafafa; padding:20px; border-radius:8px;">
+<!-- Panel A and B -->
+<div class="panel" id="panel-ab" style="background:#fafafa; padding:20px; border-radius:8px;">
 
-<h2><strong>Panel A — Strength Architecture and Distribution</strong></h2>
+<h2><strong>Panel A & Panel B — Strength Architecture and Distribution</strong></h2>
 
 <h3><strong>Purpose</strong></h3>
 <p>
@@ -249,10 +250,10 @@ signature_levels = c(names(graph_list))</code></pre>
 
 <h3><strong>What this Panel Shows</strong></h3>
 <ul>
-    <li><strong>Top:</strong> Median normalized node strength (violin plot). Each point is a PPIN’s median.</li>
+    <li><strong>A:</strong> Median normalized node strength (violin plot). Each point is a PPIN’s median.</li>
     <li>Violin shapes show the distribution of medians within each category.</li>
     <li>Wilcoxon tests compare CTS vs CTS&HiG, CTS&HiG vs HiG, CTS vs HiG.</li>
-    <li><strong>Bottom:</strong> Boxplot of normalized node strength for all genes (log₁₀ scale).
+    <li><strong>B:</strong> Boxplot of normalized node strength for all genes (log₁₀ scale).
         CHD-risk genes labeled if top 5 strongest.</li>
 </ul>
 
@@ -271,7 +272,7 @@ signature_levels = c(names(graph_list))</code></pre>
 </ul>
 
 <h3>Outputs</h3>
-<img src="figures/panel_a.jpg" alt="Panel A" style="max-width: 25%; height: auto;">
+<img src="figures/panel_A_B.jpg" alt="Panel A and Panel B" style="max-width: 25%; height: auto;">
 <p>Note: figures shown are polished versions of the raw outputs</p>
 
 
@@ -388,40 +389,54 @@ vertex(boxplot_strength)
 </div>
 
 
-<!-- Panel B -->
-<div class="panel" id="panel-b" style="background:#ffffff; padding:20px; border-radius:8px;">
+<!-- Panel C -->
+<div class="panel" id="panel-c" style="background:#ffffff; padding:20px; border-radius:8px;">
 
-<h2><strong>Panel B — Connectivity of Transition-Cluster PPINs</strong></h2>
+<h2><strong>Panel C — Connectivity and PageRank Influence of Transition-Cluster PPINs</strong></h2>
 
 <h3><strong>Purpose</strong></h3>
 <p>
-    To determine whether PPINs derived from transcriptionally unstable
+    <strong>Node-strength: </strong>To determine whether PPINs derived from transcriptionally unstable
     <strong>transition clusters</strong> (clusters 7, 8, 11, 13, 15, 16, 16.1)
     show systematically altered connectivity.
+
+    <strong>PageRank: </strong>
+    To quantify how global influence is distributed within each transition PPIN. PageRank identifies genes
+    positioned on influential, central routes through the network.
 </p>
 
 <h3><strong>What this Panel Shows</strong></h3>
 <ul>
-    <li>A boxplot of <strong>normalized node strength</strong> for PPINs from transition clusters,
+    <li><strong>Node-strength: </strong>A boxplot of <strong>normalized node strength</strong> for PPINs from transition clusters,
         grouped into CTS, CTS&HiG, and HiG categories.</li>
+    <li><strong>PageRank: </strong>A violin plot of the median <strong>PageRank</strong> per PPIN across CTS, CTS&HiG, and HiG.</li>
     <li>Wilcoxon tests quantify pairwise differences.</li>
 </ul>
 
 <h3><strong>Interpretation</strong></h3>
 <p>
-    Weaker normalized strength in HiG transition clusters suggests <p style="color: #ff0000; display: inline">TBD</p>
+    <strong>Node-strength: </strong>Weaker normalized strength in HiG transition clusters suggests <p style="color: #ff0000; display: inline">TBD</p>
+
+    <strong>PageRank: </strong>
+    <p>
+        Lower medians in HiG suggest a <p style="color: #ff0000; display: inline">TBD</p>.
+        Higher medians indicate <p style="color: #ff0000; display: inline">TBD</p>.
+    </p>
 </p>
 
 <h3><strong>Inputs</strong></h3>
 <ul>
     <li><code>graph_list</code> from <code>GSE87038_STRING_graph_perState_simplified_combinedweighted.rds</code></li>
+    <li><code>df_PAGERANK_strength_ANND.rewring.P.rds</code></li>
 </ul>
 
+
 <h3>Outputs</h3>
-<img src="figures/panel_b.jpg" alt="Panel B" style="max-width: 15%; height: auto;">
+<img src="figures/panel_C.jpg" alt="Panel C" style="max-width: 25%; height: auto;">
 <p>Note: figures shown are polished versions of the raw outputs</p>
 
 <h3>Code</h3>
+<strong>Left</strong>
 <pre class="code-box"><code>###################################################
 # Fig C) boxplot of normalized strength for only transition clusters per category
 # original code: 11.2.1_CTS_cardiac_network_strengthDistribution.R
@@ -464,42 +479,7 @@ boxplot_transition_strength = ggplot(subset(V_deg_dis, grepl(CT_id_formatted, si
 print(boxplot_transition_strength)
 }
 </code></pre>
-
-</div>
-  
-
-<!-- Panel C -->
-<div class="panel" id="panel-c" style="background:#fafafa; padding:20px; border-radius:8px;">
-
-<h2><strong>Panel C — Network Influence via PageRank</strong></h2>
-
-<h3><strong>Purpose</strong></h3>
-<p>
-    To quantify how global influence is distributed within each PPIN. PageRank identifies genes
-    positioned on influential, central routes through the network.
-</p>
-
-<h3><strong>What this Panel Shows</strong></h3>
-<ul>
-    <li>A violin plot of the median <strong>PageRank</strong> per PPIN across CTS, CTS&HiG, and HiG.</li>
-</ul>
-
-<h3><strong>Interpretation</strong></h3>
-<p>
-    Lower medians in HiG suggest a <p style="color: #ff0000; display: inline">TBD</p>.
-    Higher medians indicate <p style="color: #ff0000; display: inline">TBD</p>.
-</p>
-
-<h3><strong>Inputs</strong></h3>
-<ul>
-    <li><code>df_PAGERANK_strength_ANND.rewring.P.rds</code></li>
-</ul>
-
-<h3>Outputs</h3>
-<img src="figures/panel_c.jpg" alt="Panel C" style="max-width: 15%; height: auto;">
-<p>Note: figures shown are polished versions of the raw outputs</p>
-
-<h3>Code</h3>
+<strong>Right</strong>
 <pre class="code-box"><code>###################################################
 # Fig D) violin plot of median PageRank per category
 # original code: 11.3_CTS_cardiac_network_ANND_pagerank.R
@@ -542,7 +522,6 @@ vertex(violin_median_pagerank)
 </code></pre>
 
 </div>
-  
 
 <!-- Panel D -->
 <div class="panel" id="panel-d" style="background:#ffffff; padding:20px; border-radius:8px;">
@@ -979,12 +958,113 @@ print(plot_simulation)
 
 </div>
   
-
-
 <!-- Panel G -->
 <div class="panel" id="panel-g" style="background:#fafafa; padding:20px; border-radius:8px;">
 
-<h2><strong>Panel G — Median Betweenness Centrality</strong></h2>
+<h2><strong>Panel G — Distribution of PPI Edge Weights</strong></h2>
+
+<h3><strong>Purpose</strong></h3>
+<p>
+    To compare how strongly connected the protein–protein interactions (PPIs) are 
+    within each PPI category (CTS, CTS&HiG, HiG). Edge weight reflects the confidence 
+    or support for each interaction in the STRING database.
+</p>
+
+<h3><strong>What this Panel Shows</strong></h3>
+<ul>
+    <li>Kernel density curves of <strong>log<sub>10</sub>(edge weight + 1)</strong> for each PPI category.</li>
+    <li>Pairwise Wilcoxon tests (CTS vs CTS&HiG, CTS vs HiG, CTS&HiG vs HiG) with significance annotations.</li>
+    <li>The number of edges used for each category is shown under each label.</li>
+</ul>
+
+<h3><strong>Interpretation</strong></h3>
+<p>
+    <p style="color: #ff0000; display: inline">TBD</p>
+</p>
+
+<h3><strong>Inputs</strong></h3>
+<ul>
+    <li><code>GSE87038_STRING_graph_perState_notsimplified.rds</code></li>
+    <li><code>correct_n_edges_HiG_STRING2.14.0.rds</code></li>
+    <li>Edge weights extracted with <code>extract_edge_weights_by_category()</code></li>
+    <li>Plotted with <code>plot_edge_weight_distributions()</code></li>
+</ul>
+
+<h3>Outputs</h3>
+<img src="figures/panel_G.jpg" alt="Panel G" style="max-width: 25%; height: auto;">
+<p>Note: figures shown are polished versions of the raw outputs</p>
+
+<pre class="code-box"><code>###################################################
+# Fig L) Edge weight density
+# original code: 11.6_communities_edge_weight_distribution.R
+# original pdf: edge_weight.pdf
+###################################################
+{
+graph_list_notsimplified <- readRDS( file= paste0('../', db, '_STRING_graph_perState_notsimplified.rds'))
+
+# Remove duplicate vertices
+correct_n_edges = readRDS('../correct_n_edges_HiG_STRING2.14.0.rds')
+for(g_name in unique(correct_n_edges$graph_id)){
+    vertices_to_remove = subset(correct_n_edges, graph_id == g_name)$vetex_index_to_remove
+    if(any(is.na(vertices_to_remove))) vertices_to_remove = vertices_to_remove[!is.na(vertices_to_remove)]
+    graph_list[[g_name]] = delete_vertices(graph_list_notsimplified[[g_name]], vertices_to_remove)
+}
+N = sapply(graph_list_notsimplified, vcount)
+((N0-N)[which(N0-N>0)])
+# named numeric(0)
+
+graph_list_notsimplified <- lapply(graph_list_notsimplified, simplify, edge.attr.comb ='max') #!!!!!!!!!!!!!!!!!!!
+N2 = sapply(graph_list_notsimplified, vcount)
+(all(N==N2))   # [1] TRUE 
+
+edge_data <- extract_edge_weights_by_category(graph_list, PPI_color_palette, CT_id)
+(head(edge_data, 3))
+#   sample PPI_cat edge_weight num_edges cluster_ID cluster_cat
+# 1  HiG_1     HiG       0.211      4978          1      stable
+# 2  HiG_1     HiG       0.410      4978          1      stable
+# 3  HiG_1     HiG       0.767      4978          1      stable
+
+# Create plots for PPI category analysis
+category_plots <- plot_edge_weight_distributions(edge_data, PPI_color_palette)
+
+plot_density <- category_plots$density_plot
+
+edge_counts <- edge_data %>%
+    group_by(PPI_cat) %>%
+    summarise(
+    edge_count = n(),
+    .groups = "drop"
+    )
+
+(edge_counts)
+#   PPI_cat edge_count
+#   <fct>        <int>
+# 1 CTS            905
+# 2 HiGCTS         137
+# 3 HiG         184731
+
+pairwise_pvals <- edge_data %>%
+    pairwise_wilcox_test(
+    formula = edge_weight ~ PPI_cat,
+    p.adjust.method = "BH"
+    )
+
+(pairwise_pvals)
+#   .y.         group1 group2    n1     n2 statistic        p   p.adj p.adj.signif
+# * <chr>       <chr>  <chr>  <int>  <int>     <dbl>    <dbl>   <dbl> <chr>       
+# 1 edge_weight CTS    HiGCTS   905    137     45708  7.03e-7 2.11e-6 ****        
+# 2 edge_weight CTS    HiG      905 184731  80746929  7.7 e-2 7.7 e-2 ns          
+# 3 edge_weight HiGCTS HiG      137 184731  14062139  2.4 e-2 3.6 e-2 *   
+}
+
+</code></pre>
+
+</div>
+
+<!-- Panel H -->
+<div class="panel" id="panel-h" style="background:#fafafa; padding:20px; border-radius:8px;">
+
+<h2><strong>Panel H — Median Betweenness Centrality</strong></h2>
 
 <h3><strong>Purpose</strong></h3>
 <p>
@@ -1008,7 +1088,7 @@ print(plot_simulation)
 </ul>
 
 <h3>Outputs</h3>
-<img src="figures/panel_g.jpg" alt="Panel G" style="max-width: 25%; height: auto;">
+<img src="figures/panel_H.jpg" alt="Panel H" style="max-width: 25%; height: auto;">
 <p>Note: figures shown are polished versions of the raw outputs</p>
 
 <pre class="code-box"><code>###################################################
@@ -1057,15 +1137,15 @@ plot(violin_median_bc_wilcox)
   
 
 
-<!-- Panel H -->
-<div class="panel" id="panel-h" style="background:#ffffff; padding:20px; border-radius:8px;">
+<!-- Panel I -->
+<div class="panel" id="panel-i" style="background:#ffffff; padding:20px; border-radius:8px;">
 
-<h2><strong>Panel H — Boxplot of Betweenness per PPIN</strong></h2>
+<h2><strong>Panel I — Boxplot of Betweenness per PPIN</strong></h2>
 
 <h3><strong>Purpose</strong></h3>
 <p>
     To visualize the full distribution of betweenness centrality across all genes in each PPIN,
-    complementing Panel G.
+    complementing Panel H.
 </p>
 
 <h3><strong>What this Panel Shows</strong></h3>
@@ -1086,7 +1166,7 @@ plot(violin_median_bc_wilcox)
 </ul>
 
 <h3>Outputs</h3>
-<img src="figures/panel_h.jpg" alt="Panel H" style="max-width: 25%; height: auto;">
+<img src="figures/panel_I.jpg" alt="Panel I" style="max-width: 25%; height: auto;">
 <p>Note: figures shown are polished versions of the raw outputs</p>
 
 <pre class="code-box"><code>###################################################
@@ -1145,10 +1225,10 @@ vertex(boxplot_bc_log10)
   
 
 
-<!-- Panel I -->
-<div class="panel" id="panel-i" style="background:#fafafa; padding:20px; border-radius:8px;">
+<!-- Panel J -->
+<div class="panel" id="panel-j" style="background:#fafafa; padding:20px; border-radius:8px;">
 
-<h2><strong>Panel I — Boxplot of PageRank per PPIN</strong></h2>
+<h2><strong>Panel J — Boxplot of PageRank per PPIN</strong></h2>
 
 <h3><strong>Purpose</strong></h3>
 <p>
@@ -1173,7 +1253,7 @@ vertex(boxplot_bc_log10)
 </ul>
 
 <h3>Outputs</h3>
-<img src="figures/panel_i.jpg" alt="Panel I" style="max-width: 25%; height: auto;">
+<img src="figures/panel_J.jpg" alt="Panel J" style="max-width: 25%; height: auto;">
 <p>Note: figures shown are polished versions of the raw outputs</p>
 
 <pre class="code-box"><code>###################################################
@@ -1232,11 +1312,11 @@ vertex(boxplot_pagerank)
 <h2>Appendix — Derived Data Used in Panels</h2>
 
 <!-- ======================== -->
-<!-- Panel A & B -->
+<!-- Panel A & B & C (left)-->
 <!-- ======================== -->
 <div class="appendix-subsection">
 
-    <h3>Panel A &amp; B — Strength Architecture and Distribution</h3>
+    <h3>Panel A &amp; B &amp; C(left) — Strength Architecture and Distribution</h3>
 
     <h4><strong>Inputs</strong></h4>
     <ul>
@@ -1258,11 +1338,11 @@ vertex(boxplot_pagerank)
 </div>
 
 <!-- ======================== -->
-<!-- Panel C -->
+<!-- Panel C (right) -->
 <!-- ======================== -->
 <div class="appendix-subsection">
 
-    <h3>Panel C — Network Influence via PageRank</h3>
+    <h3>Panel C (right) — Network Influence via PageRank</h3>
 
     <h4><strong>Inputs</strong></h4>
     <ul>
@@ -1325,11 +1405,34 @@ vertex(boxplot_pagerank)
 </div>
 
 <!-- ======================== -->
-<!-- Panel G & H -->
+<!-- Panel G -->
 <!-- ======================== -->
 <div class="appendix-subsection">
 
-    <h3>Panel G &amp; H — Betweenness Centrality</h3>
+    <h3>Panel G — Distribution of PPI Edge Weights</h3>
+
+    <h4><strong>Inputs</strong></h4>
+    <ul>
+    <li><code>results/GSE87038_STRING_graph_perState_notsimplified.rds</code></li>
+    <li><code>results/correct_n_edges_HiG_STRING2.14.0.rds</code></li>
+    </ul>
+
+    <h4><strong>Provenance</strong></h4>
+    <ul>
+    <li>Weighted graphs (<code>GSE87038_STRING_graph_perState_notsimplified.rds</code>)  
+        created by <code>code/11.1_STRINGweighted_CTS_cardiac_network.R</code>.
+    <li>Duplicate vertices (<code>correct_n_edges_HiG_STRING2.14.0.rds</code>)  
+        created by <code>code/11.1.1_check_vertex_duplication.R</code>.
+    </ul>
+
+</div>
+
+<!-- ======================== -->
+<!-- Panel H & I -->
+<!-- ======================== -->
+<div class="appendix-subsection">
+
+    <h3>Panel H &amp; I — Betweenness Centrality</h3>
 
     <h4><strong>Inputs</strong></h4>
     <ul>
@@ -1348,11 +1451,11 @@ vertex(boxplot_pagerank)
 </div>
 
 <!-- ======================== -->
-<!-- Panel I -->
+<!-- Panel J -->
 <!-- ======================== -->
 <div class="appendix-subsection">
 
-    <h3>Panel I — PageRank Distribution</h3>
+    <h3>Panel J — PageRank Distribution</h3>
 
     <h4><strong>Inputs</strong></h4>
     <ul>
@@ -1384,11 +1487,11 @@ vertex(boxplot_pagerank)
 
 <h4><strong>Inputs</strong></h4>
 <ul>
-    <li><code>BioTIP.res.RData</code> (data)</li>
+    <li><code>BioTIP.res.RData</code> (data) downloaded from code</li>
     <li><code>sce_E.825_uncorrected.RData</code> (data)</li>
-    <li><code>10090.protein.aliases.v12.0.txt.gz</code> (data/PPIN)</li>
-    <li><code>10090.protein.info.v12.0.txt.gz</code> (data/PPIN)</li>
-    <li><code>10090.protein.links.v12.0.txt.gz</code> (data/PPIN)</li>
+    <li><code>10090.protein.aliases.v12.0.txt.gz</code> (data/PPIN) downloaded from code</li>
+    <li><code>10090.protein.info.v12.0.txt.gz</code> (data/PPIN) downloaded from code</li>
+    <li><code>10090.protein.links.v12.0.txt.gz</code> (data/PPIN) downloaded from code</li>
 </ul>
 
 <h4><strong>Outputs</strong></h4>
@@ -1434,17 +1537,15 @@ vertex(boxplot_pagerank)
 <ul>
     <li><code>network_specificity_list.rds</code> (results/PPI_&lt;max&gt;weight)</li>
     <li><code style="color: #ff0000">GSE87038_STRING_graph_perState_simplified_combinedweighted.rds</code></li>
-    <li><code>GSE87038_STRING_graph_perState_simplified_ratioweighted.rds</code></li>
-    <li><code>GSE87038_STRING_graph_perState_simplified_zscoreweighted.rds</code></li>
-    <li><code>GSE87038_STRING_graph_perState_simplified_diffweighted.rds</code></li>
-    <li><code>compare_specificity_method_vs_PPIscores.pdf</code></li>
-    <li><code>compare_specificity_method_HiGCTS_8_vs_PPIscores.pdf</code></li>
+    <li><code>GSE87038_STRING_graph_perState_simplified_ratioweighted.rds</code> optional</li>
+    <li><code>GSE87038_STRING_graph_perState_simplified_zscoreweighted.rds</code> optional</li>
+    <li><code>GSE87038_STRING_graph_perState_simplified_diffweighted.rds</code> optional</li>
+    <li><code>compare_specificity_method_vs_PPIscores.pdf</code> optional</li>
+    <li><code>compare_specificity_method_HiGCTS_8_vs_PPIscores.pdf</code> optional</li>
 </ul>
 
 </div>
-  
 
 </div>
-
 
 </div>

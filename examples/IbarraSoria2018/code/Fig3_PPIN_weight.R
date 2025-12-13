@@ -2,57 +2,58 @@ library(gplots)
 require(dplyr)
 library(data.table)
 library(ggplot2)
-library(ggpubr)  # ggarrange()
-library("gridExtra")
-library(ggrepel)
 library(ggpubr)
+library(ggrepel)
 library(igraph)
 library(rstatix)
-library(brainGraph)
+library(scales)
+library(pracma)
+library(MLmetrics)
+library(sm)
 
-wd = "/Users/felixyu/Documents/IbarraSoria2018/"
-setwd(paste0(wd, 'results/PPI_weight/'))
-inputdir = "../../data/"
+########## BEGINNING OF USER INPUT ##########
 
+wd = "/Users/felixyu/Documents/GSE87038_weighted/"
 celltype_specific_weight_version <- '10'
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
-db <- "IbarraSoria2018"
+db <- "GSE87038"
 
 PPI_color_palette = c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
 PPI_size_palette = c("CTS" = 1, "HiGCTS" = 0.75, "HiG" = 0.25)
 
-CT_id = c("cardiac.a", "endothelial.b")
+CT_id = c("7", "8", "11", "13", "15", "16", "16.1")
 CT_id_formatted <- paste0("_(", paste(CT_id, collapse = "|"), ")")
+
+setwd(paste0(wd, 'results/PPI_weight/'))
+inputdir = "../../data/"
 
 # For Figure E
 # Choose what to plot: "vertex", "edge", or "both"
 plot_mode <- "vertex"  # change this to "edge" or "both" as needed
 
 # For Figure K
-CP_CTS <- "HiGCTS_cardiac.a" # cardiac progenitor critical transition cluster
+CP_CTS <- "HiGCTS_8" # cardiac progenitor critical transition cluster
 
-s = "combined"
+s = "combined" # specificity method
+
+########## END OF USER INPUT ##########
 
 file = paste0(db, '_STRING_graph_perState_simplified_',s,'weighted.rds')
 graph_list <- readRDS(file)  
 	
 (names(graph_list))
-#  [1] "HiG_extraembryonicMesoderm" "HiG_endothelial.a"          "HiG_endothelial.c"          "HiG_endothelial.d"         
-#  [5] "HiG_blood"                  "HiG_mesodermProgenitors"    "HiG_presomiticMesoderm.b"   "HiG_presomiticMesoderm.a"  
-#  [9] "HiG_somiticMesoderm"        "HiG_mixedMesoderm.a"        "HiG_pharyngealMesoderm"     "HiG_mixedMesoderm.b"       
-# [13] "HiG_cardiac.b"              "HiG_cardiac.c"              "HiG_endothelial.b"          "HiG_cardiac.a"             
-# [17] "HiGCTS_endothelial.b"       "HiGCTS_cardiac.a"           "CTS_endothelial.b"          "CTS_cardiac.a" 
+#  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"       "HiG_6"       "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"      "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"      
+# [15] "HiG_11"      "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"    "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_8"    "CTS_7"       "CTS_11"      "CTS_15"     
+# [29] "CTS_16"      "CTS_16.1"    "CTS_13"      "CTS_8"       "HiGCTS_13"
 
 signature_levels = c(names(graph_list))
-
-CHD = readRDS( file=paste0(inputdir, 'CHD_Cilia_Genelist.rds'))
 
 ###################################################
 # Fig A ) normalized node strength analysis
 # original code: 11.3_CTS_cardiac_network_ANND_pagerank.R
-# original pdf: normalized.node.strength_IbarraSoria2018_v2.pdf
-###################################################
+# original pdf: normalized.node.strength_GSE87038_v2.pdf
+################################################################
 {
 df = readRDS(file='df_PAGERANK_strength_ANND.rewring.P.rds')  #!!!!!!!!!!!!!!!!!!!!!!!
 df = rbind(subset(df, PPI_cat=='CTS'),
@@ -60,6 +61,8 @@ df = rbind(subset(df, PPI_cat=='CTS'),
 					subset(df, PPI_cat=='HiG')
 					)
 df$label=df$gene
+
+CHD = readRDS( file=paste0(inputdir, 'CHD_Cilia_Genelist.rds'))
 
 df_median = df %>% group_by(signature) %>%
 					summarise(median_normalized_strength = median(normalized.strength, na.rm = TRUE))
@@ -88,7 +91,7 @@ vertex(violin_median_normalized.strength_wilcox)
 }
 
 ###################################################
-# Fig B. degree) boxplot of normalized strength for all transition clusters per category
+# Fig B) boxplot of normalized strength for all clusters per category
 # original code: 11.3_CTS_cardiac_network_ANND_pagerank.R
 # original pdf: normalized.node.strength_GSE87038_v2.pdf
 ################################################################
@@ -154,7 +157,7 @@ vertex(boxplot_strength)
 ###################################################
 # Fig C) boxplot of normalized strength for only transition clusters per category
 # original code: 11.2.1_CTS_cardiac_network_strengthDistribution.R
-# original pdf: boxplot_normalized_strength_IbarraSoria2018.pdf
+# original pdf: boxplot_normalized_strength_GSE87038.pdf
 ################################################################
 {
 V_deg_dis = lapply(graph_list, function(x) strength_distribution(x, cumulative=TRUE )) %>% 
@@ -169,7 +172,7 @@ V_deg_dis$PPI_cat = lapply(V_deg_dis$signature, function(x) unlist(strsplit(x , 
 
 (table(V_deg_dis$PPI_cat))
 #    CTS HiGCTS    HiG 
-#    118     50   1600 
+#    578    176   1900
 V_deg_dis$cluster = lapply(V_deg_dis$signature, function(x) unlist(strsplit(x , '_'))[2]) %>% unlist 
 
 all(V_deg_dis$signature %in% names(graph_list)) #T
@@ -191,13 +194,12 @@ boxplot_transition_strength = ggplot(subset(V_deg_dis, grepl(CT_id_formatted, si
                      p.adjust.method = "BH",  # Adjust p-values using Benjamini-Hochberg (BH) method
                      label = "p.signif")
 print(boxplot_transition_strength)
-
 }
 
 ###################################################
 # Fig D) violin plot of median PageRank per category
 # original code: 11.3_CTS_cardiac_network_ANND_pagerank.R
-# original pdf: PageRank_IbarraSoria20183_v2.pdf
+# original pdf: PageRank_GSE870383_v2.pdf
 ################################################################
 {
 df = readRDS(file='df_PAGERANK_strength_ANND.rewring.P.rds')  #!!!!!!!!!!!!!!!!!!!!!!!
@@ -237,9 +239,10 @@ vertex(violin_median_pagerank)
 ###################################################
 # Fig E) boxplot of %remained_fraction of targeted attack vs random attack
 # original code: 11.2_CTS_cardiac_network_robustness.R
-# original pdf: box_wilcox-test_attack_IbarraSoria2018.pdf
+# original pdf: box_wilcox-test_attack_GSE87038.pdf
 ################################################################
 {
+
 attack.edge.btwn = readRDS(file='attack.edge.btwn.rds')
 attack.vertex.btwn = readRDS(file='attack.vertex.btwn.rds')
 failure.vertex = readRDS(paste0('failure.vertex_100_simplified_', s, 'weighted.rds'))
@@ -359,24 +362,21 @@ fold_change <- robustness.dt %>%
 (fold_change)
 #   PPI_cat fold_change_edge fold_change_vertex
 #   <fct>              <dbl>              <dbl>
-# 1 CTS                0.957               1.40
-# 2 HiGCTS             0.956               1.33
-# 3 HiG                0.915               1.09
-
-# HiG vertex too low, nonsignificant
-
+# 1 CTS                1.04                1.66
+# 2 HiGCTS             1.00                1.68
+# 3 HiG                0.913               1.09
 
 ### additionally, wilcox-test the between-group changes among observed PPINs
 tmp = subset(robustness.dt,measure=='btwn.cent')
-dim(tmp) # [1] 6447    9
+dim(tmp) #[1] 8245    9
 wilcox.test(subset(tmp,PPI_cat=='HiG')$comp.pct, subset(tmp,PPI_cat=='CTS')$comp.pct)
-# W = 277446, p-value = 0.001694
+# W = 1961908, p-value < 2.2e-16
 
 wilcox.test(subset(tmp,PPI_cat=='HiG')$comp.pct, subset(tmp,PPI_cat=='HiGCTS')$comp.pct)
-# W = 117240, p-value = 0.06436
+# W = 623754, p-value = 1.008e-09
 
 wilcox.test(subset(tmp,PPI_cat=='HiGCTS')$comp.pct, subset(tmp,PPI_cat=='CTS')$comp.pct)
-# W = 1215, p-value = 0.4781
+# W = 25486, p-value = 0.1847
 
 # Run Wilcoxon tests between PPI categories
 sig_results_ppi <- lapply(ppi_comparisons, function(cmp) {
@@ -400,21 +400,18 @@ sig_results_ppi <- lapply(ppi_comparisons, function(cmp) {
 
 (sig_results_ppi)
 #   group1 group2            p p_stars
-# 1    HiG HiGCTS 0.0321726222       *
-# 2    HiG    CTS 0.0003531766     ***
-# 3    CTS HiGCTS 0.5594116666      ns
+# 1    HiG HiGCTS 5.746002e-11    ****
+# 2    HiG    CTS 8.242192e-28    ****
+# 3    CTS HiGCTS 4.910623e-01      ns
 
 }
 
 ###################################################
 # Fig F) ARC plot of vertex attack
 # original code: 11.2_CTS_cardiac_network_robustness.R
-# original pdf: attack_IbarraSoria2018.pdf
+# original pdf: attack_GSE87038.pdf
 ################################################################
 {  
-# failure.vertex = readRDS(file=paste0('failure.vertex_100_simplified_',s,'weighted.rds'))  
-# failure.edge = readRDS(paste0('failure.edge_100_simplified_',s,'weighted.rds'))
-# failure.dt <- rbind(failure.edge, failure.vertex)   
 failure.dt = readRDS(file=paste0('failure.vertex_100_simplified_',s,'weighted.rds'))  
 colnames(failure.dt)[1] ='signature'
 
@@ -423,13 +420,13 @@ attack.vertex.btwn = readRDS( file=paste0('attack.vertex.btwn.rds'))
 colnames(attack.vertex.btwn)[1] = 'signature'	 
 
 robustness.dt <- rbind(failure.dt, attack.vertex.btwn[,1:6])  #, attack.edge.btwn[,1:6])  
-(dim(robustness.dt)) # [1] 14582     6
+(dim(robustness.dt)) #  16490     6
 robustness.dt$PPI_cat = lapply(robustness.dt$signature, function(x) unlist(strsplit(x , '_'))[1]) %>% unlist %>%
 		factor(.,levels=c('CTS', 'HiGCTS', 'HiG')) 
 head(robustness.dt, 3)
 
 
-(robustness.dt$measure %>% unique)
+robustness.dt$measure %>% unique
 #[1] "random"     "btwn.cent"
 robustness.dt = subset(robustness.dt ,measure != 'degree')
 robustness.dt$experiment = ifelse(grepl('edge', robustness.dt$type), 'edge', 'vertex')
@@ -455,7 +452,7 @@ vertex(p_attack4)
 ###################################################
 # Fig G) violin plot of median betweenness per category
 # original code: Code: 11.3_CTS_cardiac_network_ANND_pagerank.R
-# original pdf: BetweennessCentrality_IbarraSoria2018_v2.pdf
+# original pdf: BetweennessCentrality_GSE870383_v2.pdf
 ################################################################
 {
 df_BC = read.table(file='df_betweeness.tsv',sep='\t', header=T) 
@@ -493,15 +490,25 @@ violin_median_bc_wilcox = ggplot(df_median, aes(x = PPI_cat, y = bc.median , col
 plot(violin_median_bc_wilcox)
 }
 
-
 ###################################################
 # Fig H) boxplot of AUC for vertex attack
 # original code: 11.2_CTS_cardiac_network_robustness.R
-# original pdf: box_wilcox-test_attack_AUC_IbarraSoria2018.pdf
+# original pdf: box_wilcox-test_attack_AUC_GSE87038.pdf
 ################################################################
 {
-library(MLmetrics)
-library(sm)
+failure.dt = readRDS(file=paste0('failure.vertex_100_simplified_', s, 'weighted.rds'))
+colnames(failure.dt)[1] = 'signature'
+
+attack.vertex.btwn = readRDS('attack.vertex.btwn.rds')
+colnames(attack.vertex.btwn)[1] = 'signature'
+
+robustness.dt <- rbind(failure.dt, attack.vertex.btwn[,1:6])
+robustness.dt$PPI_cat = lapply(robustness.dt$signature, function(x) unlist(strsplit(x , '_'))[1]) %>% unlist %>%
+    factor(.,levels=c('CTS', 'HiGCTS', 'HiG'))
+
+robustness.dt = subset(robustness.dt ,measure != 'degree')
+robustness.dt$type = factor(robustness.dt$type,
+    levels = c("Random edge removal","Targeted edge attack","Random vertex removal","Targeted vertex attack"))
 
 observed_auc_list = list()
 for(j in names(graph_list)){
@@ -537,8 +544,6 @@ boxplot_AUC_vertex_attack = ggplot(df_AUC, aes(x = PPI_cat, y = auc, fill = PPI_
   theme(legend.position = "top")
 vertex(boxplot_AUC_vertex_attack)
 }
-
-
 
 ###################################################
 # Fig I) boxplot of betweenness per PPIN
@@ -593,7 +598,7 @@ vertex(boxplot_bc_log10)
 ###################################################
 # Fig J) boxplot of PageRank per PPIN
 # original code: Code: 11.3_CTS_cardiac_network_ANND_pagerank.R
-# original pdf: PageRank_IbarraSoria2018_v2.pdf
+# original pdf: PageRank_GSE870383_v2.pdf
 ################################################################
 {
 CHD = readRDS( file=paste0(inputdir, 'CHD_Cilia_Genelist.rds'))
@@ -616,7 +621,7 @@ tb = df5[, c('signature','gene','PPI_cat','rank_by_PR','PCGC_AllCurated')]
 write.table(tb, file= 'table_top5_pagerank_perPPI.tsv', sep='\t', row.names=F)
  	  
 df5_CHD = subset(df5, PCGC_AllCurated==TRUE)
-(dim(df5_CHD))  # [1] 16 18
+(dim(df5_CHD))  # [1] 15 18
 
 boxplot_pagerank <- ggplot(df, aes(x = signature, y = PageRank, colour = PPI_cat)) +
     geom_boxplot(show.legend = TRUE) + # Enable legend for the boxplot
@@ -651,14 +656,73 @@ g_real <- graph_list[[CP_CTS]]
 res <- synthetic_simulation(g_real, main = CP_CTS)
 
 # Combine into a single plot object
-plot_simulation <- grid.arrange(
-    res$p_weights,
-    res$p_line,
-    res$p_AUC,
-    ncol = 3
-)
+plot_simulation <- res$p_line
 
 print(plot_simulation)
+}
+
+
+###################################################
+# Fig L) Edge weight density
+# original code: 11.6_communities_edge_weight_distribution.R
+# original pdf: edge_weight.pdf
+###################################################
+{
+graph_list_notsimplified <- readRDS( file= paste0('../', db, '_STRING_graph_perState_notsimplified.rds'))
+
+# Remove duplicate vertices
+correct_n_edges = readRDS('../correct_n_edges_HiG_STRING2.14.0.rds')
+for(g_name in unique(correct_n_edges$graph_id)){
+	vertices_to_remove = subset(correct_n_edges, graph_id == g_name)$vetex_index_to_remove
+	if(any(is.na(vertices_to_remove))) vertices_to_remove = vertices_to_remove[!is.na(vertices_to_remove)]
+	graph_list[[g_name]] = delete_vertices(graph_list_notsimplified[[g_name]], vertices_to_remove)
+}
+N = sapply(graph_list_notsimplified, vcount)
+((N0-N)[which(N0-N>0)])
+# named numeric(0)
+
+graph_list_notsimplified <- lapply(graph_list_notsimplified, simplify, edge.attr.comb ='max') #!!!!!!!!!!!!!!!!!!!
+N2 = sapply(graph_list_notsimplified, vcount)
+(all(N==N2))   # [1] TRUE 
+
+edge_data <- extract_edge_weights_by_category(graph_list, PPI_color_palette, CT_id)
+(head(edge_data, 3))
+#   sample PPI_cat edge_weight num_edges cluster_ID cluster_cat
+# 1  HiG_1     HiG       0.211      4978          1      stable
+# 2  HiG_1     HiG       0.410      4978          1      stable
+# 3  HiG_1     HiG       0.767      4978          1      stable
+
+# Create plots for PPI category analysis
+category_plots <- plot_edge_weight_distributions(edge_data, PPI_color_palette)
+
+plot_density <- category_plots$density_plot
+
+edge_counts <- edge_data %>%
+  group_by(PPI_cat) %>%
+  summarise(
+    edge_count = n(),
+    .groups = "drop"
+  )
+
+(edge_counts)
+#   PPI_cat edge_count
+#   <fct>        <int>
+# 1 CTS            905
+# 2 HiGCTS         137
+# 3 HiG         184731
+
+pairwise_pvals <- edge_data %>%
+  pairwise_wilcox_test(
+    formula = edge_weight ~ PPI_cat,
+    p.adjust.method = "BH"
+  )
+
+(pairwise_pvals)
+#   .y.         group1 group2    n1     n2 statistic        p   p.adj p.adj.signif
+# * <chr>       <chr>  <chr>  <int>  <int>     <dbl>    <dbl>   <dbl> <chr>       
+# 1 edge_weight CTS    HiGCTS   905    137     45708  7.03e-7 2.11e-6 ****        
+# 2 edge_weight CTS    HiG      905 184731  80746929  7.7 e-2 7.7 e-2 ns          
+# 3 edge_weight HiGCTS HiG      137 184731  14062139  2.4 e-2 3.6 e-2 *   
 }
 
 ### Save Plots to Folder
@@ -673,7 +737,8 @@ plots <- list(
     boxplot_AUC_vertex_attack, # H
     boxplot_bc_log10, # I
     boxplot_pagerank, # J
-    plot_simulation # K
+    plot_simulation, # K
+    plot_density # L
 )
 
 sizes <- list(
@@ -687,7 +752,8 @@ sizes <- list(
   c(2, 3), # H
   c(7, 4), # I
   c(7, 4), # J
-  c(15, 5) # K
+  c(5, 5), # K
+  c(5, 5) # L
 )
 
 # Dynamically adjust size for plot E (boxplot_remained_fraction)
