@@ -4,26 +4,6 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<div style="margin: 0 auto; width: fit-content;">
-<nav id="top-nav">
-    <div class="nav-title">Sections</div>
-    <div class="nav-links">
-        <a href="#introduction">Introduction</a>
-        <a href="#figure">Figure</a>
-        <a href="#setup">Setup</a>
-        <a href="#panel-ab">Panel A</a>
-        <a href="#panel-ab">Panel B</a>
-        <a href="#panel-c">Panel C</a>
-        <a href="#panel-d">Panel D</a>
-        <a href="#panel-e">Panel E</a>
-        <a href="#panel-f">Panel F</a>
-        <a href="#panel-g">Panel G</a>
-        <a href="#panel-h">Panel H</a>
-        <a href="#panel-i">Panel I</a>
-        <a href="#panel-j">Panel J</a>
-        <a href="#appendix">Appendix</a>
-    </div>
-</nav>
 <title>Transition Instability Prediction Suite (TIPS)</title>
 <style>
 body {
@@ -31,7 +11,9 @@ body {
     line-height: 1.6;
     margin: 40px;
     word-wrap: break-word;
-    overflow-wrap: break-word
+    overflow-wrap: break-word;
+    overflow-x: hidden;
+    max-width: 100%;
 }
 
 h1, h2, h3 { color: #333; }
@@ -164,12 +146,143 @@ html { scroll-padding-top: 150px; }
 </head>
 <body>
 
+<nav id="top-nav">
+    <div class="nav-title">Sections</div>
+    <div class="nav-links">
+        <a href="#introduction">Introduction</a>
+        <a href="#figure">Figure</a>
+        <a href="#setup">Setup</a>
+        <a href="#panel-ab">Panel A</a>
+        <a href="#panel-ab">Panel B</a>
+        <a href="#panel-c">Panel C</a>
+        <a href="#panel-d">Panel D</a>
+        <a href="#panel-e">Panel E</a>
+        <a href="#panel-f">Panel F</a>
+        <a href="#panel-g">Panel G</a>
+        <a href="#panel-h">Panel H</a>
+        <a href="#panel-i">Panel I</a>
+        <a href="#panel-j">Panel J</a>
+        <a href="#appendix">Appendix</a>
+    </div>
+</nav>
 
 <h1 class="page-title">TIPS Tutorial</h1>
 
 <div id="introduction">
-<h2>Introduction</h2>
-<p>Holly's Overview</p>
+    <h2>Introduction</h2>
+    <div id="tips-intro">
+        <h2>1. Purpose of TIPS</h2>
+
+        <p>
+          <strong>TIPS</strong> (Transcriptional Instability Prediction of Subnetworks)
+          takes the critical-transition outputs (<strong>CTS</strong>) and historical
+          markers (highly expressed genes, <strong>HiG</strong>) and their overlaps
+          (<strong>CTS&amp;HiG</strong>) gene sets to build cluster-specific,
+          edge-weighted PPINs (i.e., static knowledge-based PPI backbone ×
+          data-driven cluster-specific coexpression specificity) so you can:
+        </p>
+      
+        <ol type="i">
+          <li>
+            test the “controlled chaoticity” hypothesis at the transition
+            (ordered connectivity + targeted fragility), and
+          </li>
+          <li>
+            prioritize mechanistic bridge/hub genes and downstream “dual-pull”
+            structure for the CP → (CM vs CF-like) bifurcation.
+          </li>
+        </ol>
+        <img src="figures/intro1.jpg" alt="Controlled Chaoticity" style="max-width: 25%; height: auto;">
+        <p></p>
+        <img src="figures/intro2.jpg" alt="TIPS Pipeline" style="max-width: 25%; height: auto;">
+      
+        <h2>2. Continuing from BioTIP</h2>
+      
+        <ul>
+          <li>
+            <strong>BioTIP</strong> answers “where is the tipping point and what genes
+            define it?” → identifies critical transition clusters and their CTS
+            modules (instability peak).
+          </li>
+      
+          <li>
+            <strong>TIPS</strong> answers “how is that CTS organized mechanistically
+            and how vulnerable is it?” → maps dynamic CTS (and CTS&amp;HiG) onto a
+            static PPI scaffold, then weights edges using cluster-specific
+            coexpression.
+          </li>
+      
+          <ul>
+            <li>
+              Like BioTIP, TIPS can use shrinkage correlation
+              (stabilizes correlation estimates, reduces spurious correlations in
+              smaller/noisier clusters).
+            </li>
+      
+            <li>
+              TIPS then adds an explicit specificity penalty
+              <code>|r<sub>target</sub>| × (1 − mean(|r<sub>other</sub>|))</code>
+              so ubiquitous coexpression (often driven by broadly expressed or highly
+              expressed programs) is downweighted, while cluster-selective coupling
+              is emphasized.
+            </li>
+      
+            <li>
+              Coexpression magnitude uses absolute value (direction-agnostic
+              strength), while sign is stored separately for visualization
+              (positive vs negative edges).
+            </li>
+          </ul>
+        </ul>
+      
+        <h2>3. Why walkthrough 2019 dataset [PMC6522369]</h2>
+      
+        <ul>
+          <li>
+            This is a gold standard mouse gastrulation (E6–E8.5) dataset, downloadable
+            from the <code>MouseGastrulationData</code> package in R, and well
+            documented at
+            <a href="https://github.com/MarioniLab/MouseGastrulationData" target="_blank">
+              https://github.com/MarioniLab/MouseGastrulationData
+            </a>.
+          </li>
+      
+          <li>
+            We reanalyzed and applied BioTIP to the E8.25 subsets and demonstrated the
+            robustness of BioTIP identification across multiple datasets, including
+            this subset (Figure S1 in Yang et al., 2022).
+          </li>
+      
+          <li>
+            We previously built a BioTIP tutorial using this dataset
+            [<a href="https://htmlpreview.github.io/?https://github.com/xyang2uchicago/BioTIP/blob/master/tutorial/Gastrulation.html" target="_blank">URL</a>].
+          </li>
+        </ul>
+      
+        <p>
+          Specifically, raw counts and metadata were obtained from the
+          <code>MouseGastrulationData</code> R package. We extracted E8.25 cells and
+          removed cells annotated as putative doublets or stripped nuclei as
+          described in our prior reanalysis (Yang et al., 2022), yielding 7,240
+          E8.25 mesoderm cells.
+        </p>
+      
+        <p>
+          Counts were normalized with <code>scran::logNormCounts</code> using
+          sample-specific size factors. Gene selection and clustering followed
+          Yang et al. (2022): PCA was performed on the selected expressed-gene set,
+          and clusters were identified using an SNN graph (<code>k = 10</code>)
+          and graph-based clustering, resulting in 19 subpopulations.
+        </p>
+      
+        <p>
+          Cluster markers were identified using
+          <code>SingleCellExperiment::findMarkers</code>
+          (t-test; logFC &gt; 0.6; min.prop = 0.25; FDR &lt; 0.01).
+        </p>
+      
+      </div>
+      
 </div>
 
 <div id="figure">
@@ -251,17 +364,17 @@ signature_levels = c(names(graph_list))</code></pre>
 <h3><strong>What this Panel Shows</strong></h3>
 <ul>
     <li><strong>A:</strong> Median normalized node strength (violin plot). Each point is a PPIN’s median.</li>
-    <li>Violin shapes show the distribution of medians within each category.</li>
-    <li>Wilcoxon tests compare CTS vs CTS&HiG, CTS&HiG vs HiG, CTS vs HiG.</li>
+    <ul>
+        <li>Violin shapes show the distribution of medians within each category.</li>
+        <li>Wilcoxon tests compare CTS vs CTS&HiG, CTS&HiG vs HiG, CTS vs HiG.</li>
+    </ul>
     <li><strong>B:</strong> Boxplot of normalized node strength for all genes (log₁₀ scale).
         CHD-risk genes labeled if top 5 strongest.</li>
 </ul>
 
 <h3><strong>Interpretation</strong></h3>
 <p>
-    HiG networks generally show <strong>lower normalized strength</strong>, indicating weaker weighted
-    connectivity. CTS and CTS&HiG PPINs tend to contain more strongly connected genes, suggesting
-    <p style="color: #ff0000; display: inline">TBD</p>
+    Despite being a much smaller overlap set, CTS&HiG PPINS contain higher normalized connection strength between nodes. 
 </p>
 
 <h3><strong>Inputs</strong></h3>
@@ -415,13 +528,9 @@ vertex(boxplot_strength)
 
 <h3><strong>Interpretation</strong></h3>
 <p>
-    <strong>Node-strength: </strong>Weaker normalized strength in HiG transition clusters suggests <p style="color: #ff0000; display: inline">TBD</p>
-
-    <strong>PageRank: </strong>
-    <p>
-        Lower medians in HiG suggest a <p style="color: #ff0000; display: inline">TBD</p>.
-        Higher medians indicate <p style="color: #ff0000; display: inline">TBD</p>.
-    </p>
+    CTS&HiG networks exhibit higher normalized node strength and higher median PageRank than HiG.
+    Because strength is normalized for network size and PageRank reflects relative centrality, 
+    these results indicate that CTS&HiG nodes remain densely connected and centrally positioned.
 </p>
 
 <h3><strong>Inputs</strong></h3>
@@ -543,8 +652,9 @@ vertex(violin_median_pagerank)
 
 <h3><strong>Interpretation</strong></h3>
 <p>
-    Large gaps between random and targeted removal indicate vulnerability to disruption of
-    bottleneck genes—networks heavily reliant on a few key connectors.
+    When nodes were removed by descending betweenness centrality, CTS and CTS&HiG
+    PPINs fragmented faster than HiG PPINs, whereas random removal had a much weaker
+    effect in the transition PPINS.
 </p>
 
 <h3><strong>Inputs</strong></h3>
@@ -753,7 +863,9 @@ sig_results_ppi <- lapply(ppi_comparisons, function(cmp) {
 <ul>
   <li><strong>Left: Fragmentation curves</strong> — Tracks the collapse of each PPIN under targeted node removal.  
       Plots the percentage of nodes removed vs. the remaining size of the largest connected component.</li>
-  <li>Curves colored by PPI category reveal whether PPINs fragment early (steep curves) or remain intact longer (flatter curves).</li>
+  <ul>
+    <li>Curves colored by PPI category reveal whether PPINs fragment early (steep curves) or remain intact longer (flatter curves).</li>
+  </ul>
   <li><strong>Right: AUC boxplots</strong> — The Area Under the Curve summarizes PPIN robustness.  
       Higher AUC indicates greater resilience to targeted node removal.</li>
 </ul>
@@ -762,7 +874,7 @@ sig_results_ppi <- lapply(ppi_comparisons, function(cmp) {
 <p>
   <strong>Low AUC → fragile networks</strong> that collapse early under targeted attacks.<br>
   <strong>High AUC → robust networks</strong> that maintain connectivity longer.<br><br>
-  CTS&HiG and CTS PPINs typically show significantly lower AUC, indicating heightened vulnerability to the removal
+  Transition PPINs show significantly lower AUC, indicating heightened vulnerability to the removal
   of influential nodes and fewer redundant paths relative to HiG networks.
 </p>
 
@@ -916,11 +1028,11 @@ vertex(boxplot_AUC_vertex_attack)
 
 <h3><strong>Interpretation</strong></h3>
 <p>
-    Real CTS and HiG PPINs show earlier fragmentation compared to scale-free and small-world networks,
-    indicating dependence on <p style="color: #ff0000; display: inline">TBD</p>.  
-    Degree-preserving models partially recapitulate the observed fragility, suggesting the degree distribution
-    contributes but does not fully determine robustness.  
-    Overall, biological PPINs exhibit unique architectural constraints that elevate their susceptibility to perturbation.
+    The simulation graph shows that degree-preserving rewired CTS&HiG networks lose global connectivity 
+    earlier than the real PPIN, indicating that resilience is not explained by the degree sequence alone 
+    but depends on biologically structured edge placement. At the same time, the real network fragments 
+    earlier than toy generative graphs, placing CTS&HiG PPINs in an intermediate regime that balances robustness 
+    to random disruption with selective vulnerability to targeted bridge removal.
 </p>
 
 <h3><strong>Inputs</strong></h3>
@@ -966,8 +1078,8 @@ print(plot_simulation)
 <h3><strong>Purpose</strong></h3>
 <p>
     To compare how strongly connected the protein–protein interactions (PPIs) are 
-    within each PPI category (CTS, CTS&HiG, HiG). Edge weight reflects the confidence 
-    or support for each interaction in the STRING database.
+    within each PPI category (CTS, CTS&HiG, HiG). Edge weight is a combination of
+    string PPI confidence and coexpression in that cluster
 </p>
 
 <h3><strong>What this Panel Shows</strong></h3>
@@ -979,7 +1091,8 @@ print(plot_simulation)
 
 <h3><strong>Interpretation</strong></h3>
 <p>
-    <p style="color: #ff0000; display: inline">TBD</p>
+    Modules are tightly connected groups of nodes; since all network categories have similar numbers of modules, 
+    their different fragilities must arise from how modules are wired together, not from how many modules exist.
 </p>
 
 <h3><strong>Inputs</strong></h3>
@@ -1079,7 +1192,11 @@ pairwise_pvals <- edge_data %>%
 
 <h3><strong>Interpretation</strong></h3>
 <p>
-    Lower medians in CTS and CTS&HiG suggest fewer bottleneck nodes and less redundancy in pathways.
+    At the category level, median betweenness centrality is significantly lower in CTS and CTS&HiG PPINs 
+    compared with HiG PPINs. This indicates that HiG networks are more dominated by a small number of 
+    high-betweenness hub nodes, whereas transition PPINs (CTS and CTS&HiG) exhibit a more distributed 
+    topology with fewer globally dominant bottlenecks. In other words, information flow in HiG PPINs is 
+    concentrated through central hubs, while transition PPINs spread connectivity more evenly across nodes.
 </p>
 
 <h3><strong>Inputs</strong></h3>
@@ -1156,7 +1273,12 @@ plot(violin_median_bc_wilcox)
 
 <h3><strong>Interpretation</strong></h3>
 <p>
-    <p style="color: #ff0000; display: inline">TBD</p>
+    Although transition PPIN categories have lower median betweenness overall (as seen in H), 
+    individual CTS and CTS&HiG PPINs display a pronounced upper tail of nodes with high betweenness centrality. 
+    These nodes act as structural bridges linking otherwise weakly connected modules within the network. 
+    The presence of such high-BC outliers indicates “few-node sensitivity”: while the network is broadly distributed, 
+    it remains vulnerable to perturbation of a small set of key bridge nodes. This motivates gene-level prioritization 
+    within transition PPINs, as these nodes disproportionately maintain inter-module communication.
 </p>
 
 <h3><strong>Inputs</strong></h3>
@@ -1243,7 +1365,12 @@ vertex(boxplot_bc_log10)
 
 <h3><strong>Interpretation</strong></h3>
 <p>
-    <p style="color: #ff0000; display: inline">TBD</p>
+    PageRank analysis shows that, in CTS and CTS&HiG PPINs, only a small number of genes stand out as especially 
+    influential within the network, even though these networks do not rely on a single dominant hub overall. 
+    These influential genes sit at key positions in transition networks, where changes to them could have broad 
+    effects on how signals propagate across the system. By contrast, HiG PPINs display consistently low PageRank 
+    values across genes, suggesting a network structure driven more by tightly connected local groups than by a 
+    few genes with system-wide influence.
 </p>
 
 <h3><strong>Inputs</strong></h3>
@@ -1312,7 +1439,7 @@ vertex(boxplot_pagerank)
 <h2>Appendix — Derived Data Used in Panels</h2>
 
 <!-- ======================== -->
-<!-- Panel A & B & C (left)-->
+<!-- Panel A & B & C-->
 <!-- ======================== -->
 <div class="appendix-subsection">
 
