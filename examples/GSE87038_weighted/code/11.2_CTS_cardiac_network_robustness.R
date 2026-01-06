@@ -74,7 +74,7 @@ graphs_with_duplicates <- sapply(graph_list, function(g) {
 # See if weights have been updated
 # combined_score: the
 (names(edge_attr(graph_list[[1]])))
-# "weight"         "norm_PPI_score" "corexp_sign"    "coexp_target"  
+# "weight"         "norm_PPI_score" "corexp_sign"    "coexp_focal"  
 (all(E(graph_list[[1]])$weight == E(graph_list[[1]])$norm_PPI_score)) # FALSE
 
 

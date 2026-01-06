@@ -83,7 +83,7 @@ graphs_with_duplicates <- sapply(graph_list, function(g) {
 # combined_score: the
 (names(edge_attr(graph_list[[1]])))
 # [1] "combined_score"  "weight"          "width"           "original_weight"
-# [5] "corexp_sign"     "coexp_target"
+# [5] "corexp_sign"     "coexp_focal"
 (all(E(graph_list[[1]])$combined_score / 1000 == E(graph_list[[1]])$original_weight)) # TRUE
 (all(E(graph_list[[1]])$weight == E(graph_list[[1]])$original_weight)) # FALSE
 

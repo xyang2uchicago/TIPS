@@ -26,54 +26,54 @@ source(paste0('https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/head
 #'
 #' @description
 #' Calculates several measures of cell-type specificity by comparing
-#' co-expression of genes in a target cell type/cluster to their co-expression
+#' co-expression of genes in a focal cell type/cluster to their co-expression
 #' in other cell types/clusters.
 #'
-#' @param coexp_target A numeric matrix of gene-gene correlations (co-expression)
-#'   in the target cell type. Row and column names should be gene identifiers.
+#' @param coexp_focal A numeric matrix of gene-gene correlations (co-expression)
+#'   in the focal cell type. Row and column names should be gene identifiers.
 #' @param coexp_other_list A list of numeric matrices with gene-gene correlations
 #'   in other cell types/clusters. Each matrix should have the same dimensions
-#'   and gene ordering as \code{coexp_target}.
+#'   and gene ordering as \code{coexp_focal}.
 #'
 #' @return A list containing four different specificity score matrices:
 #'   \describe{
-#'     \item{ratio}{Ratio of target co-expression to mean co-expression in other cell types}
-#'     \item{zscore}{Z-score measure comparing target to other cell types}
-#'     \item{diff}{Simple difference between target and mean of other cell types}
-#'     \item{combined}{Product of target co-expression and (1 - other co-expression)}
+#'     \item{ratio}{Ratio of focal co-expression to mean co-expression in other cell types}
+#'     \item{zscore}{Z-score measure comparing focal to other cell types}
+#'     \item{diff}{Simple difference between focal and mean of other cell types}
+#'     \item{combined}{Product of focal co-expression and (1 - other co-expression)}
 #'   }
 #'
 #' @details
 #' This function calculates multiple specificity metrics that highlight gene-gene
-#' connections that are specific to a target cell type:
+#' connections that are specific to a focal cell type:
 #'
-#' 1. **Ratio** – The ratio of absolute co-expression in the target cell type to
+#' 1. **Ratio** – The ratio of absolute co-expression in the focal cell type to
 #'    the mean absolute co-expression across other cell types:
-#'    \deqn{ ratio = |r_{target}| / (mean(|r_{other}|) + 0.01) }
+#'    \deqn{ ratio = |r_{focal}| / (mean(|r_{other}|) + 0.01) }
 #'    Higher values indicate that a gene pair is more strongly co-expressed in
-#'    the target cell type than elsewhere. This score penalizes high co-expression 
+#'    the focal cell type than elsewhere. This score penalizes high co-expression 
 #     elsewhereis via the denominator, therefore, it is very sensitive to 
 #'    very low background co-expression (division amplifies small denominators).
 #'
 #' 2. **Z-score** – A standardized measure showing how many standard deviations
-#'    the target co-expression differs from the mean across other cell types:
-#'    \deqn{ zscore = (|r_{target}| - mean(|r_{other}|)) / (sd(|r_{other}|) + 0.01) }
-#'    The z-score measures how far the target’s co-expression deviates from 
+#'    the focal co-expression differs from the mean across other cell types:
+#'    \deqn{ zscore = (|r_{focal}| - mean(|r_{other}|)) / (sd(|r_{other}|) + 0.01) }
+#'    The z-score measures how far the focal’s co-expression deviates from 
 #'    the cross-type average in units of standard deviation. Therefore, it  
-#'    highlights edges whose co-expression is unusually strong (or weak) in the target.
+#'    highlights edges whose co-expression is unusually strong (or weak) in the focal.
 #'
-#' 3. **Difference** – The simple difference between target and mean co-expression:
-#'    \deqn{ diff = |r_{target}| - mean(|r_{other}|) }
-#'    Positive values indicate stronger co-expression in the target cell type.
-#'	  It gives credit as long as the target is stronger than the mean, good for 
-#'    identifying edges that are stronger in the target than others (quantitative gain).
+#' 3. **Difference** – The simple difference between focal and mean co-expression:
+#'    \deqn{ diff = |r_{focal}| - mean(|r_{other}|) }
+#'    Positive values indicate stronger co-expression in the focal cell type.
+#'	  It gives credit as long as the focal is stronger than the mean, good for 
+#'    identifying edges that are stronger in the focal than others (quantitative gain).
 #'
-#' 4. **Combined** – A multiplicative metric rewarding high co-expression in the target
+#' 4. **Combined** – A multiplicative metric rewarding high co-expression in the focal
 #'    and low co-expression in other cell types:
-#'    \deqn{ combined = |r_{target}| * (1 - mean(|r_{other}|)) }
-#'    This score Rewards high co-expression in target and explicitly penalizes high 
+#'    \deqn{ combined = |r_{focal}| * (1 - mean(|r_{other}|)) }
+#'    This score Rewards high co-expression in focal and explicitly penalizes high 
 #'    co-expression elsewhere through (1 - mean).
-#'    Emphasizes edges that are both strong and specific to the target cell type.
+#'    Emphasizes edges that are both strong and specific to the focal cell type.
 #'
 #' All correlations are converted to absolute values before comparison to capture
 #' connection strength regardless of direction (positive or negative correlation).
@@ -82,8 +82,8 @@ source(paste0('https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/head
 #' \dontrun{
 #' # Create example correlation matrices
 #' genes <- c("GENE1", "GENE2", "GENE3", "GENE4")
-#' target_matrix <- matrix(runif(16), 4, 4)
-#' rownames(target_matrix) <- colnames(target_matrix) <- genes
+#' focal_matrix <- matrix(runif(16), 4, 4)
+#' rownames(focal_matrix) <- colnames(focal_matrix) <- genes
 #'
 #' other_matrix1 <- matrix(runif(16), 4, 4)
 #' rownames(other_matrix1) <- colnames(other_matrix1) <- genes
@@ -93,7 +93,7 @@ source(paste0('https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/head
 #'
 #' # Calculate specificity
 #' spec_scores <- calculate_specificity(
-#'     target_matrix,
+#'     focal_matrix,
 #'     list(other_matrix1, other_matrix2)
 #' )
 #' }
@@ -101,15 +101,15 @@ source(paste0('https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/head
 #' @export
 #' @author Holly Yang \email{xyang2.at.uchicago.edu}
 
-calculate_specificity <- function(coexp_target, coexp_other_list) {
+calculate_specificity <- function(coexp_focal, coexp_other_list) {
     # Convert correlation to absolute value
-    coexp_target_abs <- abs(coexp_target)
+    coexp_focal_abs <- abs(coexp_focal)
 
     # Calculate mean and standard deviation of co-expression in other cell types
-    other_coexp_mean <- matrix(0, nrow = nrow(coexp_target), ncol = ncol(coexp_target))
-    other_coexp_sd <- matrix(0, nrow = nrow(coexp_target), ncol = ncol(coexp_target))
-    dimnames(other_coexp_mean) <- dimnames(coexp_target)
-    dimnames(other_coexp_sd) <- dimnames(coexp_target)
+    other_coexp_mean <- matrix(0, nrow = nrow(coexp_focal), ncol = ncol(coexp_focal))
+    other_coexp_sd <- matrix(0, nrow = nrow(coexp_focal), ncol = ncol(coexp_focal))
+    dimnames(other_coexp_mean) <- dimnames(coexp_focal)
+    dimnames(other_coexp_sd) <- dimnames(coexp_focal)
 
     for (other_coexp in coexp_other_list) {
         other_coexp_abs <- abs(other_coexp)
@@ -140,16 +140,16 @@ calculate_specificity <- function(coexp_target, coexp_other_list) {
     # Calculate various specificity measures
 
     # Option 1: Simple ratio (avoid division by zero)
-    specificity_ratio <- coexp_target_abs / (other_coexp_mean + 0.01)
+    specificity_ratio <- coexp_focal_abs / (other_coexp_mean + 0.01)
 
     # Option 2: Z-score like measure
-    specificity_zscore <- (coexp_target_abs - other_coexp_mean) / (other_coexp_sd + 0.01)
+    specificity_zscore <- (coexp_focal_abs - other_coexp_mean) / (other_coexp_sd + 0.01)
 
     # Option 3: Difference-based measure
-    specificity_diff <- coexp_target_abs - other_coexp_mean
+    specificity_diff <- coexp_focal_abs - other_coexp_mean
 
-    # Option 4: Combined measure (rewards high co-expression in target and low in others)
-    specificity_combined <- coexp_target_abs * (1 - other_coexp_mean)
+    # Option 4: Combined measure (rewards high co-expression in focal and low in others)
+    specificity_combined <- coexp_focal_abs * (1 - other_coexp_mean)
 
     return(list(
         ratio = specificity_ratio,
@@ -166,7 +166,7 @@ calculate_specificity <- function(coexp_target, coexp_other_list) {
 #' genes in a specific cell type or cluster from a SingleCellExperiment object.
 #'
 #' @param sce A SingleCellExperiment object containing gene expression data.
-#' @param cluster_id Character or numeric identifier for the target cluster
+#' @param cluster_id Character or numeric identifier for the focal cluster
 #'   or cell type.
 #' @param genes Character vector of gene identifiers to include in the
 #'   correlation calculation.
@@ -277,9 +277,9 @@ compute_cluster_correlation <- function(sce,
 #'
 #' @description
 #' This function computes cell-type specificity scores for genes in each network.
-#' It calculates co-expression within the target cell type and compares it to
+#' It calculates co-expression within the focal cell type and compares it to
 #' co-expression in other cell types to identify connections that are specific
-#' to the target cell type.
+#' to the focal cell type.
 #'
 #' @param sce A SingleCellExperiment object containing gene expression data.
 #' @param graph_list A named list of igraph objects, where each network corresponds
@@ -364,18 +364,18 @@ calculate_network_specificity <- function(sce,
         }
 
         # Extract cluster ID from network name
-        target_cluster <- get_cluster_id(net_name)
-        target_cluster <- gsub("\\.\\d+$", "", target_cluster)
-        if (verbose) cat("Target cluster for this network:", target_cluster, "\n")
+        focal_cluster <- get_cluster_id(net_name)
+        focal_cluster <- gsub("\\.\\d+$", "", focal_cluster)
+        if (verbose) cat("Focal cluster for this network:", focal_cluster, "\n")
 
         # Check if this cluster exists in the SCE
-        if (!target_cluster %in% all_clusters) {
-            warning("Cluster '", target_cluster, "' not found in SCE for network '", net_name, "'. Skipping.")
+        if (!focal_cluster %in% all_clusters) {
+            warning("Cluster '", focal_cluster, "' not found in SCE for network '", net_name, "'. Skipping.")
             next
         }
 
-        # Define other clusters as all except the target
-        other_clusters <- setdiff(all_clusters, target_cluster)
+        # Define other clusters as all except the focal
+        other_clusters <- setdiff(all_clusters, focal_cluster)
 
         # Get gene names from this network
         net_genes <- V(g)$name
@@ -390,11 +390,11 @@ calculate_network_specificity <- function(sce,
             next
         }
 
-        # Calculate co-expression for target cluster using the independent function
-        if (verbose) cat("Computing co-expression for target cluster:", target_cluster, "\n")
-        coexp_target <- compute_cluster_correlation(
+        # Calculate co-expression for focal cluster using the independent function
+        if (verbose) cat("Computing co-expression for focal cluster:", focal_cluster, "\n")
+        coexp_focal <- compute_cluster_correlation(
             sce = sce,
-            cluster_id = target_cluster,
+            cluster_id = focal_cluster,
             genes = genes_in_sce,
             celltype_col = celltype_col,
             assayName = assayName,
@@ -436,18 +436,18 @@ calculate_network_specificity <- function(sce,
 
         # Calculate specificity scores using the independent function
 
-        scores <- calculate_specificity(coexp_target, coexp_other_list)
+        scores <- calculate_specificity(coexp_focal, coexp_other_list)
 
         # Store results
         specificity_scores[[net_name]] <- list(
             scores = scores,
             genes = genes_in_sce, # Store genes for which scores were calculated
-            coexp_target = coexp_target,
+            coexp_focal = coexp_focal,
             corexp_sign = matrix(
-                ifelse(coexp_target > 0, "positive", "negative"),
-                nrow = nrow(coexp_target),
-                ncol = ncol(coexp_target),
-                dimnames = dimnames(coexp_target)
+                ifelse(coexp_focal > 0, "positive", "negative"),
+                nrow = nrow(coexp_focal),
+                ncol = ncol(coexp_focal),
+                dimnames = dimnames(coexp_focal)
             ) # added v7
         )
 
@@ -490,7 +490,7 @@ calculate_network_specificity <- function(sce,
 #'   \item \code{weight}: Final combined edge weights (nornalized PPI * specificity). A positive numeric vector. Larger edge weights correspond to stronger connections.
 #'   \item \code{norm_PPI_score}:  Original PPI scores (STRING combined_score/1000)
 #'   \item \code{corexp_sign}: Sign of co-expression correlation ('positive' or 'negative')
-#'   \item \code{coexp_target}: Cell-type specific co-expression scores used for weighting
+#'   \item \code{coexp_focal}: Cell-type specific co-expression scores used for weighting
 #' }
 #'
 #' @details
@@ -529,9 +529,9 @@ calculate_network_specificity <- function(sce,
 #'         specificity_method = "combined"
 #'     )
 #'     edge_attr_names(updated_networks[["A"]])
-#'     # [1] "weight"          "norm_PPI_score" "corexp_sign"     "coexp_target"
+#'     # [1] "weight"          "norm_PPI_score" "corexp_sign"     "coexp_focal"
 #'
-#'     plot(E(updated_networks[["A"]])$coexp_target, E(updated_networks[["A"]])$weight,
+#'     plot(E(updated_networks[["A"]])$coexp_focal, E(updated_networks[["A"]])$weight,
 #'         xlab = "Pearson cor", ylab = "Coexp&PPI-combined Weights", main = "Cell cluster A-specific"
 #'     )
 #' }
@@ -623,12 +623,12 @@ update_network_weights <- function(graph_list,
         # Preallocate (all NA)
         nE <- igraph::ecount(g)
         corexp_vals <- rep(NA_character_, nE)
-        coexp_target_vals <- rep(NA_real_, nE)
+        coexp_focal_vals <- rep(NA_real_, nE)
         new_weights <- E(g)$norm_PPI_score # default: keep old weights
 
         # Fill for valid edges
         corexp_vals[valid] <- as.character(spec_data$corexp_sign[idx])
-        coexp_target_vals[valid] <- specificity_norm[idx]
+        coexp_focal_vals[valid] <- specificity_norm[idx]
 
         # Compute combined weights
         candidate_weights <- (string_norm[idx] * specificity_norm[idx])
@@ -640,7 +640,7 @@ update_network_weights <- function(graph_list,
 
         # Assign in bulk
         g <- set_edge_attr(g, "corexp_sign", value = corexp_vals)
-        g <- set_edge_attr(g, "coexp_target", value = coexp_target_vals)
+        g <- set_edge_attr(g, "coexp_focal", value = coexp_focal_vals)
         g <- set_edge_attr(g, "weight", value = new_weights)
 
         if (verbose) cat("Completed updating weights for network:", net_name, "\n")
@@ -1486,7 +1486,7 @@ plot_nEB_ggplot <- function(nEB_data, PPI_color_palette, method=c('t.test', 'wil
 #'   \item{\code{p_weights}}{ggplot histogram/density comparing edge-weight distributions.}
 #'   \item{\code{p_line}}{ggplot line plot of fragmentation curves.}
 #'   \item{\code{p_AUC}}{ggplot bar plot of AUC values.}
-#'	 \item{\code{network_colors}}{named color platte used here.}
+#'	 \item{\code{network_colors}}{named color palette used here.}
 #' }
 #'
 #' @note

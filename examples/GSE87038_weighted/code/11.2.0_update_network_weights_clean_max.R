@@ -185,7 +185,7 @@ if (step2) {
 
         stopifnot(
             is.matrix(corexp_named),
-            all(dim(corexp_named) == dim(spec_data$coexp_target))
+            all(dim(corexp_named) == dim(spec_data$coexp_focal))
         )
 
         network_specificity_list[[net]]$corexp_sign <- corexp_named
@@ -211,7 +211,7 @@ if (step2) {
     # double check outputs
     g <- weighted_graph_list[[1]]
     vertex_attr_names(g) # "name"   "weight" "FDR"  
-    edge_attr_names(g) # "weight"         "norm_PPI_score" "corexp_sign"    "coexp_target"
+    edge_attr_names(g) # "weight"         "norm_PPI_score" "corexp_sign"    "coexp_focal"
 }
 
 ###################################################
