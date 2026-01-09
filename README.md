@@ -22,7 +22,7 @@ For Holly
 ### How to use TIPS analysis? 
 
 
-1. [TIPS tutorial](https://htmlpreview.github.io/?https://github.com/xyang2uchicago/TIPS/blob/main/tutorial/TIPS.html): This is a detailed walkthrough of BioTIP on one of our key results (Mouse Gastrulation, GSE87038, [E8.25 2019](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE87038)). 
+1. [TIPS tutorial](https://htmlpreview.github.io/?https://github.com/xyang2uchicago/TIPS/blob/main/tutorial/TIPS.html): This is a detailed walkthrough of TIPS on one of our key results (Mouse Gastrulation, GSE87038, [E8.25 2019](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE87038)). 
 
 <!-- 2. [Vignette](https://bioconductor.org/packages/release/bioc/vignettes/BioTIP/inst/doc/BioTIP.html): This documented exampled case studies on bulk (GSE6136) and single-cell ([Nestorowa 2016](https://pubmed.ncbi.nlm.nih.gov/27365425/)) datasets. -->
 
