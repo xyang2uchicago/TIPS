@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <title>Transition Instability Prediction Suite (TIPS)</title>
+<link rel="icon" type="image/x-icon" href="figures/favicon.png">
 <style>
 body {
     font-family: Arial, sans-serif;
@@ -142,6 +143,22 @@ html { scroll-padding-top: 150px; }
   margin-top: 28px;
   margin-bottom: 16px;
 }
+
+.nav-button {
+    margin-left: 18px;
+    padding: 8px 14px;
+    background: #d0e5ff;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.nav-button:hover {
+    background: #1e4e8c;
+}
+
 </style>
 </head>
 <body>
@@ -149,20 +166,22 @@ html { scroll-padding-top: 150px; }
 <nav id="top-nav">
     <div class="nav-title">Sections</div>
     <div class="nav-links">
-        <a href="#introduction">Introduction</a>
-        <a href="#figure">Figure</a>
-        <a href="#setup">Setup</a>
-        <a href="#panel-ab">Panel A</a>
-        <a href="#panel-ab">Panel B</a>
-        <a href="#panel-c">Panel C</a>
-        <a href="#panel-d">Panel D</a>
-        <a href="#panel-e">Panel E</a>
-        <a href="#panel-f">Panel F</a>
-        <a href="#panel-g">Panel G</a>
-        <a href="#panel-h">Panel H</a>
-        <a href="#panel-i">Panel I</a>
-        <a href="#panel-j">Panel J</a>
-        <a href="#appendix">Appendix</a>
+        <a href="#introduction"><strong>Introduction</strong></a>
+        <a href="#figure"><strong>Figure</strong></a>
+        <a href="#setup"><strong>Setup</strong></a>
+        <a href="#panel-ab"><strong>Panel A</strong></a>
+        <a href="#panel-ab"><strong>Panel B</strong></a>
+        <a href="#panel-c"><strong>Panel C</strong></a>
+        <a href="#panel-d"><strong>Panel D</strong></a>
+        <a href="#panel-e"><strong>Panel E</strong></a>
+        <a href="#panel-f"><strong>Panel F</strong></a>
+        <a href="#panel-g"><strong>Panel G</strong></a>
+        <a href="#panel-h"><strong>Panel H</strong></a>
+        <a href="#panel-i"><strong>Panel I</strong></a>
+        <a href="#panel-j"><strong>Panel J</strong></a>
+        <a href="#appendix"><strong>Appendix</strong></a>
+
+        <a href="https://github.com/xyang2uchicago/TIPS" class="nav-button">TIPS GitHub</a>
     </div>
 </nav>
 
@@ -171,15 +190,14 @@ html { scroll-padding-top: 150px; }
 <div id="introduction">
     <h2>Introduction</h2>
     <div id="tips-intro">
-        <h2>1. Purpose of TIPS</h2>
+        <h2>1. Purpose of TIPS (Fig 1)</h2>
 
         <p>
-          <strong>TIPS</strong> (Transcriptional Instability Prediction of Subnetworks)
-          takes the critical-transition outputs (<strong>CTS</strong>) and historical
-          markers (highly expressed genes, <strong>HiG</strong>) and their overlaps
-          (<strong>CTS&amp;HiG</strong>) gene sets to build cluster-specific,
-          edge-weighted PPINs (i.e., static knowledge-based PPI backbone ×
-          data-driven cluster-specific coexpression specificity) so you can:
+            We developed <strong>TIPS (Transcriptional Instability Prediction of Subnetworks)</strong> to better
+            understand birth defects by (i) testing the “controlled chaoticity” hypothesis at the
+            transition (ordered connectivity + targeted fragility), and (ii) prioritizing mechanistic
+            bridge/hub genes and downstream “dual‑pull” architecture underlying the developmental
+            bifurcation.
         </p>
       
         <ol type="i">
@@ -192,28 +210,75 @@ html { scroll-padding-top: 150px; }
             structure for the CP → (CM vs CF-like) bifurcation.
           </li>
         </ol>
-        <img src="figures/intro1.jpg" alt="Controlled Chaoticity" style="max-width: 25%; height: auto;">
+        <figure style="display: inline-grid; justify-items: center;">
+            <img src="figures/figure1.jpg" alt="Controlled Chaoticity" style="max-width: 500px; height: auto;">
+            <p></p>
+            <figcaption style="max-width: 500px;"><strong>Figure 1: </strong> A cell begins in a single stable state. As new fate programs emerge, 
+                their competing influences pull the system into a highly dynamic transition region where multiple states are explored. 
+                The balls and hills represent changes in the underlying potential landscape that shape how easily the cell can move between states. 
+                The cell then settles into one of several stable phenotypic outcomes.
+            </figcaption>
+        </figure>
       
-        <h2>2. Continuing from BioTIP</h2>
+        <h2>2. TIPS workflow: continuing from BioTIP (Fig 2)</h2>
       
         <ul>
           <li>
             <strong>BioTIP</strong> answers “where is the tipping point and what genes
-            define it?” → identifies critical transition clusters and their CTS
+            define it?” → by identifying critical transition clusters and their CTS
             modules (instability peak).
           </li>
       
           <li>
             <strong>TIPS</strong> answers “how is that CTS organized mechanistically
-            and how vulnerable is it?” → maps dynamic CTS (and CTS&amp;HiG) onto a
-            static PPI scaffold, then weights edges using cluster-specific
-            coexpression.
+            and how vulnerable is it?” → by mapping dynamic CTS (and CTS&HiG) onto a
+            static protein–protein interaction (PPI) scaffold, then weighting edges
+            using cluster-specific coexpression.
           </li>
-      
+          <li>
+            TIPS integrates two inputs: 1) BioTIP critical-transition outputs (CTS), historical
+            markers (highly expressed genes, HiG), and their overlap (CTS&HiG); 2) a static
+            PPI with knowledge-based edge weights.
+          </li>
+          <li>
+            TIPS outputs three categories of cluster-specific, edge‑weighted protein–protein
+            interaction networks (PPINs) (i.e., static knowledge-based PPI backbone × data-
+            driven cluster‑specific coexpression specificity).
+          </li>
+        </ul>
+        <figure style="display: inline-grid; justify-items: center;">
+            <img src="figures/figure2.jpg" alt="TIPS Pipeline" style="max-width: 500px; height: auto;">
+            <p></p>
+            <figcaption style="max-width: 500px;">
+                <strong>Figure 2:</strong> How BioTIP and TIPS analysis fits into overall cell-state discovery and differentiation trajectory pipeline.
+            </figcaption>
+        </figure>        
+        
+
+          <h2>3. TIPS two-step analytic strategy and key concepts (Fig 3)</h2>
+          <p>There are two steps:</p>
+          <p>
+            In Step A, curated, knowledge based interactome is restricted to genes in a cluster
+            specific signature to form a signature derived subnetwork. STRING interaction
+            support is then combined with cluster specific coexpression information to assign
+            state specific edge weights, yielding a weighted protein–protein interaction network 
+            (PPIN) for each cell state, where genes are nodes and weighted interactions represent 
+            a combination of protein–protein associations and coexpression specificity.
+          </p>
+
+          <p>
+            In Step B, the weighted PPINs are analyzed for topological properties and
+            robustness via strategic node removal (red arrows). Robustness is quantified and
+            compared among three categories of PPINs: stable (HiG), transitional (CTS), and
+            their overlap (CTS&HiG) networks.
+          </p>
+
+          TIPS edge weighting highlights putative regulatory interactions by downweighting
+          spurious correlations:
           <ul>
             <li>
               Like BioTIP, TIPS can use shrinkage correlation
-              (stabilizes correlation estimates, reduces spurious correlations in
+              (stabilizes correlation estimates and reduces spurious correlations in
               smaller/noisier clusters).
             </li>
       
@@ -226,19 +291,35 @@ html { scroll-padding-top: 150px; }
             </li>
       
             <li>
-              Coexpression magnitude uses absolute value (direction-agnostic
-              strength), while sign is stored separately for visualization
-              (positive vs negative edges).
+              Coexpression magnitude uses the absolute value (direction-agnostic
+              strength), while the sign is stored separately for visualization (positive vs
+              negative edges).
             </li>
           </ul>
-        </ul>
-        <img src="figures/intro2.jpg" alt="TIPS Pipeline" style="max-width: 25%; height: auto;">
+        
+        <figure style="display: inline-grid; justify-items: center;">
+            <img src="figures/figure3.jpg" alt="PPI Network Two-Step Analysis" style="max-width: 500px; height: auto;">
+            <p></p>
+            <figcaption style="max-width: 500px;">
+                <strong>Figure 3:</strong> Overview of TIPS analysis including how PPINS are constructed, 
+                how edges are updated, and how robustness is tested through targeted node attacks.
+            </figcaption>
+        </figure>               
+
+        <p>
+            [The above go to <a href="https://github.com/xyang2uchicago/TIPS">https://github.com/xyang2uchicago/TIPS</a>]
+        </p>
+
+        <p>
+        [The below go to
+        <a href="https://htmlpreview.github.io/?https://github.com/xyang2uchicago/TIPS/blob/main/tutorial/TIPS.html">https://htmlpreview.github.io/?https://github.com/xyang2uchicago/TIPS/blob/main/tutorial/TIPS.html</a>]
+        </p>
       
-        <h2>3. Why walkthrough Pijuan-Sala 2019 mouse gastrulation dataset (E8.5 subset)</h2>
+        <h2>3. Why walkthrough Pijuan-Sala 2019 mouse gastrulation dataset (the mE8.25 subset)</h2>
       
         <ul>
           <li>
-            This is a gold standard mouse gastrulation (E6–E8.5) dataset, downloadable
+            This is a gold standard mouse gastrulation (E6–E8.5) datasets [PMC6522369], downloadable
             from the <code>MouseGastrulationData</code> package in R, and well
             documented at
             <a href="https://github.com/MarioniLab/MouseGastrulationData" target="_blank">
@@ -279,15 +360,23 @@ html { scroll-padding-top: 150px; }
           <code>SingleCellExperiment::findMarkers</code>
           (t-test; logFC &gt; 0.6; min.prop = 0.25; FDR &lt; 0.01).
         </p>
-      
       </div>
-      
+      Following, we detail the main delivery of TIPS analysis presented in the following
+      Figure by walking through the R set up, and each panel – the purpose, R code,
+      interpretation, inputs and outputs.
 </div>
+&nbsp;
+<hr>
+&nbsp;
+<h2>TIPS Walkthrough</h2>
 
-<div id="figure">
-<h2>Figure</h2>
-<img src="figures/whole.jpg" alt="Whole Figure" style="max-width: 50%; height: auto;">
-</div>
+<figure id = "figure" style="display: inline-grid; justify-items: left;">
+    <img src="figures/whole.jpg" alt="Whole Figure" style="max-width: 800px; height: auto;">
+    <p></p>
+    <figcaption style="max-width: 800px;">
+        <strong>Main Figure:</strong> Polished figure generated by TIPS workflow.
+    </figcaption>
+</figure>   
 
 <div id="setup">
 <h2>Setup</h2>
@@ -362,12 +451,12 @@ signature_levels = c(names(graph_list))</code></pre>
 
 <h3><strong>What this Panel Shows</strong></h3>
 <ul>
-    <li><strong>A:</strong> Median normalized node strength (violin plot). Each point is a PPIN’s median.</li>
+    <li><strong>A:</strong> Summarized on PPIN category level, median normalized node strength (violin plot). Each point is a PPIN’s median.</li>
     <ul>
         <li>Violin shapes show the distribution of medians within each category.</li>
         <li>Wilcoxon tests compare CTS vs CTS&HiG, CTS&HiG vs HiG, CTS vs HiG.</li>
     </ul>
-    <li><strong>B:</strong> Boxplot of normalized node strength for all genes (log₁₀ scale).
+    <li><strong>B:</strong> Detailed on cluster level, boxplot of normalized node strength for all genes (log₁₀ scale).
         CHD-risk genes labeled if top 5 strongest.</li>
 </ul>
 
@@ -509,12 +598,12 @@ vertex(boxplot_strength)
 <h3><strong>Purpose</strong></h3>
 <p>
     <strong>Node-strength: </strong>To determine whether PPINs derived from transcriptionally unstable
-    <strong>transition clusters</strong> (clusters 7, 8, 11, 13, 15, 16, 16.1)
+    <strong>critical transition signatures (CTSs)</strong> (clusters 7, 8, 11, 13, 15, 16, 16.1)
     show systematically altered connectivity.
 
     <strong>PageRank: </strong>
-    To quantify how global influence is distributed within each transition PPIN. PageRank identifies genes
-    positioned on influential, central routes through the network.
+    To quantify how global influence is distributed within each CTS PPIN. PageRank identifies genes
+    positioned on influential, central information routes through the network.
 </p>
 
 <h3><strong>What this Panel Shows</strong></h3>
@@ -856,7 +945,8 @@ sig_results_ppi <- lapply(ppi_comparisons, function(cmp) {
 <h3><strong>Purpose</strong></h3>
 <p>
   To quantify PPIN robustness under targeted vertex removal by observing how networks fragment as key nodes are deleted.
-  This panel evaluates both the collapse trajectory and overall resilience via AUC.
+  Robustness is quantified by tracking network fragmentation (e.g., loss of the largest connected component) under strategic
+  versus random removal, enabling comparison of PPIN vulnerability across categories.
 </p>
 
 <h3><strong>What this Panel Shows</strong></h3>
@@ -867,7 +957,7 @@ sig_results_ppi <- lapply(ppi_comparisons, function(cmp) {
     <li>Curves colored by PPI category reveal whether PPINs fragment early (steep curves) or remain intact longer (flatter curves).</li>
   </ul>
   <li><strong>Right: AUC boxplots</strong> — The Area Under the Curve summarizes PPIN robustness.  
-      Higher AUC indicates greater resilience to targeted node removal.</li>
+      Higher AUC indicates greater robustness (i.e., resilience to targeted node removal).</li>
 </ul>
 
 <h3><strong>Interpretation</strong></h3>
@@ -1077,9 +1167,9 @@ print(plot_simulation)
 
 <h3><strong>Purpose</strong></h3>
 <p>
-    To compare how strongly connected the protein–protein interactions (PPIs) are 
-    within each PPI category (CTS, CTS&HiG, HiG). Edge weight is a combination of
-    string PPI confidence and coexpression in that cluster
+    To compare how strongly connected the protein–protein interactions (PPINs) are 
+    within each PPIN category (CTS, CTS&HiG, HiG). Edge weight is a combination of
+    string PPI confidence and coexpression in that cluster.
 </p>
 
 <h3><strong>What this Panel Shows</strong></h3>
