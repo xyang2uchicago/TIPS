@@ -5,8 +5,8 @@ For more details, refer to [TIPS tutorial](https://htmlpreview.github.io/?https:
 ### What is TIPS?
 For Holly
 
-<img src="https://github.com/xyang2uchicago/TIPS/blob/main/imgs/Fig3_TIPS_pipeline.jpg">
-<img src="https://github.com/xyang2uchicago/TIPS/blob/main/imgs/Fig3_TIPS_analysis_strategy.jpg">
+<img src="https://github.com/xyang2uchicago/TIPS/blob/main/imgs/Fig3_TIPS_pipeline.jpg" width="25%" height="auto">
+<img src="https://github.com/xyang2uchicago/TIPS/blob/main/imgs/Fig3_TIPS_analysis_strategy.jpg" width="25%" height="auto">
 <!-- <img src="https://github.com/xyang2uchicago/BioTIP/blob/master/results/Fig1_BioTIP_github.jpg">  -->
 
 ### Why TIPS?
