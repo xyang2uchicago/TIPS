@@ -33,29 +33,10 @@ For Holly
 To use the newest TIPS package, either clone/download this repository, or you can install TIPS with:
 
 Will add when Bioconductor Package is created
-<!-- ```r
+```r
 library("devtools")
 devtools::install_github("xyang2uchicago/TIPS")
 ```
-
-You can install the released version of BioTIP from [CRAN](https://CRAN.R-project.org) with:
-
-``` r
-install.packages("BioTIP")
-```
-or even better:
-``` r
-source('http://bioconductor.org/biocLite.R')
-biocLite("BioTIP")
-``` -->
-
-### Variable Clarification
-
-markers.up_all_ttest.rds – List containing upregulated genes per cluster determined by positive log fold change, with no minimum expression proportion filter applied.
-
-markers.up_ttest_min.prop0.25.rds – List containing upregulated genes per cluster determined by positive log fold change, filtered to include only genes expressed in at least 25% of cells in the cluster.
-
-DEG_perState_min.prop0.25_lfc0.6_FDFR0.05.rds – List containing significant upregulated differentially expressed genes per cluster (we call these HiG genes), filtered to genes expressed in ≥25% of cells, with logFC > 0.6 and FDR < 0.01.
 
 ### Acknowledgements
 TIPS is made possible by contributions from the following authors: Xinan H Yang and Felix Yu
