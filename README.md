@@ -8,11 +8,10 @@ TIPS (Transcriptional Instability Prediction of Subnetworks) is a computational 
 
 <img src="https://github.com/xyang2uchicago/TIPS/blob/main/imgs/Fig3_TIPS_pipeline.jpg" width="50%" height="auto">
 Where BioTIP and TIPS analysis fit into the overall cell-state discovery and differentiation trajectory pipeline.
-
-
+&nbsp;
 <img src="https://github.com/xyang2uchicago/TIPS/blob/main/imgs/Fig3_TIPS_analysis_strategy.jpg" width="50%" height="auto">
 Overview of TIPS analysis, including how PPINS are constructed, how edges are updated, and how robustness is tested through targeted node attacks.
-
+&nbsp;
 ### Why TIPS?
 Developmental programs are dynamically rewired across transient and heterogeneous progenitor states, making it difficult to detect when systems become vulnerable to perturbation. TIPS provides a principled framework for mapping defect-sensitive windows and nominating regulatory bridges that mediate state transitions.
 
@@ -26,7 +25,7 @@ We applied TIPS to three datasets (see [examples](https://github.com/xyang2uchic
 
 
 ### Where to apply TIPS?
-For Holly
+TIPS is designed as a general framework to connect single-cell instability signals to mechanistically grounded network architecture, we anticipate that it will be useful beyond cardiac development for identifying defect-vulnerable windows and candidate regulators in other organogenesis trajectories.
 
 ### How to use TIPS analysis? 
 
