@@ -20,7 +20,7 @@ Overview of TIPS analysis, including how PPINS are constructed, how edges are up
 #### Why TIPS?
 Developmental programs are dynamically rewired across transient and heterogeneous progenitor states, making it difficult to detect when systems become vulnerable to perturbation. TIPS provides a principled framework for mapping defect-sensitive windows and nominating regulatory bridges that mediate state transitions.
 
-#### 3 Case Studies
+### 3 Case Studies
 
 We applied TIPS to three datasets (see [examples](https://github.com/xyang2uchicago/TIPS/tree/main/examples)). The three datasets are as follows:
 
