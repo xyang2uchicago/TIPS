@@ -1,6 +1,6 @@
 # TIPS: an R-package for Characterization of Biological Tipping Points
 
-For more details, refer to [TIPS tutorial](https://htmlpreview.github.io/?https://github.com/xyang2uchicago/TIPS/blob/main/tutorial/TIPS.html)
+For more details, refer to [**TIPS tutorial**](https://htmlpreview.github.io/?https://github.com/xyang2uchicago/TIPS/blob/main/tutorial/TIPS.html)
 
 ### What is TIPS?
 
