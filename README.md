@@ -29,17 +29,17 @@ We applied TIPS to three datasets (see [examples](https://github.com/xyang2uchic
 3. <mark style="background-color: lightblue">Dataset 3 contained 12.7k genes in 11k E8.25 cells, with 16 predefined developing mesoderm subtypes ([Ibarra-Soria et al., 2018](https://www.nature.com/articles/s41556-017-0013-z)).</mark> 
 
 
-### Where to apply TIPS?
+#### Where to apply TIPS?
 TIPS is designed as a general framework to connect single-cell instability signals to mechanistically grounded network architecture, we anticipate that it will be useful beyond cardiac development for identifying defect-vulnerable windows and candidate regulators in other organogenesis trajectories.
 
-### How to use TIPS analysis? 
+#### How to use TIPS analysis? 
 
 
 1. [<mark style="background-color: lightblue">TIPS tutorial</mark>](https://htmlpreview.github.io/?https://github.com/xyang2uchicago/TIPS/blob/main/tutorial/TIPS.html): This is a detailed walkthrough of TIPS on one of our key results (Mouse Gastrulation, GSE87038, [E8.25 2019](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE87038)). 
 
 <!-- 2. [Vignette](https://bioconductor.org/packages/release/bioc/vignettes/BioTIP/inst/doc/BioTIP.html): This documented exampled case studies on bulk (GSE6136) and single-cell ([Nestorowa 2016](https://pubmed.ncbi.nlm.nih.gov/27365425/)) datasets. -->
 
-### How to install?
+#### How to install?
 To use the newest TIPS package, clone/download this repository:
 ```
 git clone https://github.com/xyang2uchicago/TIPS.git
