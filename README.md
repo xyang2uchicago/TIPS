@@ -34,7 +34,7 @@ TIPS is designed as a general framework to connect single-cell instability signa
 ### How to use TIPS analysis? 
 
 
-1. [### TIPS tutorial](https://htmlpreview.github.io/?https://github.com/xyang2uchicago/TIPS/blob/main/tutorial/TIPS.html): This is a detailed walkthrough of TIPS on one of our key results (Mouse Gastrulation, GSE87038, [E8.25 2019](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE87038)). 
+1. [### TIPS tutorial ###](https://htmlpreview.github.io/?https://github.com/xyang2uchicago/TIPS/blob/main/tutorial/TIPS.html): This is a detailed walkthrough of TIPS on one of our key results (Mouse Gastrulation, GSE87038, [E8.25 2019](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE87038)). 
 
 ### How to install?
 To use the newest TIPS package, clone/download this repository:
