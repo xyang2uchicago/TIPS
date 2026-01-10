@@ -31,8 +31,6 @@ For Holly
 
 ### How to install?
 To use the newest TIPS package, either clone/download this repository, or you can install TIPS with:
-
-Will add when Bioconductor Package is created
 ```r
 library("devtools")
 devtools::install_github("xyang2uchicago/TIPS")
