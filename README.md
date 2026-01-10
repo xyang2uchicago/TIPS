@@ -41,9 +41,8 @@ TIPS is designed as a general framework to connect single-cell instability signa
 
 ### How to install?
 To use the newest TIPS package, either clone/download this repository, or you can install TIPS with:
-```r
-library("devtools")
-devtools::install_github("xyang2uchicago/TIPS")
+```
+git clone https://github.com/xyang2uchicago/TIPS.git
 ```
 
 ### Acknowledgements
