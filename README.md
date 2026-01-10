@@ -40,7 +40,7 @@ TIPS is designed as a general framework to connect single-cell instability signa
 <!-- 2. [Vignette](https://bioconductor.org/packages/release/bioc/vignettes/BioTIP/inst/doc/BioTIP.html): This documented exampled case studies on bulk (GSE6136) and single-cell ([Nestorowa 2016](https://pubmed.ncbi.nlm.nih.gov/27365425/)) datasets. -->
 
 ### How to install?
-To use the newest TIPS package, either clone/download this repository, or you can install TIPS with:
+To use the newest TIPS package, clone/download this repository:
 ```
 git clone https://github.com/xyang2uchicago/TIPS.git
 ```
