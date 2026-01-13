@@ -6,13 +6,10 @@ For more details, refer to [**TIPS tutorial**](https://htmlpreview.github.io/?ht
 - TIPS stands for **Transcriptional Instability Prediction of Subnetworks**.
 - TIPS quantifies developmental transitions by linking transcriptional instability to interaction-network structure (Fig 1A).
 - TIPS couples tipping-point detection (BioTIP)[https://github.com/xyang2uchicago/BioTIP] with state-specific, coexpression-weighted protein–protein interaction networks and robustness analyses (Fig 1B).
-
-A) TIPS analytic strategy
 <br>
 <img src="https://github.com/xyang2uchicago/TIPS/blob/main/imgs/Fig3_TIPS_pipeline.jpg" width="50%" height="auto">
 <br>
 <br>
-B) TIPS workflow
 <br>
 <img src="https://github.com/xyang2uchicago/TIPS/blob/main/imgs/Fig3_TIPS_analysis_strategy.jpg" width="50%" height="auto">
 <br>
