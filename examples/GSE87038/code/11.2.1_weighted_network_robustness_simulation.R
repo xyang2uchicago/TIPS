@@ -90,13 +90,13 @@ if (V_attack) {
     attac_V_random <- matrix(nrow = N, ncol = length(graph_list))
     colnames(attac_V_random) <- names(graph_list)
     for (j in colnames(attac_V_random)) {
-        g <- graph_list[[j]]
+        g0 <- graph_list[[j]]
         for (i in 1:N) {
             # This line of code rewires the graph g (from the graph_list) with a probability pn[j] for each edge,
             # where pn[j] is the average degree of the graph normalized by the number of vertices.
             # Node and Edge Count Remain Constant, and the node  with the largest betweenness after reviring is then removed
             # In contrast, robustness_MonteCarlo(g, 'vertex', 'random') randomly select node to remove
-            g <- rewire(g, each_edge(prob = pn[j])) # rewires the graph edges based on the probability stored in pn[j]. It rewires the endpoints of the edges with a constant probability uniformly randomly to a new vertex in a graph.
+            g <- rewire(g0, each_edge(prob = pn[j])) # rewires the graph edges based on the probability stored in pn[j]. It rewires the endpoints of the edges with a constant probability uniformly randomly to a new vertex in a graph.
             res <- robustness_MonteCarlo(g, "vertex", "btwn.cent") # calculate the betweenness centrality
             attac_V_random[i, j] <- Area_Under_Curve(res$removed.pct, res$comp.pct)
         }
@@ -115,10 +115,10 @@ if (E_attack) {
     set.seed(1234)
 
     for (j in colnames(attac_E_random)) {
-        g <- graph_list[[j]]
-        if (length(E(g)) > 1) {
+        g0 <- graph_list[[j]]
+        if (length(E(g0)) > 1) {
             for (i in 1:N) {
-                g <- rewire(g, igraph::each_edge(prob = pn[j]))
+                g <- rewire(g0, igraph::each_edge(prob = pn[j]))
 
                 if ("weight" %in% igraph::edge_attr_names(g)) {
                     # igraph::edge_betweenness() uses distance graph weights, but E(g) uses connection weights, thus we invert it.
