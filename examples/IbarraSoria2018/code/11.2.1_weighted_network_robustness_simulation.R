@@ -16,6 +16,10 @@ db <- "IbarraSoria2018"
 celltype_specific_weight_version <- '10'
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
+# If running offline, source local copy of celltype_specific_weight, remember to use an offline copy of BioTIP functions as well.
+# source(paste0('../code/celltype_specific_weight_v', celltype_specific_weight_version, '_offline.R'))
+
+
 inputDir <- "PPI_weight/"
 outputDir <- "PPI_weight/"
 
