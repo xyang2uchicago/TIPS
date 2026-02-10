@@ -380,11 +380,11 @@ robustness.dt$PPI_cat <- lapply(robustness.dt$signature, function(x) unlist(strs
     unlist() %>%
     factor(., levels = c("CTS", "HiGCTS", "HiG"))
 (head(robustness.dt, 3))
-#    signature                type measure comp.size comp.pct  removed.pct
-#       <char>              <char>  <char>     <num>    <num>        <num>
-# 1:     HiG_1 Random edge removal  random       300        1 0.0000000000
-# 2:     HiG_1 Random edge removal  random       300        1 0.0002008839
-# 3:     HiG_1 Random edge removal  random       300        1 0.0004017678
+#    signature                type measure comp.size comp.pct  removed.pct PPI_cat
+#       <char>              <char>  <char>     <num>    <num>        <num>  <fctr>
+# 1:     HiG_1 Random edge removal  random       300        1 0.0000000000     HiG
+# 2:     HiG_1 Random edge removal  random       300        1 0.0002008839     HiG
+# 3:     HiG_1 Random edge removal  random       300        1 0.0004017678     HiG
 
 robustness.dt$experiment <- ifelse(grepl("edge", robustness.dt$type), "edge", "vertex")
 robustness.dt$measure <- factor(robustness.dt$measure, levels = c("random", "btwn.cent"))
@@ -540,7 +540,7 @@ fold_change <- robustness.dt %>%
 #   PPI_cat fold_change_edge fold_change_vertex
 #   <fct>              <dbl>              <dbl>
 # 1 CTS                1.04                1.66
-# 2 HiGCTS             1.00                1.68
+# 2 HiGCTS             1.00                1.67
 # 3 HiG                0.913               1.09
 
 # Add annotation label and y-position to fold_change table
@@ -675,33 +675,33 @@ df$node_p.adj <- p.adjust(df$node_p, method = "bonferroni")
 
 (df[which(df$edge_p.adj < 0.05), ])
 #               edge_p    edge_p.adj      node_p node_p.adj
-# HiG_1   3.637413e-51  1.163972e-49 0.087581455  1.0000000
-# HiG_2   6.798073e-87  2.175383e-85 0.073828047  1.0000000
-# HiG_3   1.487083e-65  4.758664e-64 0.003209893  0.1027166
-# HiG_4   7.306022e-38  2.337927e-36 0.080204149  1.0000000
-# HiG_5   5.755739e-56  1.841836e-54 0.214137044  1.0000000
-# HiG_6  3.266294e-112 1.045214e-110 0.010388843  0.3324430
-# HiG_9   3.612884e-77  1.156123e-75 0.097339992  1.0000000
-# HiG_10 2.323184e-119 7.434188e-118 0.204113846  1.0000000
-# HiG_12  1.453618e-62  4.651576e-61 0.073777875  1.0000000
-# HiG_14  1.328686e-49  4.251795e-48 0.008231469  0.2634070
-# HiG_17 5.077442e-136 1.624782e-134 0.034433999  1.0000000
-# HiG_18 1.659211e-114 5.309475e-113 0.014798231  0.4735434
-# HiG_19 1.377912e-141 4.409319e-140 0.008057704  0.2578465
-# HiG_7   1.205950e-82  3.859038e-81 0.060765374  1.0000000
-# HiG_11 2.869255e-100  9.181615e-99 0.044193528  1.0000000
-# HiG_15 3.511180e-118 1.123578e-116 0.007319833  0.2342347
-# HiG_16 1.026564e-138 3.285003e-137 0.014489861  0.4636756
-# HiG_13  9.053573e-88  2.897143e-86 0.030944561  0.9902260
-# HiG_8   2.234313e-53  7.149801e-52 0.215643811  1.0000000
+# HiG_1   3.637413e-51  1.163972e-49 0.093157167  1.0000000
+# HiG_2   6.798073e-87  2.175383e-85 0.090784240  1.0000000
+# HiG_3   1.487083e-65  4.758664e-64 0.003414644  0.1092686
+# HiG_4   7.306022e-38  2.337927e-36 0.091777811  1.0000000
+# HiG_5   5.755739e-56  1.841836e-54 0.205247981  1.0000000
+# HiG_6  3.266294e-112 1.045214e-110 0.010034983  0.3211194
+# HiG_9   3.612884e-77  1.156123e-75 0.089369539  1.0000000
+# HiG_10 2.323184e-119 7.434188e-118 0.208304910  1.0000000
+# HiG_12  1.453618e-62  4.651576e-61 0.068712755  1.0000000
+# HiG_14  1.328686e-49  4.251795e-48 0.007798327  0.2495465
+# HiG_17 5.077442e-136 1.624782e-134 0.033718396  1.0000000
+# HiG_18 1.659211e-114 5.309475e-113 0.013531655  0.4330130
+# HiG_19 1.377912e-141 4.409319e-140 0.008995979  0.2878713
+# HiG_7   1.205950e-82  3.859038e-81 0.061944558  1.0000000
+# HiG_11 2.869255e-100  9.181615e-99 0.045315655  1.0000000
+# HiG_15 3.511180e-118 1.123578e-116 0.007977735  0.2552875
+# HiG_16 1.026564e-138 3.285003e-137 0.015038486  0.4812316
+# HiG_13  9.053573e-88  2.897143e-86 0.030536517  0.9771685
+# HiG_8   2.234313e-53  7.149801e-52 0.223815881  1.0000000
 
 
 (df[which(df$node_p.adj < 0.05), ])
 #                  edge_p edge_p.adj       node_p   node_p.adj
-# HiGCTS_16.1 0.892811555  1.0000000 5.747580e-04 0.0183922549
-# CTS_11      0.222390265  1.0000000 1.198383e-04 0.0038348252
-# CTS_16.1    0.013243249  0.4237840 4.469871e-06 0.0001430359
-# CTS_13      0.007453426  0.2385096 7.639771e-06 0.0002444727
+# HiGCTS_16.1 0.892811555  1.0000000 6.384315e-04 0.0204298079
+# CTS_11      0.222390265  1.0000000 1.314911e-04 0.0042077140
+# CTS_16.1    0.013243249  0.4237840 5.263737e-06 0.0001684396
+# CTS_13      0.007453426  0.2385096 6.376707e-06 0.0002040546
 
 
 df$clust <- lapply(rownames(df), function(x) unlist(strsplit(x, split = "_"))[2]) %>% unlist()
@@ -1009,7 +1009,7 @@ for (j in names(graph_list)) {
 #    HiGCTS_8       CTS_7      CTS_11      CTS_15      CTS_16    CTS_16.1 
 #   0.6071429   0.6300167   0.5586420   0.6465378   0.5522321   0.6590263 
 #      CTS_13       CTS_8 
-#   0.6808012   0.6021465
+#   0.6808012   0.6021465 
 
 # ks.test(subset(robustness.dt, signature=='cardiac.a')$comp.pc, subset(robustness.dt, signature=='cardiac.c')$comp.pc)
 # p-value < 2.2e-16
