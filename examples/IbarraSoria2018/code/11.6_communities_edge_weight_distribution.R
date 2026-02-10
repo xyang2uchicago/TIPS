@@ -257,7 +257,7 @@ dev.copy2pdf(file='community_number.pdf', width=10)
  
  
 ############################################
-# edge weigh distribution analysis across PPI categories (HiG, HiGCTS, CTS)
+# edge weight distribution analysis across PPI categories (HiG, HiGCTS, CTS)
 # showing no categry difference
 ############################################
  

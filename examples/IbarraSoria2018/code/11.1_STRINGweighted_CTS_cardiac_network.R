@@ -11,11 +11,12 @@ library("SingleCellExperiment")
 
 ########## BEGINNING OF USER INPUT ##########
 
-wd = "/Users/felixyu/Documents/GSE87038_weighted/"
+# Set working directory
+wd <- "/Users/felixyu/Documents/IbarraSoria2018/"
 setwd(paste0(wd, "results/"))
 
-db <- "GSE87038"
-
+# Database settings
+db <- "IbarraSoria2018"
 db_species <- 10090 # 10090 for mouse, 9606 for human
 
 download_files <- TRUE
@@ -25,7 +26,7 @@ if(download_files){
 
     # BioTIP.res.Rdata
     download.file(
-        "https://github.com/xyang2uchicago/BioTIP/raw/refs/heads/master/examples/result/gastrulationE8.25_Pijuan-Sala2019/C_SNNGraph_allcells/BioTIP.res.RData",
+        "https://github.com/xyang2uchicago/BioTIP/raw/refs/heads/master/examples/result/gastrulationE8.25_Ibarra-Soria2018/subcelltype/BioTIP.res.RData",
         "../data/BioTIP.res.RData"
     )
 
@@ -46,89 +47,37 @@ if(download_files){
     }
 }
 
+# Load BioTIP results and sce object
 load(file = "../data/BioTIP.res.RData")
-load("../data/sce_E8.25_uncorrected.RData")
-
-CTS <- res$CTS.candidate[which(res$significant)]
-
-# Find subclusters
-if (any(duplicated(names(CTS)))) cat('renamed duplicated CTS by extended with ".x" and reorder!')
-## manually rename
-names(CTS)[7] <- "16.1"
-CTS <- c(CTS[1:4], CTS[7], CTS[5:6])
-names(CTS)
-# [1] "7"    "11"   "15"   "16"   "16.1" "13"   "8"
+load("../data/sce_16subtype.RData") 
 
 ########## END OF USER INPUT ##########
 
-########################
-#### DEG generation taken from score400 workflow ####
-## load DEGs (or marker genes)
-# refer to BioTIP publication,  GSE87038_markers.R;  evaluate_CTS_GSE130146.R
-# we used the findMarkers function in scran package, using pairwise Welch t-tests for genes that are detected in a minimum 25% per cluster, with fold changes larger than 2.
-# refer to CTS_cardiac_network_robustness_notsimplified.R
-########################
-logFC.cut <- 0.6 # 1
+# Extract significant CTS clusters
+CTS <- res$CTS.candidate[which(res$significant)]
+names(CTS)
+# [1] "endothelial.b" "cardiac.a"
+
+logFC.cut <- 0.6
 
 sce
-# class: SingleCellExperiment
-# dim: 10938 7240
-# metadata(0):
-#   assays(2): counts logcounts
+# class: SingleCellExperiment 
+# dim: 4000 11039 
+
 table(sce$label, sce$celltype)
-#       Somitic mesoderm Intermediate mesoderm ExE mesoderm Paraxial mesoderm Allantois Pharyngeal mesoderm Cardiomyocytes Mesenchyme
-# 1               156                    36            0               650         0                   3              0          0
-# 2                 0                     0            0                 0         0                   0            334          3
-# 3                 0                     0            0                 0         0                   7              2        369
-# 4                11                   598          348                31         0                  37              0          0
-# 5               551                   192            0                 0         0                   0              0          0
-# 6                 0                     0            0                 0         0                   0              0          0
-# 7                 0                     0            0                 0         0                   0              0          0
-# 8                 0                     5            0                21         0                 742             21          8
-# 9                 0                     0            0               519         0                  12              0          0
-# 10                0                     0            0                 3         0                   1              0          0
-# 11                0                     0            0                 0       179                   0              0          4
-# 12                0                     7          276                 0        19                  42              0        122
-# 13                0                     0            0                 0         0                   0              0          0
-# 14                0                     0           27                 0       328                   0              0         29
-# 15                0                     0            0                 0         0                   0              0          0
-# 16                0                     0            0                 0         0                   0              0        175
-# 17                0                     0            0                 0         0                   0            107          0
-# 18                0                     0            0                 0         0                   0              0        203
-# 19                0                     0            0                 0         0                   0              0         63
-#
-#             Haematoendothelial progenitors Endothelium Blood progenitors 1 Blood progenitors 2
-# 1                               0           0                   0                   0
-# 2                               0           0                   0                   0
-# 3                               3           0                   0                   0
-# 4                               0           0                   0                   0
-# 5                               0           0                   0                   0
-# 6                               0         283                   0                   0
-# 7                               0           0                   0                 137
-# 8                               3           0                   0                   0
-# 9                               3           0                   0                   0
-# 10                            204          70                   0                   0
-# 11                              0           0                   0                   0
-# 12                              0           0                   0                   0
-# 13                            223           0                   0                   0
-# 14                             13           0                   0                   0
-# 15                              2           5                  34                  19
-# 16                              0           0                   0                   0
-# 17                              0           0                   0                   0
-# 18                              0           0                   0                   0
-# 19                              0           0                   0                   0
 
-# find markers for every cluster compared to all remaining cells, report only the positive one
-## begin do not repeat !!!!!!!!!!
-
-markers.up <- findMarkers(sce,
-    test = "t", # if wilcox test rather than t-test, get AUC rather than lfc
-    groups = sce$label, # lfc=logFC.cut ,
-    min.prop = 0.25,
+# Generate markers for each cluster (positive only)
+markers.up <- findMarkers(
+    sce,
+    test = "t",            # Welch t-test
+    groups = sce$subcelltype,    # use subcelltype labels from sce
+    min.prop = 0.25,       # only consider genes expressed in >=25% of cells
     direction = "up"
-) # , block=mnn.all$sample)
+)
+
 DEG <- list()
 
+# Handle potential "." in cluster names
 unique_CTS_ID <- names(CTS)
 
 # Subclusters are labeled numerically as <cluster_name.subcluster_number>
@@ -136,67 +85,64 @@ unique_CTS_ID <- names(CTS)
 unique_CTS_ID <- unique_CTS_ID[ !(
     grepl("\\.", unique_CTS_ID) &
     grepl("^[0-9]+$", sub("^[^.]*\\.", "", unique_CTS_ID))
-)]
+) ]
 
+
+# Assign DEGs per cluster
 for (i in c(setdiff(names(markers.up), names(CTS)), unique_CTS_ID)) {
     interesting.up <- markers.up[[i]]
-    DEG[[i]] <- subset(interesting.up, summary.logFC > logFC.cut & FDR < 0.01) %>% rownames()
+    DEG[[i]] <- rownames(interesting.up[interesting.up$summary.logFC > logFC.cut & interesting.up$FDR < 0.01, ])
 }
 
 saveRDS(DEG, file = paste0("../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.05.rds"))
 saveRDS(markers.up, file = "../data/markers.up_ttest_min.prop0.25.rds")
-dim(markers.up[[1]])
 
+dim(markers.up[[1]]) # just to check dimensions
 
-markers.up_all <- findMarkers(sce,
-    test = "t", # if wilcox test rather than t-test, get AUC rather than lfc
-    groups = sce$label,
+# Compute all markers without min.prop filter ---
+markers.up_all <- findMarkers(
+    sce,
+    test = "t",
+    groups = sce$subcelltype,
     min.prop = NULL,
     direction = "up"
-) # , block=mnn.all$sample)
+)
 saveRDS(markers.up_all, file = "../data/markers.up_all_ttest.rds")
-dim(markers.up[[1]])
-
+dim(markers.up_all[[1]])
 
 DEG <- readRDS(file = paste0("../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.05.rds"))
 lengths(DEG)
 
 ######################################################
-# 3) load STRING db and build GRN
+# 3) load STRING db and build GRN 
 ## second trial, using STRING, IFT57/74/88 are all included
 # https://www.bioconductor.org/packages/release/bioc/vignettes/STRINGdb/inst/doc/STRINGdb.pdf
 # refer to CTS_cardiac_ntwork_robustness_notsimplified.R
 ################################################################
 library(BioNet)
-packageVersion("BioNet") # '1.69.0'
+packageVersion('BioNet') # '1.56.0'
 library(igraph)
 library("STRINGdb")
-packageVersion("STRINGdb") # '2.21.0'
+packageVersion('STRINGdb') # '2.14.0'
 library(tibble)
 
-string_db <- STRINGdb$new(
-    version = "12.0", species = db_species, # species= 10090 for mouse
-    score_threshold = 200, # !!!!!!!!!!!default is 200
-    network_type = "full",
-    input_directory = "../data/PPIN"
-)
+string_db <- STRINGdb$new( version="12.0", species=10090,   # species= 10090 for mouse;    ?? for human 2021 version
+                        score_threshold = 200, #!!!!!!!!!!!default is 200
+                        network_type="full", 
+                        input_directory="../data/PPIN") 
 string_db
-# version: 12.0
-# species: 10090
-# proteins: 21840
-# interactions: 6859804>
+# version 12.0  / 11.5
+# proteins: 19699    / for mouse: 22048
+# interactions:  7533072   / for mouse 6859804
 
 graph_list <- list()
-# rather than build for steady PPI_cats
-# for(i in setdiff(names(DEG), names(CTS))){
-# build for traditional up-regulated markers
 
 # HiG
 for (i in names(DEG)) {
     # Filter differentially expressed genes based on logFC and FDR thresholds
     diff_exp <- markers.up[[i]]
     diff_exp$symbol <- rownames(diff_exp)
-    diff_exp <- subset(diff_exp, summary.logFC > logFC.cut & FDR < 0.01)
+    diff_exp <- diff_exp[diff_exp$summary.logFC > logFC.cut & diff_exp$FDR < 0.01, ]
 
     # Map to STRING
     mapped <- string_db$map(diff_exp, "symbol", removeUnmappedRows = TRUE)
@@ -234,8 +180,6 @@ for (i in names(DEG)) {
 }
 names(graph_list) <- paste0("HiG_", names(DEG))
 
-# instead build for transitory PPI_cats only with the significantly up-regulated CTS genes !!!!!
-# build for (up-regulated_marker intersecting CTS)
 # HiGCTS
 for (i in names(CTS)) {
     # Get unique cluster ids for clusters containing subclusters labeled by numerical id
@@ -249,7 +193,7 @@ for (i in names(CTS)) {
     deg_table <- deg_table[deg_table$symbol %in% CTS[[i]], ]
 
     # Filter on significance
-    diff_exp <- subset(deg_table, summary.logFC > logFC.cut & FDR < 0.01)
+    diff_exp <- deg_table[deg_table$summary.logFC > logFC.cut & deg_table$FDR < 0.01, ]
 
     mapped <- string_db$map(diff_exp, "symbol", removeUnmappedRows = TRUE)
 
@@ -257,6 +201,7 @@ for (i in names(CTS)) {
     # string_db$plot_network( hits )
 
     graph <- string_db$get_subnetwork(hits) # t
+
     # translate STRING_id to symbol
     all(mapped[match(V(graph)$name, mapped$STRING_id), ]$STRING_id == V(graph)$name) # TRUE
     V(graph)$name <- mapped[match(V(graph)$name, mapped$STRING_id), ]$symbol
@@ -275,13 +220,13 @@ for (i in names(CTS)) {
     graph_list[[paste0("HiGCTS_", i)]] <- graph
 }
 
-## lastly, build for CTS
-# refer to 6.3_DE.statistics_CTS.R
 markers.up_all <- readRDS("../data/markers.up_all_ttest.rds")
 
 # CTS
 for (i in names(CTS)) {
+    # Get unique cluster ids for clusters containing subclusters labeled by numerical id
     j <- if (grepl("\\.", i) && grepl("^[0-9]+$", sub("^[^.]*\\.", "", i))) sub("\\..*$", "", i) else i
+
     diff_exp <- markers.up_all[[j]][CTS[[i]], ]
     diff_exp$symbol <- rownames(diff_exp)
     mapped <- string_db$map(diff_exp, "symbol", removeUnmappedRows = TRUE)
@@ -305,106 +250,34 @@ for (i in names(CTS)) {
 
     graph_list[[paste0("CTS_", i)]] <- graph
 }
+ 
+ names(graph_list)
+#  [1] "HiG_blood"                  "HiG_cardiac.b"             
+#  [3] "HiG_cardiac.c"              "HiG_endothelial.a"         
+#  [5] "HiG_endothelial.c"          "HiG_endothelial.d"         
+#  [7] "HiG_extraembryonicMesoderm" "HiG_mesodermProgenitors"   
+#  [9] "HiG_mixedMesoderm.a"        "HiG_mixedMesoderm.b"       
+# [11] "HiG_pharyngealMesoderm"     "HiG_presomiticMesoderm.a"  
+# [13] "HiG_presomiticMesoderm.b"   "HiG_somiticMesoderm"       
+# [15] "HiGCTS_endothelial.b"       "HiGCTS_cardiac.a"          
+# [17] "CTS_endothelial.b"          "CTS_cardiac.a"    
+ 
 
-
-names(graph_list)
-#  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"
-#  [6] "HiG_6"       "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"
-# [11] "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"       "HiG_11"
-# [16] "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"
-# [21] "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_13"
-# [26] "HiGCTS_8"    "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"
-# [31] "CTS_16.1"    "CTS_13"      "CTS_8"
-
-
-df_graph_info <- data.frame(
-    name = names(graph_list),
-    vcount = sapply(graph_list, igraph::vcount),
-    ecount = sapply(graph_list, igraph::ecount),
-    stringsAsFactors = FALSE
-)
-
-(df_graph_info)
-
-#                    name vcount ecount
-# HiG_1             HiG_1    303   9956
-# HiG_2             HiG_2    435  19088
-# HiG_3             HiG_3    411  14240
-# HiG_4             HiG_4    304  10724
-# HiG_5             HiG_5    322  11622
-# HiG_6             HiG_6    512  21986
-# HiG_9             HiG_9    358  13874
-# HiG_10           HiG_10    422  17310
-# HiG_12           HiG_12    341  11656
-# HiG_14           HiG_14    364  14008
-# HiG_17           HiG_17    524  23448
-# HiG_18           HiG_18    457  17098
-# HiG_19           HiG_19    529  15668
-# HiG_7             HiG_7    336  15144
-# HiG_11           HiG_11    441  18602
-# HiG_15           HiG_15    406  17264
-# HiG_16           HiG_16    524  21162
-# HiG_13           HiG_13    403  17016
-# HiG_8             HiG_8    332  11760
-# HiGCTS_7       HiGCTS_7     14     34
-# HiGCTS_11     HiGCTS_11     19     30
-# HiGCTS_15     HiGCTS_15     30    108
-# HiGCTS_16     HiGCTS_16     13     20
-# HiGCTS_16.1 HiGCTS_16.1     30     62
-# HiGCTS_13     HiGCTS_13     13     18
-# HiGCTS_8       HiGCTS_8     10     20
-# CTS_7             CTS_7     31    104
-# CTS_11           CTS_11     51    108
-# CTS_15           CTS_15     66    414
-# CTS_16           CTS_16     39    140
-# CTS_16.1       CTS_16.1     79    420
-# CTS_13           CTS_13     60    294
-# CTS_8             CTS_8     54    330
-
-saveRDS(graph_list, file = paste0(db, "_STRING_graph_perState_notsimplified.rds")) # !!!!!!!!!!!!!!!!!!!
-
-graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_notsimplified.rds"))
-graph_list <- lapply(graph_list, simplify, edge.attr.comb ='max') # !!!!!!!!!!!!!!!!!!! # FIXED
+ saveRDS(graph_list, file= paste0(db, '_STRING_graph_perState_notsimplified.rds'))  #!!!!!!!!!!!!!!!!!!!
+ 
+ graph_list <- readRDS( file= paste0(db, '_STRING_graph_perState_notsimplified.rds'))  
+ graph_list <- lapply(graph_list, simplify) #!!!!!!!!!!!!!!!!!!!
 
 # Check which graphs have duplicate vertex names
 graphs_with_duplicates <- sapply(graph_list, function(g) {
-    vertex_names <- V(g)$name
-    if (is.null(vertex_names)) {
-        # If no names, use vertex indices
-        vertex_names <- V(g)
-    }
-    any(duplicated(vertex_names))
+  vertex_names <- V(g)$name
+  if(is.null(vertex_names)) {
+    # If no names, use vertex indices
+    vertex_names <- V(g)
+  }
+  any(duplicated(vertex_names))
 })
 
 # See which graphs have duplicates
 which(graphs_with_duplicates)
-#       HiG_5      HiG_17      HiG_18      HiG_19    HiGCTS_7   HiGCTS_11
-#           5          11          12          13          20          21
-#   HiGCTS_15   HiGCTS_16 HiGCTS_16.1   HiGCTS_13    HiGCTS_8       CTS_7
-#          22          23          24          25          26          27
-#      CTS_11      CTS_15      CTS_16    CTS_16.1      CTS_13       CTS_8
-#          28          29          30          31          32          33
-
-# Show actual edges for duplicated vertices
-g1 <- graph_list[["HiG_1"]]
-vertex_names <- V(g1)$name
-(duplicated_names <- unique(vertex_names[duplicated(vertex_names)]))
-#  "H3F3B"
-if (length(duplicated_names) > 0) {
-    for (dup_name in duplicated_names) {
-        dup_indices <- which(vertex_names == dup_name)
-        all(incident(g1, dup_indices[1], mode = "all") == incident(g1, dup_indices[2], mode = "all"))
-
-        edges <- incident(g1, dup_indices[1], mode = "all")
-        edge_list1 <- get.edgelist(g1)[edges, ]
-        edge_list1 %>% dim() # [1] 290   2
-        weights1 <- E(g1)[edges]$weight
-
-        edges <- incident(g1, dup_indices[2], mode = "all")
-        edge_list2 <- get.edgelist(g1)[edges, ]
-        edge_list2 %>% dim() # [1] 64  2
-        weights2 <- E(g1)[edges]$weight
-
-        all(edge_list2[, 2] %in% edge_list1[, 2]) # FALSE !!
-    }
-}
+# named integer(0)
