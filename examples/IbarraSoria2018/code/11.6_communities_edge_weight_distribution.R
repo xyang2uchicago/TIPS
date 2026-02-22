@@ -25,7 +25,7 @@ library(igraph)
 
 ########## BEGINNING OF USER INPUT ##########
 
-wd = "/Users/felixyu/Documents/IbarraSoria2018/"
+wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/"
 setwd(paste0(wd, "results/"))
 
 celltype_specific_weight_version <- '10'

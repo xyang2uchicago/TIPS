@@ -11,7 +11,7 @@ library(rstatix)
 library(brainGraph)
 library(pracma)
 
-wd = "/Users/felixyu/Documents/IbarraSoria2018/"
+wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/"
 setwd(paste0(wd, 'results/PPI_weight/'))
 inputdir = "../../data/"
 
@@ -662,7 +662,7 @@ print(plot_simulation)
 {
 graph_list_notsimplified <- readRDS( file= paste0('../', db, '_STRING_graph_perState_notsimplified.rds'))
 
-graph_list_notsimplified <- lapply(graph_list_notsimplified, simplify, edge.attr.comb ='max') #!!!!!!!!!!!!!!!!!!!
+graph_list<- lapply(graph_list_notsimplified, simplify, edge.attr.comb ='max') #!!!!!!!!!!!!!!!!!!!
 
 
 edge_data <- extract_edge_weights_by_category(graph_list, PPI_color_palette, CT_id)

@@ -10,6 +10,8 @@ BioTIP_version <- '06232025'
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/heads/master/R/BioTIP_update_', BioTIP_version, '.R'))
 
 ################  The above lines should be removed when submission to Bioconductor !!!###############################
+## version 2026, add functions to prioritize lineage-pull regulator from CTS 
+## (can extended to one key upstream regulators from cisTarget motif target-enrichment analysis of CTS)
 ## version 10 add synthetic_simulation() and more visualization functions
 
 ## version 10 update robustness_MonteCarlo(..., measure = "btwn.cent") to use 1/weight when calling new_centr_betw() and betweenness()  
@@ -1713,66 +1715,84 @@ synthetic_simulation = function(g_real, main=NULL){
 #' @examples
 #' plot_weighted_PPIN(graph_list[["HiGCTS_CP.1"]], CHD = CHD_genes)
 #' @import ggraph ggplot2 igraph
-#' @author X. Yang
+#' @author X. Yang; Felix Yu
 #' @export
 #'
-plot_weighted_PPIN = function(g, layout = "fr", 
-		CHD = NULL, node_size_title = "|Wilcox score|") {
-	# ---- Attribute checks ----
-	if (!"weight" %in% vertex_attr_names(g))
-		stop("Please assign V(g)$weight for plotting node size")
-
-	if (!"weight" %in% edge_attr_names(g))
-		stop("Please assign E(g)$weight for plotting edge width")
-
-	if (!"corexp_sign" %in% edge_attr_names(g))
-		stop("Please assign E(g)$corexp_sign for plotting edge color")
-    # ---- Validate that edge signs include 'positive' and 'negative' ----
-    expected_signs <- c("positive", "negative")
-    missing_signs <- setdiff(expected_signs, unique(E(g)$corexp_sign))
-	if (length(missing_signs) > 1)  
-		stop("Edge attribute 'corexp_sign' does not include expected values: 'positive', 'negative'")
-	
-	# ---- Disease-gene highlight ----
-	if (is.null(CHD)) {
-		warning("No disease genes supplied for highlighting (CHD = NULL)")
-		V(g)$is_CHD <- FALSE
-	  } else {
-		V(g)$is_CHD <- V(g)$name %in% CHD
-	  }
-
-	# ---- Remove isolated nodes ----
-	g_connected <- delete_vertices(g, which(degree(g) == 0))
-		
-	set.seed(1234)  # Use to ensure layout repeatable  
-	layout_coords <- create_layout(g_connected, layout = layout)  
-	
-	p  = ggraph(layout_coords) +  
-	  geom_edge_link(aes(
-		width = weight,                   
-		color = corexp_sign           
-	  ), alpha = 0.7) +	  
-	  geom_node_point(aes(
-		size = weight,    
-		color = is_CHD   
-		#shape = is_CHD
-	  )) +  
-	  geom_node_text(aes(label = name), repel = TRUE, size = 3) +  # <--- Add labels
-	  scale_color_manual(values = c(`TRUE` = "red", `FALSE` = "gray70")) +
-	  scale_edge_color_manual(values = c("positive" = "orange", "negative" = "blue")) +
-	  scale_size_continuous(range = c(2, 5), name = node_size_title) +
-	  scale_edge_width_continuous(range = c(0.1, 1), 
-					limits = range(E(g)$weight, na.rm = TRUE), 
-					name = "E weights") +	 
-	  theme_void() +
-	  labs(
-		 edge_color = "Specific co-exp",
-		 color = "Curated CHD genes"
-	  ) +
-	  theme(legend.position = "right") +
-	  ggtitle(paste0(db, ': ', int, ' ', vcount(g_connected), '/', vcount(g), ' PPI genes'))
-
-	return(p)
+plot_weighted_PPIN <- function(g, layout = "fr", CHD = NULL, node_size_title = "|Wilcox score|") {
+  
+  # ---- Attribute checks ----
+  if (!"weight" %in% vertex_attr_names(g))
+    stop("Please assign V(g)$weight for plotting node size")
+  
+  if (!"weight" %in% edge_attr_names(g))
+    stop("Please assign E(g)$weight for plotting edge width")
+  
+  if (!"corexp_sign" %in% edge_attr_names(g))
+    stop("Please assign E(g)$corexp_sign for plotting edge color")
+  
+  # ---- Validate edge signs ----
+  expected_signs <- c("positive", "negative")
+  missing_signs <- setdiff(expected_signs, unique(E(g)$corexp_sign))
+  if (length(missing_signs) > 1)
+    stop("Edge attribute 'corexp_sign' does not include expected values: 'positive', 'negative'")
+  
+  # ---- Disease-gene highlight ----
+  if (is.null(CHD)) {
+    warning("No disease genes supplied for highlighting (CHD = NULL)")
+    V(g)$is_CHD <- FALSE
+  } else {
+    V(g)$is_CHD <- toupper(V(g)$name) %in% CHD
+  }
+  
+  # ---- Determine if this is a CTS network ----
+  # Only CTS networks will use HiG for shape mapping
+  graph_name <- graph_attr(g, "name")  # if you use graph_attr, or pass the network ID externally
+  use_HiG_shape <- !is.null(graph_name) && grepl("^CTS_", graph_name)
+  
+  # ---- Layout ----
+  set.seed(1234)
+  layout_coords <- create_layout(g, layout = layout)
+  
+  # ---- Start plotting ----
+  p <- ggraph(layout_coords) +
+    # edges
+    geom_edge_link(aes(
+      width = weight,
+      color = corexp_sign
+    ), alpha = 0.7) +
+    
+    # nodes
+    geom_node_point(aes(
+      size = weight,
+      color = is_CHD,
+      shape = if (use_HiG_shape) is_HiG else NULL   # only map shape for CTS
+    )) +
+    
+    # node labels
+    geom_node_text(aes(label = name), repel = TRUE, size = 3) +
+    
+    # color scales
+    scale_color_manual(values = c(`TRUE` = "red", `FALSE` = "gray70")) +
+    scale_edge_color_manual(values = c("positive" = "orange", "negative" = "blue")) +
+    
+    # node size / edge width
+    scale_size_continuous(range = c(2, 5), name = node_size_title) +
+    scale_edge_width_continuous(range = c(0.1, 1),
+                                limits = range(E(g)$weight, na.rm = TRUE),
+                                name = "E weights") +
+    
+    # theme
+    theme_void() +
+    labs(edge_color = "Specific co-exp", color = "Curated CHD genes") +
+    theme(legend.position = "right") +
+    ggtitle(paste0(vcount(g), " PPI genes"))
+  
+  # ---- Conditionally add shape scale for CTS only ----
+  if (use_HiG_shape) {
+    p <- p + scale_shape_manual(values = c(`TRUE` = 17, `FALSE` = 16), name = "is_HiG")
+  }
+  
+  return(p)
 }
 
 #' PPIN-based gene set enrichment analysis for a key gene
@@ -2123,12 +2143,13 @@ GS_enrichment_Dotplot = function(df, GS_database= 'Msigdb.c2.cp', sig_p_adjust=T
 #' @param main Character string specifying the main plot title. If \code{NULL}, defaults to "Volcano plot".
 #'
 #' @details
-#' The function automatically categorizes genes into "Up", "Down", and "NotSig"
+#' The function automatically categorizes genes into "Up", "Down", and "NotSig" in Isl1KO reported by Maven2023 table S1, filtered by
+#' abs(log₂FC) > 0.25 & FDR < 0.05
 #' based on user-defined thresholds, and visually distinguishes them using color:
 #' \itemize{
-#'   \item Upregulated genes — red (\code{"#E64B35"})
-#'   \item Downregulated genes — blue (\code{"#4DBBD5"})
-#'   \item Non-significant genes — light gray (\code{"grey80"})
+#'   \item Upregulated genes in Isl1KO — red (\code{"#E64B35"})
+#''   \item Downregulated genes in Isl1KO — blue (\code{"#4DBBD5"})
+#'   \item Non-significant genes in Isl1KO — light gray (\code{"grey80"})
 #' }
 #' Highlighted genes are plotted in orange and labeled using \code{ggrepel}.
 #'
@@ -2229,3 +2250,1263 @@ Volcano_for_highlight_genes = function(highlight_genes = c('ISL1', 'GATA6', 'FGF
 
 	return(p)
 }
+
+
+
+################################################ 2026 new functions #############################################
+# This function plots gene symbols ranked by pagerank, highlight the CHD in red dot and the TF in red triangle #########################
+
+#' Rank and plot genes across PPIN signatures
+#'
+#' For each signature, rank genes by betweenness and plot `key` vs rank.
+#' CHD genes are highlighted in red; TFs are triangles.
+#'
+#' @param df Data frame with columns `gene`, `signature`, `BetweennessCentrality`, and `key`.
+#' @param CHD,TF_human Character vectors of genes to highlight.
+#' @param signatures Signatures to plot (must exist in `df$signature`).
+#' @param key Column name to plot (e.g. "PageRank").
+#' @param top_TF_rank Numbers of top ranked TFs to label.
+#' @param gene_top_n  Numbers of gene_of_interested (eg. TF, CHD) to label
+#' @param saveFigure If TRUE, save `CP_rank_gene_by_<key>.pdf`.
+#'
+#' @return Named list of subset of df for the top TFs (one per signature).
+#' @export plot_TF_CHD_in_PPIN, Triangle = TF; circle = non-TF. 
+#' Red points indicate CHD genes. 
+#' Labels are shown for TF/CHD genes within the top gene_top_n ranks, plus the top top_TF_rank TFs; 
+#' label text is red for TFs and black otherwise.
+#' @examples
+#' \dontrun{
+#' set.seed(1)
+#' df <- data.frame(
+#'   gene = paste0("G", 1:200),
+#'   signature = rep(c("HiG_CP","CTS_CP","CTS_CP.1","HiGCTS_CP","HiGCTS_CP.1"), each = 40),
+#'   BetweennessCentrality = rexp(200),
+#'   PageRank = runif(200)
+#' )
+#' CHD <- c("G2","G50","G120")
+#' TF  <- c("G10","G11","G12")
+#' p_list <- rank_TF_CHD_in_PPIN(
+#'   df, CHD = CHD, TF_human = TF,
+#'   key = "PageRank",
+#'   saveFigure = FALSE
+#' )
+#' p_list[["HiG_CP"]]
+#'
+#' @export
+#'
+rank_TF_CHD_in_PPIN = function(df, CHD, TF_human, 
+        signatures=c('HiG_CP','CTS_CP','CTS_CP.1', 'HiGCTS_CP', 'HiGCTS_CP.1' ), 
+        key = 'PageRank',#'BetweennessCentrality'
+        top_TF_rank = 3, gene_top_n = 20, saveFigure=TRUE) {
+  
+  # tmp = try(df$signature, silent = TRUE)
+  if(is.null(df$signature)) stop("signature column not found in df")
+  if(any(!signatures %in% df$signature )) stop("signature not found in df$signature")
+  if(!(key %in% colnames(df))) stop("key not found in df")
+
+  int = union(CHD, TF_human)
+  p = df_TF_top = list()
+
+  for(signatureID in signatures){
+    df_plot <- subset(df, signature==signatureID) %>%
+		  #arrange(desc(.data[[key]])) %>%
+      arrange(desc(!!sym(key))) %>%  ## advanced way
+		  mutate(rank = row_number()) %>%
+		  mutate(is_CHD = gene %in% CHD) %>%
+      mutate(is_TF = gene %in% TF_human )
+		  
+		labeled_genes = union(intersect(df_plot$gene[1:gene_top_n], int), subset(df_plot, is_TF)$gene[1:top_TF_rank])		  
+        
+    p[[signatureID]] <- ggplot(df_plot, aes(x = rank, y = .data[[key]])) +
+      # base layer: all genes
+      geom_point(aes(shape = is_TF, size = is_TF), color = "black", alpha = 0.9) +
+      # overlay: CHD genes in red (keeps TF shape)
+      geom_point(
+        data = subset(df_plot, is_CHD),
+        aes(shape = is_TF, size = is_TF),
+        color = "red"
+      ) +
+      scale_shape_manual(values = c(`FALSE` = 16, `TRUE` = 17)) +
+      scale_size_manual(values  = c(`FALSE` = 1.0, `TRUE` = 2.2)) +
+      labs(x = paste("Rank in", signatureID), y = key, title = signatureID) +
+      theme_classic(base_size = 12) +
+      ggrepel::geom_text_repel(
+        data = subset(df_plot, gene %in% labeled_genes),
+        aes(label = gene, color = is_TF),
+        size = 3, box.padding = 0.3,
+        segment.color = "grey50",
+        max.overlaps = 30
+      ) +
+      scale_color_manual(values = c(`TRUE` = "red", `FALSE` = "black")) +
+      theme(legend.position = "none")
+
+    df_TF_top[[signatureID]] <- filter(df_plot, is_TF & rank<=gene_top_n)
+    if(nrow(df_TF_top[[signatureID]]) > top_TF_rank) df_TF_top[[signatureID]] <- df_TF_top[[signatureID]][1:top_TF_rank,]  # !!!!!!!!!!$gene
+  }
+
+  # ---- Correct legend panel (matches plot semantics exactly) ----
+  legend_text <- paste0(
+    "Point shape/size: TF (triangle, larger) vs non-TF (circle, smaller)\n",
+    "Point color: CHD genes are overlaid in red\n",
+    "Label color: TF labels in red; non-TF labels in black\n",
+    "Labels shown: TF/CHD within top ", gene_top_n, " ranks + top ", top_TF_rank, " TFs"
+  )
+
+  p_legend <- ggplot() +
+    annotate("point", x = 0.08, y = 0.78, shape = 17, colour = "black", size = 3) +
+    annotate("text",  x = 0.15, y = 0.78, label = "TF", hjust = 0, size = 3) +
+
+    annotate("point", x = 0.08, y = 0.62, shape = 16, colour = "black", size = 2) +
+    annotate("text",  x = 0.15, y = 0.62, label = "non-TF", hjust = 0, size = 3) +
+
+    annotate("point", x = 0.08, y = 0.46, shape = 16, colour = "red", size = 2) +
+    annotate("text",  x = 0.15, y = 0.46, label = "CHD (red points)", colour = "red", hjust = 0, size = 3) +
+
+    annotate("text",  x = 0.02, y = 0.26, label = legend_text, hjust = 0, size = 3) +
+    coord_cartesian(xlim = c(0, 1), ylim = c(0, 1), expand = FALSE) +
+    theme_void()
+
+  if(saveFigure) {
+    pdf(file=paste0('CP_rank_gene_by_',key,'.pdf'), width = 7, height = 7)
+    print((p[[signatures[1]]] | p[[signatures[2]]] | p[[signatures[3]]]) /
+            (p_legend          | p[[signatures[4]]] | p[[signatures[5]]]))
+ dev.off()
+  }
+  return(df_TF_top) 
+}
+
+
+#############################################################################################
+## subset a igraph object to a subset that directly connected to a given vetrex of interest ###########
+
+#' Subgraph around seed vertices
+#'
+#' Induce the subgraph of vertices within `order` steps of `seed`.
+#' Returns `NULL` if none of the seeds are present.
+#'
+#' @param g An igraph object.
+#' @param seed Character vector of vertex names.
+#' @param order Neighborhood distance (1 = direct neighbors).
+#' @param mode Neighborhood mode for directed graphs ("all", "out", "in").
+#'
+#' @return An igraph subgraph or `NULL`.
+#' @export
+
+direct_connected_to_seed = function(g, seed, order = 1, mode = "all") {
+  seeds <- intersect( seed, V(g)$name)
+  if(length(seeds) > 0){
+    v_1hop <- unique(unlist(neighborhood(g, order = order, nodes = seeds, mode = mode)))
+    g_sub = induced_subgraph(g, v_1hop)
+  } else g_sub = NULL
+  g_sub
+}
+ 
+lign_pair <- function(g1, g2, nodes = NULL) {
+  library(igraph)
+
+  if (is.null(nodes)) nodes <- sort(intersect(V(g1)$name, V(g2)$name))
+
+  g1a <- induced_subgraph(g1, nodes)
+  g2a <- induced_subgraph(g2, nodes)
+
+  # reorder vertices to EXACTLY the same order in both graphs
+  g1a <- permute(g1a, match(nodes, V(g1a)$name))
+  g2a <- permute(g2a, match(nodes, V(g2a)$name))
+
+  stopifnot(identical(V(g1a)$name, V(g2a)$name))
+  list(g1 = g1a, g2 = g2a, nodes = nodes)
+}
+
+
+#############################################################################################
+## identify the TF-targeted pull candidate genes #############################################################################################
+# a function used by identify_TF_targeted_pull_candidate to add missing vertices to the graph
+add_vertex_if_missing <- function(g, key) {
+  vname <- unique(key)
+  missing <- setdiff(vname, V(g)$name)
+  if (length(missing) > 0) {
+    g <- add_vertices(g, nv = length(missing), name = missing)
+    # optional: set default attributes for new nodes
+    if ("weight" %in% vertex_attr_names(g)) V(g)$weight[match(missing, V(g)$name)] <- NA_real_
+    if ("FDR"    %in% vertex_attr_names(g)) V(g)$FDR[match(missing, V(g)$name)]    <- NA_real_
+    if ("color"  %in% vertex_attr_names(g)) V(g)$color[match(missing, V(g)$name)]  <- "grey80"
+  }
+  g
+}
+
+
+#' Build TF-targeted CTS/HiG subnetworks
+#'
+#' Builds four lineage-biased subnetworks (CP, HiGCM, HiGCF, CPopen) and adds
+#' dashed TF→target edges from `key` to TF-bound targets present in each subgraph.
+#' Newly added edges are marked with `E(g)$lty == "dashed"`.
+#'
+#' @param mat Gene-by-annotation table (rownames are genes).
+#' @param graph_list Named list of igraph objects containing `CTS_ID` and `paste0("HiG", CTS_ID)`.
+#' @param CTS_ID Name of the CTS network in `graph_list`.
+#' @param CHD CHD genes to highlight (colored red).
+#' @param key TF node name to add/connect.
+#' @param keep_selfloop Whether to keep `key`→`key`.
+#' @param TF_bound_column_name Column in `mat` (0/1) marking TF-bound targets.
+#' @param TF_appendix If not NULL, use `{key}_CP_candidate/{key}_CM_candidate/{key}_CF_candidate`.
+#' @param edge_colored_by_Maven2023_ISL1KO If TRUE, color new edges using `Maven2023_gene_ISL1_(up|dn)*` columns.
+#' @param key_in_TFfamily default is the same as {key}, eitherwise a string  of the predicted TF in a TF motif family 
+#'
+#' @return Named list of 4 igraph subnetworks with updated `color` and `lty` attributes.
+#' @importFrom igraph V E induced_subgraph is_directed as.undirected get_edge_ids
+#'   add_edges ecount
+#'
+#' @examples
+#' \dontrun{
+#' library(igraph)
+#'
+#' # Minimal toy PPIN (note lower-case to demonstrate internal toupper())
+#' g <- make_ring(5)
+#' V(g)$name <- c("isl1", "gata4", "gata6", "meis1", "fgf10")
+#'
+#' graph_list <- list(
+#'   HiGCTS_CP.1 = g,
+#'   CTS_CP.1    = g
+#' )
+#'
+#' # Minimal annotation matrix
+#' mat <- data.frame(
+#'   ISL1_CP_bound      = c(1, 1, 0, 1, 1),
+#'   CP_candidate       = c(1, 1, 0, 0, 0),
+#'   CM_candidate       = c(0, 1, 0, 1, 0),
+#'   CF_candidate       = c(0, 0, 1, 0, 1),
+#'   PCW6CP_access      = c(1, 1, 1, 1, 1),
+#'   PCW8_CM_access     = c(0, 1, 0, 1, 0),
+#'   PCW19_CM_access    = c(0, 0, 0, 0, 0),
+#'   PCW8_CF_access     = c(0, 0, 1, 0, 1),
+#'   PCW19_CF_access    = c(0, 0, 0, 0, 0),
+#'   PCW8_SMC_access    = c(0, 0, 0, 0, 0),
+#'   PCW19_SMC_access   = c(0, 0, 0, 0, 0),
+#'   Maven2023_gene_ISL1_up_E = c(0, 1, 0, 0, 1),
+#'   Maven2023_gene_ISL1_dn_E = c(0, 0, 0, 1, 0)
+#' )
+#' rownames(mat) <- toupper(V(g)$name)
+#'
+#' keep_selfloop <- TRUE
+#' out <- identify_TF_targeted_pull_candidate(
+#'   mat = mat,
+#'   graph_list = graph_list,
+#'   CTS_ID = "CTS_CP.1",
+#'   CHD = c("GATA4"),
+#'   key = "ISL1"
+#' )
+#'
+#' names(out)
+#' plot(out[[1]])
+#' }
+#'
+#' @export
+#'
+identify_TF_targeted_pull_candidate = function(mat, graph_list, CTS_ID, CHD, key='ISL1',
+                                keep_selfloop=TRUE, # whether to keep the self-loop of the key
+                                TF_bound_column_name = "ISL1_CP_bound", TF_appendix = NULL,
+                                edge_colored_by_Maven2023_ISL1KO = TRUE, key_in_TFfamily = key  
+){
+  four_names = c("CTSHiG.CP_TF.target", "CTS.CP_TF.target_HiGCM", "CTS.CP_TF.target_HiGCF","CTSHiG.CP_TF.target_CPopen")
+  
+  graph_TF_list = graph_list[c( paste0('HiG',CTS_ID), CTS_ID, CTS_ID, CTS_ID)]  # note that the follwoing three PPINs be replaced later in this sections !!! 
+	names(graph_TF_list) = four_names
+	
+	## add the ISL1-targeting as dashlines
+	TF_target = rownames(mat)[which(mat[,TF_bound_column_name] == 1)]
+	length(TF_target)  # 35
+    
+	## get the subset of CTS that are Isl1-bound in CP
+	if(is.null(TF_appendix)) {
+    GRN_node_list = list( rownames(mat)[which(mat[,"CP_candidate"] == 1)],
+						   rownames(mat)[which(mat[,"CM_candidate"] == 1)],
+						   rownames(mat)[which(mat[,"CF_candidate"] == 1)],
+						   rownames(mat)[which(mat[,"CP_candidate"] == 1)]
+						  )
+   } else {
+    GRN_node_list = list( "CTSHiG.CP_TF.target" = rownames(mat)[which(mat[,paste0(key,'_CP_candidate')] == 1)],
+						  "CTS.CP_TF.target_HiGCM" = rownames(mat)[which(mat[,paste0(key,'_CM_candidate')] == 1)],
+						  "CTS.CP_TF.target_HiGCF" = rownames(mat)[which(mat[,paste0(key,'_CF_candidate')] == 1)],
+						  "CTSHiG.CP_TF.target_CPopen" = rownames(mat)[which(mat[,paste0(key,'_CP_candidate')] == 1)]
+						  )
+   }       
+  names(GRN_node_list) = four_names            
+	lengths(GRN_node_list)
+   #     CTSHiG.CP_Isl1.CP.bound     CTS.CP_Isl1.CP.bound_HiGCM 
+                            # 12                             11 
+    # CTS.CP_Isl1.CP.bound_HiGCF CTSHiG.CP_Isl1.CP.bound_CPopen 
+                             # 6                             12 
+
+	
+    ## further narrow the subset to be open at CP, but the bone PPIN of CTS at CP (the 1st object in GRN_node_list) does NOT require CP accessibility, 
+    # considering Isl1's pioneering role in CP cell fate determination
+	for(i in 2:length(GRN_node_list)){
+      # extend the lineage-biased subset by adding back the lieage-psecifically open genes
+      if(grepl('CM' , names(GRN_node_list)[i]))  {
+          GRN_node_list[[i]] = intersect(GRN_node_list[[i]], rownames(mat)[which(mat[,"PCW6CP_access"] == 1  |
+                    mat[,"PCW8_CM_access"] == 1 | mat[,"PCW19_CM_access"] == 1  )] )
+      } else if(grepl('CF',names(GRN_node_list)[i]) | grepl('SMC',names(GRN_node_list)[i])) {
+      GRN_node_list[[i]] = intersect(GRN_node_list[[i]], rownames(mat)[which(mat[,"PCW6CP_access"] == 1  |
+                    mat[,"PCW8_CF_access"] == 1 |  mat[,"PCW19_CF_access"] == 1 |
+                    mat[,"PCW8_SMC_access"] == 1 |  mat[,"PCW19_SMC_access"] == 1 	|
+                    mat[,"iEPC_access"] == 1 )] )
+      } else GRN_node_list[[i]] = intersect(GRN_node_list[[i]], rownames(mat)[which(mat[,"PCW6CP_access"] == 1)] )
+	 } #end for(i in 2:length(GRN_node_list)){
+
+	lengths(GRN_node_list)
+	 #        CTSHiG.CP_Isl1.CP.bound     CTS.CP_Isl1.CP.bound_HiGCM 
+                            # 12                              5 
+    # CTS.CP_Isl1.CP.bound_HiGCF CTSHiG.CP_Isl1.CP.bound_CPopen 
+                             # 1                              1 
+
+	mat <- as.data.frame(apply(mat, 2, as.numeric), row.names = rownames(mat))
+	
+	for (name in names(graph_TF_list)) {
+		graph = graph_TF_list[[name]]
+		V(graph)$name = toupper(V(graph)$name)  ## for mosue dataset to reuse the mat annotaiton
+  
+    graph = induced_subgraph(graph, intersect(GRN_node_list[[name]], V(graph)$name))
+		## ensure node of CHD is red
+		V(graph)$color = ifelse(V(graph)$name %in% CHD, "red", "lightgrey")
+		E(graph)$color <- "grey70"
+		E(graph)$lty   <- "solid"   
+		## add the edges between the ISL1-targeting and the (new and old) nodes in the graph
+		
+		TF_target_in_graph = intersect(TF_target, V(graph)$name)
+		if(!keep_selfloop) TF_target_in_graph <- setdiff(TF_target_in_graph, key)  
+		
+		if(length(TF_target_in_graph) > 0) {
+		## check adjacency against an undirected view of the current PPIN
+		## (so an existing edge counts regardless of direction)
+		g_check <- if (is_directed(graph)) as.undirected(graph, mode = "collapse") else graph
+   
+    flag = !(key_in_TFfamily %in% V(graph)$name )
+    g_check <- add_vertex_if_missing(g_check, key_in_TFfamily)
+ 
+
+   	if (is.null(vertex_attr(g_check, "color"))) V(g_check)$color <- "lightgrey"
+		if (flag) V(g_check)[name == key_in_TFfamily]$color <- "yellow"
+
+		## get.edge.ids returns 0 for pairs with no edge
+		vp_pairs <- as.vector(rbind(key_in_TFfamily, TF_target_in_graph))
+		eid      <- get_edge_ids(g_check, vp = vp_pairs)
+
+		## only add TF->target links for missing pairs
+		targets_to_add <- TF_target_in_graph[eid == 0]
+
+		if (length(targets_to_add) > 0) {
+			m_before <- ecount(g_check)
+
+			edges_vec <- as.vector(rbind(key_in_TFfamily, targets_to_add))
+			g_check <- add_edges(g_check, edges_vec)     
+      
+			new_edges <- seq.int(m_before + 1, ecount(g_check))
+      # ---- ensure edge attributes exist for all edges ----
+      if (is.null(edge_attr(g_check, "color"))) E(g_check)$color <- rep(NA_character_, ecount(g_check))
+      if (is.null(edge_attr(g_check, "lty")))   E(g_check)$lty   <- rep(NA_character_, ecount(g_check))
+
+      ## style ONLY those newly added TF->target edges (order matches targets_to_add)
+      new_edges_color <- rep("grey70", length(targets_to_add))
+		
+      if(edge_colored_by_Maven2023_ISL1KO){## style ONLY those newly added TF->target edges (order matches targets_to_add)
+			  up_cols <- grep("^Maven2023_gene_ISL1_up", colnames(mat), value = TRUE)
+			  if (length(up_cols) > 0) {
+				new_edges_color[rowSums(mat[targets_to_add, up_cols, drop = FALSE]) > 0] <- "blue"
+			  }
+			  dn_cols <- grep("^Maven2023_gene_ISL1_dn", colnames(mat), value = TRUE)
+			  if (length(dn_cols) > 0) {
+				new_edges_color[rowSums(mat[targets_to_add, dn_cols, drop = FALSE]) > 0] <- "orange"
+			  }
+      }  # end  if(edge_colored_by_Maven2023_ISL1KO)
+
+			E(g_check)$color[new_edges] <- new_edges_color
+			E(g_check)$lty[new_edges]   <- "dashed"
+
+		  } # end if (length(targets_to_add) > 0)
+      graph = g_check
+		} # end if (length(targets_to_add) > 0)
+
+		graph_TF_list[[name]] = graph
+		 
+	} # end for (name in names(graph_TF_list))
+  return(graph_TF_list)
+}
+
+
+##########################################################
+## plot venn diagram of CTS and its predicted dual pull candidates, which are 
+## and co-expressed with the key TF (as CTS identification) in transition state, lineage-based express highly, targets of the key TF, and
+## open either at CP pool (PCW6) or at its specificed lineages at PCW8 or PCW19 (as dual pull candidates) 
+# also plotthe graphs of predicted subnetwork from CTS PPIN 
+# graph_TF_list: a list of igraph object, the output of identify_TF_targeted_pull_candidate()
+# TF_key: a string of the key TF symbol
+# CTS_ID: a string of the CTS ID
+# saveFigure: a logical value to indicate whether to save the figure
+
+plot_TF_targeted_pull_candidate = function(graph_TF_list, TF_key, CTS_ID, saveFigure = TRUE, saveFileName = NULL) {
+  require(gplots)
+ # key = gsub(';','\\.',key)
+ # graph_TF_list = readRDS(file=paste0('PPI_graph_',TF_key,'_GRN_prediction_',CTS_ID,'_v3.rds'))
+	node_color = c('black', 'blue', 'darkgreen')
+	names(node_color) = names(graph_TF_list)[1:3]
+
+	# pdf(file='PPI_graph_PRRX1_GRN_prediction.pdf')
+	tmp = list( V(graph_TF_list[[1]])$name,  V(graph_TF_list[[2]])$name, V(graph_TF_list[[3]])$name)
+	names(tmp) = names(graph_TF_list)[1:3]
+  names(tmp) = gsub('_TF', paste0('_',TF_key), names(tmp))
+	x = venn(tmp)
+	ints <- attr(x, "intersections")
+  ints  <- ints[-which(names(ints)==paste0("CTSHiG.CP_",TF_key,".target") )]   # drop the first element, regardless of name
+
+	venn_text <- vapply(
+  names(ints),
+  function(nm) {
+    sprintf(
+      "%s (%d): %s",
+      nm,
+      length(ints[[nm]]),
+      paste(ints[[nm]], collapse = ", ")
+    )
+  },
+  character(1)
+  )	
+  if(is.null(saveFileName)) saveFileName = paste0('PPI_graph_',TF_key,'_GRN_prediction_',CTS_ID,'_v3.pdf')
+	if(saveFigure) pdf(file=saveFileName)  #!!!!!!!
+  plot(x)
+	# place text above the Venn
+	text(
+	  x = par("usr")[1], 
+	  y = par("usr")[4],
+	  labels = paste(venn_text, collapse = "\n"),
+	  adj = c(0, 1),
+	  cex = 0.6
+	)
+
+  
+	for(name in names(graph_TF_list)) {
+		graph = graph_TF_list[[name]]
+		set.seed(123)                      # for reproducibility
+		center <- which(V(graph)$name == TF_key)
+		lay <- layout_as_star(graph, center = center)
+
+		gene_color= rep(node_color[name], length(V(graph)$name))
+		## those in CTS_CP & in HiG_CM but not in HiG_CF  is blue !!!!!
+		gene_color[V(graph)$name %in% setdiff(V(graph_TF_list[['CTS.CP_TF.target_HiGCM']])$name, V(graph_TF_list[['CTS.CP_TF.target_HiGCF']])$name)] = "blue"
+		gene_color[V(graph)$name %in% setdiff(V(graph_TF_list[['CTS.CP_TF.target_HiGCF']])$name, V(graph_TF_list[['CTS.CP_TF.target_HiGCM']])$name)] = "darkgreen"
+		if(name != 'CTSHiG.CP_TF.target') {
+			gene_color[V(graph)$name %in% V(graph_TF_list[['CTSHiG.CP_TF.target_CPopen']])$name] = "black"
+		}
+		plot(graph, layout = lay, 
+			vertex.size = 5,
+			vertex.label.color = gene_color,
+			main= name
+			)
+	}
+	if(saveFigure) dev.off()
+}
+
+
+##### calculate within cluster gene-gene co-expression for graph_pair, to be used in prioritize_edge_change() ##############################################################
+
+## Helper function: 
+fill_coexp_for_edges <- function(g, sce,   celltype_col = "cluster", cluster_id,
+                                 assayName = "logcounts",
+                                 ppi_weight = 1,
+                                 min_cells = 10,
+                                 shrink = TRUE) {
+  if (igraph::ecount(g) == 0) return(g)
+
+  # cells in this cluster
+  cl <- as.character(SummarizedExperiment::colData(sce)[, celltype_col])
+  cells <- which(cl == cluster_id)
+  if (length(cells) < min_cells) {
+    warning("Too few cells in cluster ", cluster_id, " (", length(cells), "); leaving edges unchanged.")
+    #return(g)
+    return(NULL)
+  }
+
+ # Helper: get newly added edges
+  new_edge_ids <- function(g, dashed_value = "dashed") {
+   if (!"lty" %in% igraph::edge_attr_names(g)) return(integer(0))
+   which(igraph::E(g)$lty == dashed_value)
+  }
+ 
+  g_id_toupdate = new_edge_ids(g)
+  if(length(g_id_toupdate) > 0) {
+    EE <- igraph::ends(g, es = igraph::E(g)[g_id_toupdate], names = TRUE)
+    genes_needed <- unique(as.vector(EE))
+    genes_in_sce <- intersect(genes_needed, rownames(sce))
+
+    g_cor_mat = compute_cluster_correlation(sce, cluster_id = cluster_id,
+                                 genes = genes_in_sce,
+                                 celltype_col = celltype_col,
+                                 assayName = assayName,
+                                 min_cells = min_cells,
+                                 shrink = shrink)
+     # fetch correlation for each edge
+     cor_vec <- mapply(function(a, b) g_cor_mat[a, b], EE[,1], EE[,2])
+     E(g)$coexp_target[g_id_toupdate] <- abs(cor_vec)
+     E(g)$corexp_sign[g_id_toupdate]  <- ifelse(cor_vec >= 0, "positive", "negative")
+     E(g)$weight[g_id_toupdate]       <- abs(cor_vec) * ppi_weight   
+     E(g)$norm_PPI_score[g_id_toupdate]       <- ppi_weight
+   }
+  return(g)
+  }
+
+
+#############################################################################################
+## Edge weight change table between two igraph networks #############################################################################################
+#' Edge weight change table between two graphs
+#'
+#' Compares two igraph networks by merging edges (by endpoint names) and computing
+#' `delta = w2 - w1` plus change labels (gained/lost/changed/unchanged), if PPI(i,j)>0
+#' otehrwise delta = r2 - r1 where r() is the shriked coexprssion value of two genes in a cell clsuters
+#'
+#' @param g1,g2 igraph objects.
+#' @param weight_attr Edge attribute to compare (default: "weight").
+#' @param missing_as Weight to use when an edge is absent (default: 0).
+#' @param undirected If TRUE, treat A--B the same as B--A.
+#'
+#' @return A data.frame with `from`, `to`, `w1`, `w2`, `delta`, `abs_delta`, `direction`, `status`, `rank`.
+#' @export
+edge_change_table = function(g1, g2, weight_attr = "weight", missing_as = 0, undirected = TRUE) {
+
+  # require vertex names
+  if (is.null(V(g1)$name) || is.null(V(g2)$name)) stop("Both graphs must have V(g)$name")
+
+  # require corexp_sign if you want signed weights
+  if (is.null(edge_attr(g1, "corexp_sign")) || is.null(edge_attr(g2, "corexp_sign"))) {
+    stop("'corexp_sign' is not an edge attribute of one or both graphs")
+  }
+
+  # helper to extract a clean edge table with signed weights
+  extract_edges <- function(g, w_attr, undirected) {
+    e <- igraph::as_data_frame(g, what = "edges")
+
+    e$from <- as.character(e$from)
+    e$to   <- as.character(e$to)
+
+    if (undirected) {
+      a <- pmin(e$from, e$to)
+      b <- pmax(e$from, e$to)
+      e$from <- a; e$to <- b
+    }
+
+    # raw weight (fallback to 1 if missing attribute)
+    w <- if (w_attr %in% names(e)) e[[w_attr]] else rep(1, nrow(e))
+    # fix NA weights (e.g. newly added dashed TF->target edges)
+    w[is.na(w)] <- 0
+
+    # signed weight using corexp_sign
+    sign_vec <- e$corexp_sign
+    sign_vec[is.na(sign_vec)] <- "positive"
+    signed_w <- ifelse(sign_vec == "positive", w, -w)
+
+    data.frame(from = e$from, to = e$to, w = signed_w, stringsAsFactors = FALSE)
+  }
+
+  e1 <- extract_edges(g1, weight_attr, undirected)
+  e2 <- extract_edges(g2, weight_attr, undirected)
+
+  # collapse duplicates (keep max abs weight; adjust if you prefer sum/mean)
+  collapse_fun <- function(df) {
+    key <- paste(df$from, df$to, sep = "||")
+    # pick the entry with largest |w|
+    idx <- tapply(seq_len(nrow(df)), key, function(ii) ii[which.max(abs(df$w[ii]))])
+    df[unlist(idx), , drop = FALSE]
+  }
+  e1 <- collapse_fun(e1); names(e1)[3] <- "w1"
+  e2 <- collapse_fun(e2); names(e2)[3] <- "w2"
+
+  m <- merge(e1, e2, by = c("from", "to"), all = TRUE)
+
+  m$w1[is.na(m$w1)] <- missing_as
+  m$w2[is.na(m$w2)] <- missing_as
+
+  m$delta     <- m$w2 - m$w1
+  m$abs_delta <- abs(m$delta)
+
+  m$direction <- ifelse(m$delta > 1e-10, "increase",
+                 ifelse(m$delta < -1e-10, "decrease", "unchanged"))
+
+  m$status <- ifelse(m$w1 == missing_as & m$w2 != missing_as, "gained",
+              ifelse(m$w1 != missing_as & m$w2 == missing_as, "lost",
+              ifelse(m$w1 != m$w2, "changed", "unchanged")))
+
+  m <- m[order(m$abs_delta, decreasing = TRUE), ]
+  m$rank <- seq_len(nrow(m))
+  rownames(m) <- NULL
+  m
+}
+
+
+
+#############################################################################################
+#' Annotate and plot edge-weight changes on a graph
+#'
+#' Adds per-edge change metrics (e.g., `delta`) from `edge_change_df` to `g1` and
+#' optionally plots the network with edge color/width driven by the change.
+#'
+#' @param g1 An igraph object.
+#' @param edge_change_df Data frame with at least `regulator`, `target`, and `delta`.
+#' @param top_n Number of edges with largest |delta| to label.
+#' @param title Plot title (also used in default PDF name).
+#' @param savepdf If TRUE, save a PDF.
+#' @param ... Passed to `plot.igraph()`.
+#'
+#' @return `g1` with added edge attributes prefixed `TIPS_`.
+#' @export
+#'
+prioritize_edge_change <- function(g1, edge_change_df, top_n = 5, title='CM-pull subnetwork',
+        savepdf=TRUE){  #, layout = NULL
+	# Initialize edge attributes
+	E(g1)$TIPS_w1        <- E(g1)$weight
+	E(g1)$TIPS_w2        <- E(g1)$weight
+	E(g1)$TIPS_delta     <- 0
+	E(g1)$TIPS_direction <- "unchanged"
+
+	# Match dataframe edges to graph edges (robust way)
+	# edge endpoints in g1
+	edge_ends <- ends(g1, E(g1), names = TRUE)
+
+	# helper to find edge index
+	find_edge <- function(a, b, ends_mat) {
+	  which(
+		(ends_mat[,1] == a & ends_mat[,2] == b) |
+		(ends_mat[,1] == b & ends_mat[,2] == a)
+	  )
+	}
+	# Update edges using edge_change_df
+	for (i in seq_len(nrow(edge_change_df))) {
+
+	  a <- edge_change_df$from[i]
+	  b <- edge_change_df$to[i]
+
+	  eid <- find_edge(a, b, edge_ends)
+
+	  if (length(eid) == 1) {
+		E(g1)$TIPS_w1[eid]        <- edge_change_df$w1[i]
+		E(g1)$TIPS_w2[eid]        <- edge_change_df$w2[i]
+		E(g1)$TIPS_delta[eid]     <- edge_change_df$delta[i]
+		E(g1)$TIPS_direction[eid] <- edge_change_df$direction[i]
+#	E(g1)$TIPS_status[eid]    <- edge_change_df$status[i]
+	  }
+	}
+
+	# Edge color by directionE(g1)$color <- "grey80"
+	E(g1)$color[E(g1)$TIPS_direction == "increase"] <- "#D73027"  # red
+	E(g1)$color[E(g1)$TIPS_direction == "decrease"] <- "#4575B4"  # blue
+	# Edge width by |delta|
+	E(g1)$width <- 1 + 4 * abs(E(g1)$TIPS_delta) / max(abs(E(g1)$TIPS_delta), na.rm = TRUE)
+	# make unchanged edges thinner:
+	E(g1)$width[E(g1)$TIPS_status == "unchanged"] <- 0.5
+
+	# label only top-ranked changes
+	top_edges <- edge_change_df$rank <= top_n
+	label_edges <- unlist(
+	  mapply(find_edge,
+			 edge_change_df$from[top_edges],
+			 edge_change_df$to[top_edges],
+			 MoreArgs = list(ends_mat = edge_ends))
+	)
+
+	E(g1)$label <- NA
+	E(g1)$label[label_edges] <- round(E(g1)$TIPS_delta[label_edges], 3)
+	E(g1)$label.cex <- 0.8
+
+  if(grepl("CM", title)) label= 'CMvsCP' else label= 'CFvsCP'
+  if(savepdf)  pdf(file=paste0('TIPS_delta_edge_reweighting_',title,'.pdf'), width = 7, height = 7)
+  #if(is.null(layout)) layout = layout_with_fr(g1)
+  # avoide the error that layour reuires positive edge weight, but we may have zero
+  plot(
+	  g1,
+	  layout = layout_with_fr(g1, weights = NA),
+	  edge.curved = 0.15,
+	  vertex.size = 22,
+	  vertex.label.cex = 0.9,
+	  main = paste0("TIPS delta-edge reweighting (",title,")")
+  )
+  mtext(paste0(label, " Top ", top_n, " edges labeled by delta"), side = 1, line = -1, cex = 2)
+   
+	if(savepdf) dev.off()
+  
+  g1
+}	
+
+get_regulators_from_motifs <- function(cisTarget.res, CTS_name, NES_threshold=3, motifAnnot = NULL,
+                                       sep = ";", toupper_out = FALSE) {
+  motifs = subset(cisTarget.res, geneSet == CTS_name & NES>=NES_threshold)
+	motifs = c(motifs$motif, motifs$TF_highConf)
+
+  motifs_in <- motifs
+  motifs    <- trimws(motifs)
+
+  # ---- helpers ----
+  extract_symbols <- function(x) {
+    x <- as.character(x)
+    x <- x[!is.na(x)]
+    x <- trimws(x)
+    x <- x[nzchar(x)]
+    if (length(x) == 0) return(character(0))
+
+    # remove "(directAnnotation)" etc.
+    x <- gsub("\\([^)]*\\)", "", x)
+
+    # "." often separates blocks like "A ... . B ..."
+    x <- gsub("\\.+", ";", x)
+
+    # unify separators
+    x <- gsub(",", ";", x)
+
+    parts <- unlist(strsplit(paste(x, collapse = ";"), ";", fixed = TRUE), use.names = FALSE)
+    parts <- trimws(parts)
+    parts <- parts[nzchar(parts)]
+
+    # strip trailing punctuation, remove internal whitespace
+    parts <- gsub("[[:punct:]]+$", "", parts)
+    parts <- gsub("\\s+", "", parts)
+
+    # keep gene-like tokens only
+    parts <- parts[grepl("^[A-Za-z][A-Za-z0-9-]*$", parts)]
+    if (toupper_out) parts <- toupper(parts)
+
+    parts
+  }
+
+  collapse_symbols <- function(x) {
+    x <- unique(x)
+    x <- sort(x)
+    if (length(x) == 0) return(NA_character_)
+    paste(x, collapse = sep)
+  }
+
+  clean_to_key <- function(x) collapse_symbols(extract_symbols(x))
+
+  # ---- 1) parse motif strings / IDs (fallback) ----
+  parsed <- rep(NA_character_, length(motifs))
+
+  # (a) annotation-label strings like "ETS2 (directAnnotation). " or long multi-TF strings
+  i <- grepl("directAnnotation|inferredBy", motifs, ignore.case = TRUE) | grepl("\\(", motifs)
+  parsed[i] <- vapply(motifs[i], clean_to_key, character(1))
+
+  # (b) plain gene symbol (e.g., "SPIB")
+  i <- is.na(parsed) & grepl("^[A-Za-z][A-Za-z0-9-]*$", motifs)
+  parsed[i] <- if (toupper_out) toupper(motifs[i]) else motifs[i]
+
+  # (c) motif ID patterns that embed TF names
+  i <- is.na(parsed) & grepl("^hdpi__", motifs)
+  parsed[i] <- vapply(sub("^hdpi__([^_]+).*$", "\\1", motifs[i]), clean_to_key, character(1))
+
+  i <- is.na(parsed) & grepl("^hocomoco__", motifs)
+  parsed[i] <- vapply(sub("^hocomoco__([^_]+)_.*$", "\\1", motifs[i]), clean_to_key, character(1))
+
+  i <- is.na(parsed) & grepl("^swissregulon__", motifs)
+  parsed[i] <- vapply(sub("^swissregulon__[^_]+__([^_]+).*$", "\\1", motifs[i]), clean_to_key, character(1))
+
+  i <- is.na(parsed) & grepl("^taipale_tf_pairs__", motifs)
+  parsed[i] <- vapply(sub("^taipale_tf_pairs__([^_]+)_([^_]+)_.*$", "\\1;\\2", motifs[i]), clean_to_key, character(1))
+
+  i <- is.na(parsed) & grepl("^kznf__", motifs)
+  parsed[i] <- vapply(sub("^kznf__([^_]+)_.*$", "\\1", motifs[i]), clean_to_key, character(1))
+
+  i <- is.na(parsed) & grepl("^dbtfbs__", motifs)
+  parsed[i] <- vapply(sub("^dbtfbs__([^_]+)_.*$", "\\1", motifs[i]), clean_to_key, character(1))
+
+  # ---- 2) motifAnnot mapping (preferred when available) ----
+  ann_map <- rep(NA_character_, length(motifs))
+  if (!is.null(motifAnnot)) {
+    if (!all(c("motif", "TF") %in% colnames(motifAnnot))) {
+      stop("motifAnnot must have at least columns: motif, TF")
+    }
+
+    mot <- trimws(as.character(motifAnnot$motif))
+    tf  <- as.character(motifAnnot$TF)
+    ok  <- !is.na(mot) & nzchar(mot) & !is.na(tf) & nzchar(tf)
+    mot <- mot[ok]
+    tf  <- tf[ok]
+
+    # collapse TFs per motif into a single cleaned key string
+    idx_by_motif <- split(seq_along(mot), mot)
+    tf_by_motif <- vapply(
+      idx_by_motif,
+      function(ii) collapse_symbols(extract_symbols(tf[ii])),
+      character(1)
+    )
+
+    ann_map <- unname(tf_by_motif[motifs])
+  }
+
+  # ---- 3) final regulators: annotation mapping when available, otherwise parsed ----
+  regulators <- ifelse(!is.na(ann_map) & nzchar(ann_map), ann_map, parsed)
+
+  motifAnnot_sub = data.frame(
+    motif_TF_highConf = motifs_in,
+    regulators = regulators,
+    parsed_from_id = parsed,
+    mapped_from_annot = ann_map,
+    stringsAsFactors = FALSE
+  )
+
+  # --- 4 check redundent regulator and pick the one with highest NES ------
+  reg_dup = motifAnnot_sub$regulators[duplicated(motifAnnot_sub$regulators)]
+  if(length(reg_dup) > 0) {
+    motifAnnot_unique = motifAnnot_sub[!duplicated(motifAnnot_sub$regulators),]
+    for(reg in reg_dup) {
+      motif_found = motifAnnot_sub[which( motifAnnot_sub$regulators %in% reg), ]$motif
+      cis_found = subset(cisTarget.res, geneSet==CTS_name & motif %in% motif_found )
+      if(nrow(cis_found)>0) {
+        cis_found = subset(cis_found, NES == max(cis_found$NES))
+      ## in case equal NES, pick the one randomly
+        if(nrow(cis_found) > 1) cis_found = cis_found[sample(1:nrow(cis_found), 1),]
+        x = which(motifAnnot_unique$regulators == reg)
+        motifAnnot_unique[x, ] = motifAnnot_sub[which(motifAnnot_sub$motif == cis_found$motif),]
+      }
+    } 
+  } else motifAnnot_unique = motifAnnot_sub
+  return(motifAnnot_unique)
+}
+
+# get_regulators_from_motifs_v0 <- function(motifs, motifAnnot = NULL) {
+#    stopifnot(is.character(motifs))
+
+# #  # --- 1) Regex-based parsing for common motif name styles ---
+#   parsed <- rep(NA_character_, length(motifs))
+
+#   # hocomoco__NFKB1_HUMAN.H11MO.0.A  -> NFKB1
+#   i <- grepl("^hocomoco__", motifs)
+#   parsed[i] <- sub("^hocomoco__([^_]+)_.*$", "\\1", motifs[i])
+
+#   # swissregulon__hs__EZH2  -> EZH2 ; swissregulon__mm__Atf2 -> Atf2
+#   i <- grepl("^swissregulon__", motifs)
+#   parsed[i] <- sub("^swissregulon__[^_]+__([^_]+).*$", "\\1", motifs[i])
+
+#   # taipale_tf_pairs__ETV2_ONECUT2_... -> ETV2;ONECUT2 (keep both)
+#   i <- grepl("^taipale_tf_pairs__", motifs)
+#   parsed[i] <- sub("^taipale_tf_pairs__([^_]+)_([^_]+)_.*$", "\\1;\\2", motifs[i])
+
+#   # kznf__ZNF263_Transfac... -> ZNF263
+#   i <- grepl("^kznf__", motifs)
+#   parsed[i] <- sub("^kznf__([^_]+)_.*$", "\\1", motifs[i])
+
+
+#   # --- 2) Annotation-based mapping (recommended for transfac_pro__, metacluster__, tfdimers__, etc.) ---
+#   ann_map <- rep(NA_character_, length(motifs))
+#   if (!is.null(motifAnnot)) {
+#     # motifAnnot should contain columns: motif, TF, (often) directAnnotation, etc.
+#     if (!all(c("motif", "TF") %in% colnames(motifAnnot))) {
+#       stop("motifAnnot must have at least columns: motif, TF")
+#     }
+#     # For each motif, collect unique TFs
+#     tf_by_motif <- tapply(motifAnnot$TF, motifAnnot$motif, function(x) paste(unique(x), collapse = ";"))
+#     ann_map <- unname(tf_by_motif[motifs])
+#   }
+
+#   # choose annotation mapping when available, otherwise parsed
+#   regulators <- ifelse(!is.na(ann_map) & ann_map != "", ann_map, parsed)
+
+#   data.frame(
+#     motif = motifs,
+#     regulators = regulators,
+#     parsed_from_id = parsed,
+#     mapped_from_annot = ann_map,
+#     stringsAsFactors = FALSE
+#   )
+# }
+
+
+
+heatmap_pull_candidate = function(mat, graph_list, CTS_ID, CHD, key='ISL1', coding_genes = NULL, TF = NULL,
+  chip_targets = FALSE, show_SMC_access= FALSE)
+{
+	library(pheatmap)
+  key = gsub(';','\\.',key)
+
+	PPI_gene = V(graph_list[[CTS_ID]])$name 
+	In_PPI = ifelse(rownames(mat) %in% PPI_gene, TRUE, FALSE)
+	IS_CHD = ifelse(rownames(mat) %in% CHD, TRUE, FALSE)
+  Is_protein_coding = ifelse(rownames(mat) %in% coding_genes, TRUE, FALSE)
+	# TF_mouse <- unique(dorothea_mm$tf)
+	Is_TF = ifelse(rownames(mat) %in% TF, TRUE, FALSE)
+
+	## example: build row annotation with 3 yes/no columns
+	row_anno <- data.frame(
+	  is_TF = factor(ifelse(Is_TF, TRUE, FALSE), levels = c(FALSE, TRUE), labels = c("no", "yes")),
+	  coding = factor(ifelse(Is_protein_coding, TRUE, FALSE), levels = c(FALSE, TRUE), labels = c("no", "yes")),
+	  CHD= factor(ifelse(IS_CHD, TRUE, FALSE), levels = c(FALSE, TRUE), labels = c("no", "yes")),
+	  PPI = factor(ifelse(In_PPI, TRUE, FALSE), levels = c(FALSE, TRUE), labels = c("no", "yes"))
+	)
+	rownames(row_anno) <- rownames(mat)
+
+	## same color scheme for all three bars: no = lightgrey, yes = blue
+	ann_colors <- list(
+	  CHD = c(no = "lightgrey", yes = "blue"),
+	  PPI = c(no = "lightgrey", yes = "blue"),
+	  is_TF = c(no = "lightgrey", yes = "blue")
+	 )
+
+	ann_colors[['coding']] = c(no = "lightgrey", yes = "blue")
+
+  ########## update column names to non-key-specific names ##########
+   {
+    # replace to non-key-specific column names
+    colnames(mat) = gsub(paste0(key,'_CP_candidate'),'CP_candidate', colnames(mat))
+    colnames(mat) = gsub(paste0(key,'_CM_candidate'),'CM_candidate',colnames(mat))
+    colnames(mat) = gsub(paste0(key,'_CF_candidate'),'CF_candidate',colnames(mat))
+  }
+
+	# ### a plot with less rows: -- only PRRX1-binding coding genes are shown
+  x = which(rownames(mat) %in% coding_genes & (mat[, 'CP_candidate']==1 | mat[, 'CM_candidate']==1 | mat[, 'CF_candidate']==1))
+	length(x)  # 3
+	mat_sub = mat[x,  ]
+	row_anno_sub = row_anno[x,]
+	row_anno_sub = row_anno_sub[, -which(colnames(row_anno_sub) == "coding")]	
+  cat('candidate genes: ', nrow(mat_sub), '\n' )
+
+ 	pattern <- paste0(mat_sub[, 'CP_candidate'], mat_sub[, 'CM_candidate'], mat_sub[, 'CF_candidate'])
+	(y = table(pattern))
+# 	pattern
+# 101 111 
+#   1   2 
+	## map pattern → block name
+	pattern_to_block <- c(
+	 "100" = "CP_only"
+	  ,"110" = "CP_CM"
+	   ,"101" = "CP_CF"
+	  ,"111" = "CP_CM_CF"
+	  ,"010" = "CM_only"
+	 ,"001" = "CF_only"
+	 ,"011" = "CM_CF"
+	 ,"000" = "none"
+	)
+
+	block <- pattern_to_block[pattern]
+
+	## choose order you want to see in heatmap
+	#block_levels <- c("CP_only","CP_CM","CM_only","CP_CM_CF","CM_CF","CF_only","CP_CF","none")
+	block_levels <- pattern_to_block[which(names(pattern_to_block) %in% unique(pattern))]
+	block <- factor(block, levels = block_levels)
+	names(block) <- rownames(mat_sub)   # keep rownames aligned
+
+	ord <- order(block)
+	cols_to_show <- c('CP_candidate',   "CP_hi"   ,   "PCW6CP_access"    , #"PCW8_CM_access"  , 
+					'CM_candidate'   ,  "CM_hi"  ,    "PCW8_CM_access"  , "PCW19_CM_access",
+					'CF_candidate'   ,  "CF_hi"  , "iEPC_access",    "PCW8_CF_access"  , "PCW19_CF_access" )
+  if(show_SMC_access) {
+    cols_to_show = c(cols_to_show, "PCW8_SMC_access", "PCW19_SMC_access")
+  }
+	if( chip_targets)		{
+    cols_to_show = c(cols_to_show ,  "ISL1_CP_bound", "Maven2023_gene_ISL1_WT_d6CP", 
+					"Gao2019_gene_Isl1_E825E9.bound", "Gao2019_gene_Isl1.iCPC_CPC.bound",
+					"Maven2023_gene_ISL1_up_E" ,  
+					"Maven2023_gene_ISL1_up_T"  ,  "Maven2023_gene_ISL1_up_L"  ,  "Maven2023_gene_ISL1_dn_E"   ,
+					"Maven2023_gene_ISL1_dn_T" ,   "Maven2023_gene_ISL1_dn_L") 
+
+          title = paste0("candidate: ", key, " CP ChIP-seq targets that highly expressed in a state")
+  } else {
+    # cols_to_show = c(cols_to_show, paste0('cisTarget_',key,'.motif_target'))  
+
+    y = which(grepl(key, colnames(mat_sub) ) & grepl('cisTarget_', colnames(mat_sub) ) )
+    muti_match_flag = grepl(";", colnames(mat_sub)[y])
+    if(length(y)>0 && any(!muti_match_flag)) { 
+      y = y[!muti_match_flag]
+      muti_match_flag = FALSE
+      cat('direct motif: ', colnames(mat_sub)[y], ' used from multiple potentoal matches\n')
+    }
+    if(any(muti_match_flag)) {
+      cat('simplified motif name: ', colnames(mat_sub)[y], '\n')
+      colnames(mat_sub)[y] = paste0('cisTarget_',key,'.motif_target')  ## in case motif name is too long, simplify it
+     }
+    cols_to_show = c(cols_to_show, colnames(mat_sub)[y])   
+
+    title = paste0("candidate: ", key, " cisTarget targets that highly expressed in a state")
+  }
+
+	row_label_col <- ifelse(mat_sub[, 'CP_candidate'] == 1, "red", "black")
+
+	# Ensure all values in mat are numeric before plotting
+	#mat_sub_numeric <- as.data.frame(apply(mat_sub, 2, as.numeric), row.names = rownames(mat_sub)) %>% as.matrix
+  mat_sub_numeric <- data.matrix(mat_sub) 
+	cols_to_show <- intersect(cols_to_show, colnames(mat_sub_numeric))
+  if (length(cols_to_show) == 0) stop("No columns found in mat_sub for plotting.")
+  p = pheatmap(
+	  mat_sub_numeric[ord, cols_to_show, drop = FALSE],
+	  cluster_rows = FALSE,
+	  cluster_cols = FALSE,
+	  color = c("white", "orange"),
+	  annotation_row = row_anno_sub,
+	  annotation_colors = ann_colors,
+	  margins = c(4, 4),
+	  fontsize = 10,
+	  fontsize_col = 6,
+	  fontsize_row = 6,    # reduce to fit more if necessary, or adjust as you want
+	  main = title
+	)
+return(p)
+}
+
+
+
+#############################################################################################
+
+# graph_TF_list: the dual-pull predicted subnetwork of PPIN (CTS at bifurcation)
+# graph_list: the edge-precalcualted PPIN list
+# sce: the "SingleCellExperiment" object of the datasets
+# celltype_col: a string to specify the columns of cell cluster
+# descendent_cluster_id: a string of the cluster ID of the descendent of interest
+fill_TF_targeting_predicted_edges = function(graph_TF_list, linkeage_name = 'CM', graph_list, 
+										sce, celltype_col='cluster', CT_cluster_id = CP_cluster ,
+                    descendent_cluster_id = CM_cluster , TF_symbol='ISL1', HVG=NULL,
+                    shrink = TRUE
+										 ){
+    if(! paste0("CTS.CP_TF.target_HiG", linkeage_name) %in% names(graph_TF_list)) stop(paste0("the parent PPIN 'CTS.CP_TF.target_HiG", linkeage_name, " is missing from graph_TF_list"))
+
+    CM_ID = paste0('HiG_', descendent_cluster_id)
+	
+    # helper function to find the missing edges 
+	edge_keys <- function(g) {
+		  el <- igraph::as_edgelist(g, names = TRUE)
+		  a <- pmin(el[,1], el[,2])
+		  b <- pmax(el[,1], el[,2])
+		  paste(a, b, sep = "--")
+		}
+
+	# for CM-pull
+	g1 = graph_TF_list[[paste0("CTS.CP_TF.target_HiG", linkeage_name)]]
+  g_descendent_sub = graph_list[[CM_ID]]
+  
+  ## check if all nodes are in the HVG 
+  if(!is.null(HVG)) {
+    if(!all(V(g1)$name %in% HVG)) stop('all nodes are not in the HVG')
+    if(!all(V(g_descendent_sub)$name %in% HVG)) stop('all nodes are not in the HVG')
+  }
+	## add back the coexpression between keyTF and targets that was missing from PPI database but suggested by ChIP-seq or cisTarget
+	if(vcount(g1)>0) g1 = fill_coexp_for_edges(g1, sce, celltype_col=celltype_col, cluster_id = CT_cluster_id )	
+
+	if(vcount(g1)>0) {
+	## the subset of CTS genes that also highly expressed in CM thus in the edge-calculated PPIN of HiG 
+		g_descendent_sub = induced_subgraph(g_descendent_sub, vids = V(g_descendent_sub)$name %in% V(g1)$name) 
+		# add key TF back to the subset of g_descendent_sub if it is within HiG but not in PPINs thus was missing
+		if(!(TF_symbol %in% V(g_descendent_sub)$name) & (TF_symbol %in%  DEG[[descendent_cluster_id]]) )  {
+			g_descendent_sub = igraph::add_vertices(g_descendent_sub, 1, name = TF_symbol)
+      V(graph)[name == key_in_TFfamily]$color <- "yellow"
+			g_descendent_sub = fill_coexp_for_edges(g_descendent_sub, sce, celltype_col=celltype_col, cluster_id = descendent_cluster_id )	
+		 }		
+	}
+	
+	## fill back coexpression in the descendent cluster for missing linkages 
+	if(vcount(g1)>0 & vcount(g_descendent_sub)>0) {
+		# find the missing edges 
+		missing_in_desc <- setdiff(edge_keys(g1), edge_keys(g_descendent_sub))   # edges present in g1 but absent in g_descendent_sub
+		
+		if(length(missing_in_desc)>0) {
+			# add back missing_in_desc to g_descendent_sub, assign lty = dashed
+		  pairs <- do.call(rbind, strsplit(missing_in_desc, "--", fixed = TRUE))
+		  from <- pairs[, 1]
+		  to   <- pairs[, 2]
+
+		  # make sure vertices exist (should, but safe)
+		  missing_v <- setdiff(unique(c(from, to)), V(g_descendent_sub)$name)
+		  if (length(missing_v) > 0) {
+			g_descendent_sub <- add_vertices(g_descendent_sub, nv = length(missing_v), name = missing_v)
+		  }
+
+		  # build edge vector: from1,to1, from2,to2,...
+		  edges_vec <- as.vector(rbind(from, to))
+
+		  m_before <- ecount(g_descendent_sub)
+		  g_descendent_sub <- add_edges(g_descendent_sub, edges_vec)
+		  new_edges <- seq.int(m_before + 1, ecount(g_descendent_sub))
+
+		  # ensure attrs exist, then style new edges
+		  if (!"lty" %in% edge_attr_names(g_descendent_sub)) E(g_descendent_sub)$lty <- "solid"
+		  E(g_descendent_sub)$lty[new_edges] <- "dashed"
+
+		g_descendent_sub = fill_coexp_for_edges(g_descendent_sub, sce, celltype_col=celltype_col, cluster_id = descendent_cluster_id, shrink = shrink)	
+		}
+	} else g_descendent_sub = NULL
+	
+	return(list(g_CT_sub = g1, g_descendent_sub = g_descendent_sub))
+}
+
+########################################################
+#' Merge cisTarget/ChIP-derived edge-delta tables into a single styled igraph network
+#'
+#' This function merges many TF-specific “Top edges labeled by delta” results (stored in a
+#' single table) into one undirected graph, de-duplicates repeated edges by keeping the
+#' row with the largest absolute change (\code{abs_delta}), and applies a consistent
+#' visualization style:
+#' \itemize{
+#'   \item Node color: CHD genes in red; “added TF” nodes in yellow; all others in grey.
+#'   \item Edge color: red for \code{direction == "increase"}, blue for \code{"decrease"},
+#'         grey otherwise.
+#'   \item Edge width: proportional to \code{abs_delta}.
+#'   \item Edge line type: dashed if an edge is not present in a reference STRING PPIN
+#'         graph (\code{g_string}); otherwise solid.
+#'   \item Edge labels: \code{top_n_label} edges (by \code{abs_delta}) labeled with \code{delta}.
+#' }
+#'
+#' The function is designed for outputs from your TIPS delta-edge reweighting pipeline
+#' where \code{final_table} contains columns such as \code{from}, \code{to}, \code{delta},
+#' \code{abs_delta}, \code{direction}, \code{status}, and \code{rank}.
+#'
+#' @param final_table A data.frame of edge changes. Must contain at least columns:
+#'   \code{linkeage}, \code{from}, \code{to}, \code{delta}, \code{abs_delta},
+#'   \code{direction}, \code{status}, \code{rank}. Additional columns are allowed.
+#'
+#' @param descendent Character scalar. Which lineage to keep (matched against the
+#'   \code{linkeage} column), e.g. \code{"CM"} or \code{"CF"}. Default \code{"CM"}.
+#'
+#' @param CHD Character vector of CHD genes to highlight as red nodes. Default \code{character(0)}.
+#'
+#' @param added_TF Character vector of TF symbols that were added as nodes because they
+#'   were missing from the STRING PPIN. These are colored yellow unless they overlap with
+#'   \code{CHD} (CHD overrides). Default \code{character(0)}.
+#'
+#' @param top_n_label Integer. Number of edges to label (largest \code{abs_delta}).
+#'   Set \code{0} to disable labeling. Default \code{5}.
+#'
+#' @param g_string Optional igraph object representing the reference STRING PPIN
+#'   subnetwork (same naming convention/casing as \code{final_table}). If provided,
+#'   dashed edges indicate edges absent from \code{g_string}. If NULL (default), line
+#'   type defaults to solid for all edges (or you can set dashed by status upstream).
+#'
+#' @param normalize_case Logical. If TRUE (default), vertex names in both graphs are
+#'   uppercased prior to edge comparison against \code{g_string}. Set FALSE if your
+#'   naming is already consistent and case-sensitive.
+#'
+#' @return An undirected igraph object with vertex attributes:
+#'   \code{name}, \code{color}, and edge attributes including:
+#'   \code{delta}, \code{abs_delta}, \code{direction}, \code{status}, \code{rank},
+#'   \code{weight} (=\code{abs_delta}), \code{color}, \code{width}, \code{lty},
+#'   and \code{label} (for the top edges).
+#'
+#' @details
+#' ## De-duplication
+#' Because multiple TF panels may contain the same edge (or the same TF may contribute
+#' repeated rows), the function creates an undirected edge key by sorting endpoints
+#' (\code{pmin(from,to)}, \code{pmax(from,to)}) and keeps only the row with maximum
+#' \code{abs_delta} for each unique pair.
+#'
+#' ## Line type semantics (recommended)
+#' If you want dashed lines to strictly mean “not in STRING PPIN”, pass the appropriate
+#' STRING subgraph as \code{g_string}. This is more robust than using \code{status}
+#' because \code{status} can reflect gained/lost under the delta comparison rather than
+#' “absent from STRING”.
+#'
+#' @examples
+#' \dontrun{
+#' library(igraph)
+#' library(dplyr)
+#'
+#' # final_table: output table read from file
+#' final_table <- read.table("final_table.tsv", header = TRUE, sep = "\t",
+#'                           stringsAsFactors = FALSE)
+#'
+#' # Optional reference STRING PPIN subgraph for the same lineage
+#' # g_string <- graph_list[["HiG_CM_cluster"]]  # example
+#'
+#' g <- make_merged_TIPS_graph(
+#'   final_table,
+#'   descendent = "CM",
+#'   CHD = c("GATA6","TBX5"),
+#'   added_TF = c("ETV2","PRDM6"),
+#'   top_n_label = 10,
+#'   g_string = NULL
+#' )
+#'
+#' set.seed(1)
+#' plot(g, layout = layout_with_fr(g, weights = NA),
+#'      edge.curved = 0.15, vertex.size = 22, vertex.label.cex = 0.9)
+#'
+#' # With STRING reference for dashed edges:
+#' # g <- make_merged_TIPS_graph(final_table, "CM", CHD, added_TF, 10, g_string = g_string)
+#' }
+#'
+#' @export
+
+make_merged_TIPS_graph <- function(final_table,
+                                   descendent = "CM",
+                                   CHD = character(0),
+                                   added_TF = character(0),   # TFs that were added because missing in STRING PPIN
+                                   top_n_label = 5,
+                                   g_string=NULL,
+                                   normalize_case = TRUE) {
+  library(dplyr)
+  req <- c("linkeage","from","to","delta","abs_delta","direction","status","rank")
+  stopifnot(all(req %in% colnames(final_table)))
+
+  ## two helper functions
+  library(igraph)
+
+ edge_keys <- function(g, undirected = TRUE) {
+  el <- igraph::as_edgelist(g, names = TRUE)
+  if (undirected && !igraph::is_directed(g)) {
+    a <- pmin(el[,1], el[,2])
+    b <- pmax(el[,1], el[,2])
+    paste(a, b, sep = "||")
+  } else {
+    paste(el[,1], el[,2], sep = "||")
+  }
+}
+
+  set_lty_by_reference <- function(g, g_string, undirected = TRUE) {
+  keys_string <- edge_keys(g_string, undirected = undirected)
+  keys_g      <- edge_keys(g,        undirected = undirected)
+
+  E(g)$lty <- "solid"
+  E(g)$lty[!(keys_g %in% keys_string)] <- "dashed"
+  g
+}
+
+  # Build graph with all edge attributes carried in
+  g <- graph_from_data_frame(
+      final_table %>% dplyr::select(from, to, delta, abs_delta, direction, status, rank),
+      directed = FALSE)
+  E(g)$weight = E(g)$abs_delta
+  g = igraph::simplify(g, edge.attr.comb = "max")
+
+  # ---- Node colors: CHD red; added TF yellow; else grey ----
+  V(g)$color <- "grey80"
+  if (length(CHD) > 0)     V(g)$color[V(g)$name %in% CHD] <- "red"  
+  if (length(added_TF) > 0) V(g)$color[V(g)$name %in% added_TF] <- "yellow" # overrides red
+
+ # ---- Edge style ----
+  # color by 'direction' of changes from CP to descedent
+  E(g)$color <- "grey80"
+  E(g)$color[E(g)$direction == "increase"] <- "#D73027"  # red
+  E(g)$color[E(g)$direction == "decrease"] <- "#4575B4"  # blue
+
+  # # lty: default from status (optional, dashed for gain )
+  E(g)$lty <- "solid"
+  E(g)$lty[E(g)$status == "gained"] <- "dashed"
+
+  # OVERRIDE: dashed if not in STRING PPIN
+  if (!is.null(g_string)) {
+    if (normalize_case) {
+      igraph::V(g)$name <- toupper(igraph::V(g)$name)
+      igraph::V(g_string)$name <- toupper(igraph::V(g_string)$name)
+    }
+  g <- set_lty_by_reference(g, g_string)
+  }
+
+  # width by abs_delta
+  max_abs <- max(E(g)$abs_delta, na.rm = TRUE)
+  if (is.finite(max_abs) && max_abs > 0) {
+    E(g)$width <- 1 + 4 * (E(g)$abs_delta / max_abs)
+  } else {
+    E(g)$width <- 2
+  }
+
+  # ---- Labels: only top_n_label edges by abs_delta ----
+  E(g)$label <- NA
+  if (top_n_label > 0) {
+    top_e <- order(E(g)$abs_delta, decreasing = TRUE)[seq_len(min(top_n_label, ecount(g)))]
+    E(g)$label[top_e] <- round(E(g)$delta[top_e], 3)
+    E(g)$label.cex <- 0.8
+  }
+
+  g
+}
+
+	
+

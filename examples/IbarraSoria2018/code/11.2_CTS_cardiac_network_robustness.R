@@ -13,7 +13,7 @@ library(sm)
 
 ########## BEGINNING OF USER INPUT ##########
 
-wd = "/Users/felixyu/Documents/IbarraSoria2018/"
+wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/"
 
 setwd(paste0(wd, "/results/PPI_weight/"))
 
@@ -389,13 +389,12 @@ failure.vertex <- readRDS(paste0("failure.vertex_100_simplified_", s, "weighted.
 failure.edge <- readRDS(paste0("failure.edge_100_simplified_", s, "weighted.rds"))
 failure.dt <- rbind(failure.edge, failure.vertex)
 (head(failure.dt, 3))
-#    HiG_blood                type measure comp.size comp.pct  removed.pct
+#    signature                type measure comp.size comp.pct  removed.pct
 #       <char>              <char>  <char>     <num>    <num>        <num>
 # 1: HiG_blood Random edge removal  random       417        1 0.000000e+00
 # 2: HiG_blood Random edge removal  random       417        1 9.102494e-05
 # 3: HiG_blood Random edge removal  random       417        1 1.820499e-04
 
-colnames(failure.dt)[1] <- "signature"
 (table(failure.dt$signature, failure.dt$type))
 #                              Random edge removal Random vertex removal
 #   CTS_cardiac.a                               80                    38

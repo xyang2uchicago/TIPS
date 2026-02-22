@@ -15,7 +15,7 @@ library(sm)
 
 ########## BEGINNING OF USER INPUT ##########
 
-wd = "/Users/felixyu/Documents/GSE87038_weighted/"
+wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/"
 
 setwd(paste0(wd, "results/PPI_weight/"))
 
@@ -328,7 +328,7 @@ failure.vertex <- readRDS(paste0("failure.vertex_100_simplified_", s, "weighted.
 failure.edge <- readRDS(paste0("failure.edge_100_simplified_", s, "weighted.rds"))
 failure.dt <- rbind(failure.edge, failure.vertex)
 (head(failure.dt, 3))
-#     HiG_1                type measure comp.size comp.pct  removed.pct
+#     signature                type measure comp.size comp.pct  removed.pct
 #    <char>              <char>  <char>     <num>    <num>        <num>
 # 1:  HiG_1 Random edge removal  random       300        1 0.0000000000
 # 2:  HiG_1 Random edge removal  random       300        1 0.0002008839

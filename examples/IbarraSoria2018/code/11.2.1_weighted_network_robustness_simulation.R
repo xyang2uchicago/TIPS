@@ -58,10 +58,12 @@ if(failureAnalysis){
 	} 
 	names(tmp) = names(graph_list)
 	failure.edge <- rbindlist(tmp, idcol=names(graph_list))
+    colnames(failure.edge)[1] <- "signature"
 	saveRDS(failure.edge, file= paste0(outputDir,'failure.edge_100_simplified_',s,'weighted.rds'))
 
 
 	failure.vertex <- rbindlist(lapply(graph_list, robustness_MonteCarlo, "vertex", measure='random', N=1e2), idcol=names(graph_list))
+    colnames(failure.vertex)[1] <- "signature"
 	saveRDS(failure.vertex, file= paste0(outputDir,'failure.vertex_100_simplified_',s,'weighted.rds'))
     cat('failureAnalysis done \n')
 }

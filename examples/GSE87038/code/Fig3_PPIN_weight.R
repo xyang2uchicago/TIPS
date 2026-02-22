@@ -13,7 +13,7 @@ library(sm)
 
 ########## BEGINNING OF USER INPUT ##########
 
-wd = "/Users/felixyu/Documents/GSE87038_weighted/"
+wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/"
 celltype_specific_weight_version <- '10'
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
@@ -679,8 +679,8 @@ for(g_name in unique(correct_n_edges$graph_id)){
 }
 N = sapply(graph_list_notsimplified, vcount)
 
-graph_list_notsimplified <- lapply(graph_list_notsimplified, simplify, edge.attr.comb ='max') #!!!!!!!!!!!!!!!!!!!
-N2 = sapply(graph_list_notsimplified, vcount)
+graph_list <- lapply(graph_list_notsimplified, simplify, edge.attr.comb ='max') #!!!!!!!!!!!!!!!!!!!
+N2 = sapply(graph_list, vcount)
 (all(N==N2))   #  TRUE 
 
 edge_data <- extract_edge_weights_by_category(graph_list, PPI_color_palette, CT_id)

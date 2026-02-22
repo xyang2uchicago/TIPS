@@ -12,7 +12,7 @@ library("SingleCellExperiment")
 ########## BEGINNING OF USER INPUT ##########
 
 # Set working directory
-wd <- "/Users/felixyu/Documents/IbarraSoria2018/"
+wd <- "/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/"
 setwd(paste0(wd, "results/"))
 
 # Database settings

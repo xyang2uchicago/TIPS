@@ -10,7 +10,7 @@ library(stringr)
 
 ########## BEGINNING OF USER INPUT ##########
 
-wd = "/Users/felixyu/Documents/GSE87038_weighted/"
+wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/"
 setwd(paste0(wd, "results/PPI_weight/"))
 
 db <- "GSE87038"

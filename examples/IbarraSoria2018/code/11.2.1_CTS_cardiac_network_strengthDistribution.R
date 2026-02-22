@@ -9,7 +9,7 @@ library(igraph)
 
 ########## BEGINNING OF USER INPUT ##########
 
-wd = '/Users/felixyu/Documents/IbarraSoria2018/'
+wd = '/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/'
 setwd(paste0(wd, 'results/'))
 PPI_color_palette <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
 PPI_size_palette <- c("CTS" = 1, "HiGCTS" = 0.75, "HiG" = 0.25)

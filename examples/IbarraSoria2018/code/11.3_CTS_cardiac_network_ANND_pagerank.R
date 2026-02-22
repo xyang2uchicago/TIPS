@@ -12,7 +12,7 @@ library(brainGraph)
 
 ########## BEGINNING OF USER INPUT ##########
 
-wd = "/Users/felixyu/Documents/IbarraSoria2018/"
+wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/"
 
 setwd(paste0(wd, "results/PPI_weight/"))
 inputdir <- paste0(wd, "data/")
