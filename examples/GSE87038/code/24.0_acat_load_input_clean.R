@@ -40,8 +40,8 @@ CM_cluster = '17'
 CF_cluster = '16'  # mesenchymal/ECM‑high (“CF‑like”).
 CMES_cluster = '4'  # Mesp1+
 
-CTS_name = '8'
-CTS_ID = paste0('CTS_',CTS_name)
+CTS_ID = '8'
+CTS_name = paste0('CTS_',CTS_ID)
 
 ########################################################
 ##  input 2.1   hg38 coding gene symbols & TF annotations  -- shared ---
@@ -109,7 +109,7 @@ table(maps$category)
 
 ########################################################
 ##  input 2.3 published gene openness score -- shared ---
-## gene-level Marker genes (gene score) for fetall heart scATAC-seq clusters using differential test, published by authors 
+## gene-level Marker genes (gene score) for fetal heart scATAC-seq clusters using differential test, published by authors 
 # the table S3
 library(openxlsx)
 annotation_vitro = read.xlsx(xlsxFile = paste0(input_path, 'Ameen2022cell-supplement-10.xlsx'), sheet = 4)  
@@ -357,7 +357,7 @@ library(igraph)
 file = paste0(db_specifc_result_path, '/PPI_weight/GSE87038_STRING_graph_perState_simplified_combinedweighted.rds')
 graph_list <- readRDS( file)  	
 
-## 2026 correction: C13 is not significant by teh filter of maximal Is* at its clutster
+## 2026 correction: C13 is not significant by the filter of maximal Is* at its clutster
 if("CTS_13" %in% names(graph_list)) graph_list = graph_list[-which(names(graph_list) == 'CTS_13')]
 names(graph_list)
  # [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"       "HiG_6"      
@@ -385,12 +385,12 @@ CTS[[1]]
 ################# create ATAC_anno_df table and save it ####################
 ### step 1.2) building the binary annotation matrix 
 # rebuild_mat = TRUE # Decided by 24.1 and 24.2
-fileName = paste0('binary_annot_',CTS_ID,'_scATAC_Maven2023_gene_ISL1_v3.tsv')
+fileName = paste0('binary_annot_',CTS_name,'_scATAC_Maven2023_gene_ISL1_v3.tsv')
 	
 if(rebuild_mat) {
 
-	annotation_sub = subset(ATAC_anno_df, name %in% CTS[[CTS_name ]])
-	length(unique(CTS[[CTS_name]]))  # 54
+	annotation_sub = subset(ATAC_anno_df, name %in% CTS[[CTS_ID ]])
+	length(unique(CTS[[CTS_ID]]))  # 54
 	dim(annotation_sub) #[1]44  8
 	length(unique(annotation_sub$name)) # 224
 	colnames(annotation_sub)
@@ -414,7 +414,7 @@ names(Ameen_annotation_list)
 # [25] "OFT"       "PC"        "preCF"     "preSMC"    "vCM"       "vEC"       "vSMC"      "SMC"   
 
 
-    ## here, we annotation the accessibility according to the published main figure 1
+    ## here, we annotate the accessibility according to the published main figure 1
   	annotation_sub$PCW6CP_access = ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c('CFP', 'OFT', 'FB1', 'eCM',  'i-CP' )]), '1', '0')  
 	annotation_sub$PCW8_CM_access = ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c('aCM',     'i-CM')]), '1', '0')
 	annotation_sub$PCW8_CF_access = ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c("preCF", "FB2","EPC",      'i-CF')]), '1', '0')
@@ -422,7 +422,7 @@ names(Ameen_annotation_list)
 	annotation_sub$PCW19_CM_access = ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c("vCM")]), '1', '0')
 	annotation_sub$PCW19_CF_access = ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c("CF","EPC")]), '1', '0')
 	annotation_sub$PCW19_SMC_access = ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c("SMC","EPC")]), '1', '0')   
-# FOr E8.25 snapshot, cell are to early to show CF accessibility, thus the accessibility of PCW6 CF clusters are included for ‘CF_accessibility’ (FB1, preCF) 
+# For E8.25 snapshot, cell are to early to show CF accessibility, thus the accessibility of PCW6 CF clusters are included for ‘CF_accessibility’ (FB1, preCF) 
     annotation_sub$PCW6_CF_access = ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c("CFP","FB1")]), '1', '0')
 	annotation_sub$PCW6_SMC_access = ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c("OFT")]), '1', '0')   
 	annotation_sub$PCW6_CM_access = ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c("eCM")]), '1', '0')   
@@ -463,7 +463,7 @@ names(Ameen_annotation_list)
 	dim(mat) #[1] 24 15
 
 	## add back the missing symbols
-	(missing =setdiff(CTS[[CTS_name]], rownames(mat)))
+	(missing =setdiff(CTS[[CTS_ID]], rownames(mat)))
 #[1] "IGFBPL1"  "OSR1"     "FAM213A"  "TSPAN7"   "CLU"      "GM266"    "IRX1"     "NR2F2"   
  # [9] "PDCD4"    "VEGFC"    "TRABD2B"  "OLFML3"   "SPRY1"    "ELMO1"    "EPHA7"    "PLXNA2"  
 # [17] "CHD3"     "RHOU"     "NRG1"     "RARB"     "EPHA2"    "B3GALNT1" "CDK6"     "FAM110B" 
@@ -478,7 +478,7 @@ names(Ameen_annotation_list)
 	# table for CTS.CP ==  high/low in CP ; high/low in CM;  high/low in CF; 
 	# open in PCW6; open in PCW8 CM; open in PCW19 CM; open in PCW8 CF; open in PCW19 CF
 	mat = as.data.frame(mat)
-	mat[, paste0('CTS_', CTS_name)] = ifelse(rownames(mat) %in% CTS[[CTS_name]], '1', '0')
+	mat[, paste0('CTS_', CTS_ID)] = ifelse(rownames(mat) %in% CTS[[CTS_ID]], '1', '0')
 	mat[, 'CP_hi'] = ifelse(rownames(mat) %in% DEG[[CP_cluster]], '1', '0')
 	mat[, 'CM_hi'] = ifelse(rownames(mat) %in% DEG[[CM_cluster]], '1', '0')
 	mat[, 'CF_hi'] = ifelse(rownames(mat) %in% DEG[[CF_cluster]], '1', '0')
@@ -490,7 +490,7 @@ names(Ameen_annotation_list)
 ### maven2023 ISL1 set
 # refer to D:\projects\DS\source\GSE195476_ISL1\ISL1_GS.R
 # in which we did:
-# 1) define consistend peaks (present in at least 2 replciates)
+# 1) define consistent peaks (present in at least 2 replciates)
 # 2) annotatePeak to the nearest proximal genes (within ±1 kb of transcription start sites, excluding “Distal Intergenic” peaks, hg19) to define ISL1-bound targets.
 ISL1_set = readRDS(file=paste0(db_specifc_input_path, 'GSE195476_ISL1/ISL1_set.rds'))
 lengths(ISL1_set)
@@ -688,16 +688,16 @@ if(!file.exists(file= "cisTarget_targets_in_all_CTS.rds")) {
 	summary(cisTarget.res$NES)	
 #   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 #   3.000   3.170   3.350   3.487   3.695   5.450
-    summary(cisTarget.res[which(cisTarget.res$geneSet==CTS_name),]$NES)   
+    summary(cisTarget.res[which(cisTarget.res$geneSet==CTS_ID),]$NES)   
 #       Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 #   3.050   3.197   3.355   3.434   3.607   4.560 
 
-  #(NES_threshold = quantile(cisTarget.res[which(cisTarget.res$geneSet==CTS_name),]$NES, seq(0,1,0.1))['80%'])  #3.642 
+  #(NES_threshold = quantile(cisTarget.res[which(cisTarget.res$geneSet==CTS_ID),]$NES, seq(0,1,0.1))['80%'])  #3.642 
 
 
 	# ## which CTS itself in in the motif, TF_highConf, or TF_lowConf
     # tmp = subset(cisTarget.res, geneSet %in% c(CP_cluster))
-	# for (i in CTS[[CTS_name]]) {
+	# for (i in CTS[[CTS_ID]]) {
 	#   hit <- grepl(i, tmp$motif) |
 	# 		 grepl(i, tmp$TF_highConf) |
 	# 		 grepl(i, tmp$TF_lowConf)

@@ -3201,7 +3201,7 @@ heatmap_pull_candidate = function(mat, graph_list, CTS_ID, CHD, key='ISL1', codi
 					"Maven2023_gene_ISL1_up_T"  ,  "Maven2023_gene_ISL1_up_L"  ,  "Maven2023_gene_ISL1_dn_E"   ,
 					"Maven2023_gene_ISL1_dn_T" ,   "Maven2023_gene_ISL1_dn_L") 
 
-          title = paste0("candidate: ", key, " CP ChIP-seq targets that highly expressed in a state")
+          title = paste0("candidate: ", key, " CP ChIP-seq targets that are highly expressed in a state")
   } else {
     # cols_to_show = c(cols_to_show, paste0('cisTarget_',key,'.motif_target'))  
 
@@ -3218,7 +3218,7 @@ heatmap_pull_candidate = function(mat, graph_list, CTS_ID, CHD, key='ISL1', codi
      }
     cols_to_show = c(cols_to_show, colnames(mat_sub)[y])   
 
-    title = paste0("candidate: ", key, " cisTarget targets that highly expressed in a state")
+    title = paste0("candidate: ", key, " cisTarget targets that are highly expressed in a state")
   }
 
 	row_label_col <- ifelse(mat_sub[, 'CP_candidate'] == 1, "red", "black")
@@ -3252,15 +3252,15 @@ return(p)
 # graph_list: the edge-precalcualted PPIN list
 # sce: the "SingleCellExperiment" object of the datasets
 # celltype_col: a string to specify the columns of cell cluster
-# descendent_cluster_id: a string of the cluster ID of the descendent of interest
+# descendant_cluster_id: a string of the cluster ID of the descendant of interest
 fill_TF_targeting_predicted_edges = function(graph_TF_list, linkeage_name = 'CM', graph_list, 
 										sce, celltype_col='cluster', CT_cluster_id = CP_cluster ,
-                    descendent_cluster_id = CM_cluster , TF_symbol='ISL1', HVG=NULL,
+                    descendant_cluster_id = CM_cluster , TF_symbol='ISL1', HVG=NULL,
                     shrink = TRUE
 										 ){
     if(! paste0("CTS.CP_TF.target_HiG", linkeage_name) %in% names(graph_TF_list)) stop(paste0("the parent PPIN 'CTS.CP_TF.target_HiG", linkeage_name, " is missing from graph_TF_list"))
 
-    CM_ID = paste0('HiG_', descendent_cluster_id)
+    CM_ID = paste0('HiG_', descendant_cluster_id)
 	
     # helper function to find the missing edges 
 	edge_keys <- function(g) {
@@ -3272,60 +3272,60 @@ fill_TF_targeting_predicted_edges = function(graph_TF_list, linkeage_name = 'CM'
 
 	# for CM-pull
 	g1 = graph_TF_list[[paste0("CTS.CP_TF.target_HiG", linkeage_name)]]
-  g_descendent_sub = graph_list[[CM_ID]]
+  g_descendant_sub = graph_list[[CM_ID]]
   
   ## check if all nodes are in the HVG 
   if(!is.null(HVG)) {
     if(!all(V(g1)$name %in% HVG)) stop('all nodes are not in the HVG')
-    if(!all(V(g_descendent_sub)$name %in% HVG)) stop('all nodes are not in the HVG')
+    if(!all(V(g_descendant_sub)$name %in% HVG)) stop('all nodes are not in the HVG')
   }
 	## add back the coexpression between keyTF and targets that was missing from PPI database but suggested by ChIP-seq or cisTarget
 	if(vcount(g1)>0) g1 = fill_coexp_for_edges(g1, sce, celltype_col=celltype_col, cluster_id = CT_cluster_id )	
 
 	if(vcount(g1)>0) {
 	## the subset of CTS genes that also highly expressed in CM thus in the edge-calculated PPIN of HiG 
-		g_descendent_sub = induced_subgraph(g_descendent_sub, vids = V(g_descendent_sub)$name %in% V(g1)$name) 
-		# add key TF back to the subset of g_descendent_sub if it is within HiG but not in PPINs thus was missing
-		if(!(TF_symbol %in% V(g_descendent_sub)$name) & (TF_symbol %in%  DEG[[descendent_cluster_id]]) )  {
-			g_descendent_sub = igraph::add_vertices(g_descendent_sub, 1, name = TF_symbol)
+		g_descendant_sub = induced_subgraph(g_descendant_sub, vids = V(g_descendant_sub)$name %in% V(g1)$name) 
+		# add key TF back to the subset of g_descendant_sub if it is within HiG but not in PPINs thus was missing
+		if(!(TF_symbol %in% V(g_descendant_sub)$name) & (TF_symbol %in%  DEG[[descendant_cluster_id]]) )  {
+			g_descendant_sub = igraph::add_vertices(g_descendant_sub, 1, name = TF_symbol)
       V(graph)[name == key_in_TFfamily]$color <- "yellow"
-			g_descendent_sub = fill_coexp_for_edges(g_descendent_sub, sce, celltype_col=celltype_col, cluster_id = descendent_cluster_id )	
+			g_descendant_sub = fill_coexp_for_edges(g_descendant_sub, sce, celltype_col=celltype_col, cluster_id = descendant_cluster_id )	
 		 }		
 	}
 	
-	## fill back coexpression in the descendent cluster for missing linkages 
-	if(vcount(g1)>0 & vcount(g_descendent_sub)>0) {
+	## fill back coexpression in the descendant cluster for missing linkages 
+	if(vcount(g1)>0 & vcount(g_descendant_sub)>0) {
 		# find the missing edges 
-		missing_in_desc <- setdiff(edge_keys(g1), edge_keys(g_descendent_sub))   # edges present in g1 but absent in g_descendent_sub
+		missing_in_desc <- setdiff(edge_keys(g1), edge_keys(g_descendant_sub))   # edges present in g1 but absent in g_descendant_sub
 		
 		if(length(missing_in_desc)>0) {
-			# add back missing_in_desc to g_descendent_sub, assign lty = dashed
+			# add back missing_in_desc to g_descendant_sub, assign lty = dashed
 		  pairs <- do.call(rbind, strsplit(missing_in_desc, "--", fixed = TRUE))
 		  from <- pairs[, 1]
 		  to   <- pairs[, 2]
 
 		  # make sure vertices exist (should, but safe)
-		  missing_v <- setdiff(unique(c(from, to)), V(g_descendent_sub)$name)
+		  missing_v <- setdiff(unique(c(from, to)), V(g_descendant_sub)$name)
 		  if (length(missing_v) > 0) {
-			g_descendent_sub <- add_vertices(g_descendent_sub, nv = length(missing_v), name = missing_v)
+			g_descendant_sub <- add_vertices(g_descendant_sub, nv = length(missing_v), name = missing_v)
 		  }
 
 		  # build edge vector: from1,to1, from2,to2,...
 		  edges_vec <- as.vector(rbind(from, to))
 
-		  m_before <- ecount(g_descendent_sub)
-		  g_descendent_sub <- add_edges(g_descendent_sub, edges_vec)
-		  new_edges <- seq.int(m_before + 1, ecount(g_descendent_sub))
+		  m_before <- ecount(g_descendant_sub)
+		  g_descendant_sub <- add_edges(g_descendant_sub, edges_vec)
+		  new_edges <- seq.int(m_before + 1, ecount(g_descendant_sub))
 
 		  # ensure attrs exist, then style new edges
-		  if (!"lty" %in% edge_attr_names(g_descendent_sub)) E(g_descendent_sub)$lty <- "solid"
-		  E(g_descendent_sub)$lty[new_edges] <- "dashed"
+		  if (!"lty" %in% edge_attr_names(g_descendant_sub)) E(g_descendant_sub)$lty <- "solid"
+		  E(g_descendant_sub)$lty[new_edges] <- "dashed"
 
-		g_descendent_sub = fill_coexp_for_edges(g_descendent_sub, sce, celltype_col=celltype_col, cluster_id = descendent_cluster_id, shrink = shrink)	
+		g_descendant_sub = fill_coexp_for_edges(g_descendant_sub, sce, celltype_col=celltype_col, cluster_id = descendant_cluster_id, shrink = shrink)	
 		}
-	} else g_descendent_sub = NULL
+	} else g_descendant_sub = NULL
 	
-	return(list(g_CT_sub = g1, g_descendent_sub = g_descendent_sub))
+	return(list(g_CT_sub = g1, g_descendant_sub = g_descendant_sub))
 }
 
 ########################################################
@@ -3353,7 +3353,7 @@ fill_TF_targeting_predicted_edges = function(graph_TF_list, linkeage_name = 'CM'
 #'   \code{linkeage}, \code{from}, \code{to}, \code{delta}, \code{abs_delta},
 #'   \code{direction}, \code{status}, \code{rank}. Additional columns are allowed.
 #'
-#' @param descendent Character scalar. Which lineage to keep (matched against the
+#' @param descendant Character scalar. Which lineage to keep (matched against the
 #'   \code{linkeage} column), e.g. \code{"CM"} or \code{"CF"}. Default \code{"CM"}.
 #'
 #' @param CHD Character vector of CHD genes to highlight as red nodes. Default \code{character(0)}.
@@ -3407,7 +3407,7 @@ fill_TF_targeting_predicted_edges = function(graph_TF_list, linkeage_name = 'CM'
 #'
 #' g <- make_merged_TIPS_graph(
 #'   final_table,
-#'   descendent = "CM",
+#'   descendant = "CM",
 #'   CHD = c("GATA6","TBX5"),
 #'   added_TF = c("ETV2","PRDM6"),
 #'   top_n_label = 10,
@@ -3425,7 +3425,7 @@ fill_TF_targeting_predicted_edges = function(graph_TF_list, linkeage_name = 'CM'
 #' @export
 
 make_merged_TIPS_graph <- function(final_table,
-                                   descendent = "CM",
+                                   descendant = "CM",
                                    CHD = character(0),
                                    added_TF = character(0),   # TFs that were added because missing in STRING PPIN
                                    top_n_label = 5,

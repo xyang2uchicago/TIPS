@@ -37,8 +37,8 @@ CM_cluster = 'cardiac.c'
 CF_cluster = 'extraembryonicMesoderm'
 CMES_cluster = 'mixedMesoderm.a'
 
-CTS_name = 'cardiac.a'
-CTS_ID = paste0('CTS_', CTS_name)
+CTS_ID = 'cardiac.a'
+CTS_name = paste0('CTS_', CTS_ID)
 
 ########################################################
 ##  input 2.1   hg38 coding gene symbols & TF annotations  -- shared ---
@@ -106,7 +106,7 @@ table(maps$category)
 
 ########################################################
 ##  input 2.2 published gene openness score -- shared ---
-## gene-level Marker genes (gene score) for fetall heart scATAC-seq clusters using differential test, published by authors 
+## gene-level Marker genes (gene score) for fetal heart scATAC-seq clusters using differential test, published by authors 
 # the table S3
 library(openxlsx)
 annotation_vitro = read.xlsx(xlsxFile = paste0(input_path, 'Ameen2022cell-supplement-10.xlsx'), sheet = 4)  
@@ -320,12 +320,12 @@ CTS[[1]]
 ################# creat ATAC_anno_df table and save it ####################
 ### step 1.2) building the binary annotation matrix 
 # rebuild_mat = TRUE # Decided by 24.1, 24.2, and 24.3
-fileName = paste0('binary_annot_',CTS_ID,'_scATAC_Maven2023_gene_ISL1_v3.tsv')
+fileName = paste0('binary_annot_',CTS_name,'_scATAC_Maven2023_gene_ISL1_v3.tsv')
 
 if(rebuild_mat) {
 
-	annotation_sub = subset(ATAC_anno_df, name %in% CTS[[CTS_name ]])
-	length(unique(CTS[[CTS_name]]))  # 37
+	annotation_sub = subset(ATAC_anno_df, name %in% CTS[[CTS_ID ]])
+	length(unique(CTS[[CTS_ID]]))  # 37
 	dim(annotation_sub) #[1]48  8
 	length(unique(annotation_sub$name)) # 22
 	colnames(annotation_sub)
@@ -391,7 +391,7 @@ if(rebuild_mat) {
 	dim(mat) #[1] 22 15
 
 	## add back the missing symbols
-	(missing =setdiff(CTS[[CTS_name]], rownames(mat)))
+	(missing =setdiff(CTS[[CTS_ID]], rownames(mat)))
 # 	[1] "RGS5"    "KLF6"    "ARL4C"   "GATA4"   "ST3GAL5" "TSPAN12" "PTH1R"   "DPYSL3"  "SPATS2L" "TUBB2A" 
 # [11] "NTNG1"   "DBT"     "LIPA"    "EEF2K"   "FAM83D" 
 
@@ -404,7 +404,7 @@ if(rebuild_mat) {
 	# table for CTS.CP ==  high/low in CP ; high/low in CM;  high/low in CF; 
 	# open in PCW6; open in PCW8 CM; open in PCW19 CM; open in PCW8 CF; open in PCW19 CF
 	mat = as.data.frame(mat)
-	mat[, paste0('CTS_', CTS_name)] = ifelse(rownames(mat) %in% CTS[[CTS_name]], '1', '0')
+	mat[, paste0('CTS_', CTS_ID)] = ifelse(rownames(mat) %in% CTS[[CTS_ID]], '1', '0')
 	mat[, 'CP_hi'] = ifelse(rownames(mat) %in% DEG[[CP_cluster]], '1', '0')
 	mat[, 'CM_hi'] = ifelse(rownames(mat) %in% DEG[[CM_cluster]], '1', '0')
 	mat[, 'CF_hi'] = ifelse(rownames(mat) %in% DEG[[CF_cluster]], '1', '0')
@@ -415,7 +415,7 @@ if(rebuild_mat) {
 ### maven2023 ISL1 set
 # refer to D:\projects\DS\source\GSE195476_ISL1\ISL1_GS.R
 # in which we did:
-# 1) define consistend peaks (present in at least 2 replciates)
+# 1) define consistent peaks (present in at least 2 replciates)
 # 2) annotatePeak to the nearest proximal genes (within ±1 kb of transcription start sites, excluding “Distal Intergenic” peaks, hg19) to define ISL1-bound targets.
 ISL1_set = readRDS(file=paste0(db_specifc_input_path, 'GSE195476_ISL1/ISL1_set.rds'))
 lengths(ISL1_set)
@@ -624,15 +624,15 @@ if(!file.exists(file= "cisTarget_targets_in_all_CTS.rds")) {
 	summary(cisTarget.res$NES)	
 #        Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 #   3.010   3.180   3.310   3.571   3.772   5.840 
-	summary(cisTarget.res[which(cisTarget.res$geneSet==CTS_name),]$NES)   
+	summary(cisTarget.res[which(cisTarget.res$geneSet==CTS_ID),]$NES)   
 #    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 #  3.030   3.150   3.290   3.476   3.598   4.770 
 
-    #(NES_threshold = quantile(cisTarget.res[which(cisTarget.res$geneSet==CTS_name),]$NES, seq(0,1,0.1))['80%'])  #3.814 
+    #(NES_threshold = quantile(cisTarget.res[which(cisTarget.res$geneSet==CTS_ID),]$NES, seq(0,1,0.1))['80%'])  #3.814 
 
 	# ## which CTS itself in in the motif, TF_highConf, or TF_lowConf
     # tmp = subset(cisTarget.res, geneSet %in% c(CP_cluster))
-	# for (i in CTS[[CTS_name]]) {
+	# for (i in CTS[[CTS_ID]]) {
 	  # hit <- grepl(i, tmp$motif) |
 			 # grepl(i, tmp$TF_highConf) |
 			 # grepl(i, tmp$TF_lowConf)
