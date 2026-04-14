@@ -13,6 +13,7 @@ TIPS links tipping-point instability in single-cell data to interpretable intera
 <br>
 Figure 1A
 <br>
+<br>
 <img src="https://github.com/xyang2uchicago/TIPS/blob/main/imgs/Fig3_TIPS_pipeline.jpg" width="33%" height="auto">
 <br>
 Figure 1B
