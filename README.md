@@ -9,12 +9,18 @@ TIPS links tipping-point instability in single-cell data to interpretable intera
 - Method: BioTIP + **coexpression-weighted protein–protein interaction networks + robustness (targeted-attack) + chromatin integration** to resolve lineage-leaning arms (Fig. 1C).
 <br>
 <p align="center">
+<img src="https://github.com/xyang2uchicago/TIPS/blob/main/imgs/Fig3_developmental_blackbox.jpg" width="33%" height="auto">
+<br>
+Figure 1A
+<br>
 <img src="https://github.com/xyang2uchicago/TIPS/blob/main/imgs/Fig3_TIPS_pipeline.jpg" width="33%" height="auto">
 <br>
+Figure 1B
 <br>
 <br>
 <img src="https://github.com/xyang2uchicago/TIPS/blob/main/imgs/Fig3_TIPS_analysis_strategy.jpg" width="33%" height="auto">
 </p>
+Figure 1C
 <br>
 
 ### Why TIPS?
