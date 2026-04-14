@@ -26,9 +26,9 @@ Figure 1C
 <br>
 
 ### Why TIPS?
-- Vulnerable progenitor states are transient, heterogeneous, and difficult to capture using markers alone.
-- Pinpointing when—and how—perturbations rewire developmental programs remains challenging.
-- TIPS maps defect-vulnerable windows and prioritizes lineage-selective regulatory programs from mixed progenitor pools.
+- Vulnerable progenitor states are **transient, heterogeneous**, and difficult to capture using markers alone.
+- Pinpointing **when—and how—perturbations rewire** developmental programs remains challenging.
+- TIPS maps **defect-vulnerable** windows and prioritizes **lineage-selective** regulatory programs from mixed progenitor pools.
 
 ### 3 Case Studies
 
