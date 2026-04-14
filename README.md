@@ -33,9 +33,9 @@ Figure 1C
 ### 3 Case Studies
 
 We applied TIPS to three datasets regarding early mesoderm specifications (see [examples](https://github.com/xyang2uchicago/TIPS/tree/main/examples)). The three datasets are as follows:
-1. #### Dataset 1 contained 12.7k genes in 11k E8.25 cells, with 16 predefined developing mesoderm subtypes ([Ibarra-Soria et al., 2018](https://www.nature.com/articles/s41556-017-0013-z)).
-2. #### Dataset 2 consists of 10.9k genes of 7,240 developing mesoderm cells collected at embryonic day (E) 8.25 when precursor cells of major organs have been formed ([Pijuan-Sala et al., 2019](https://pubmed.ncbi.nlm.nih.gov/30787436/)).
-3. Dataset 3 consists of 38.9k genes in 230,786 human embryonic stem cells (hESCs) of 13 clusters  ([Elorbany et al., 2022]([https://pubmed.ncbi.nlm.nih.gov/28167799/](https://pubmed.ncbi.nlm.nih.gov/35061661/)). MuTrans evaluation is given at https://github.com/MohsenZand/ipsc_cardiomyocyte.
+1.  Dataset 1 contained **12.7k genes in 11,039 E8.25 cells**, with 16 predefined developing mesoderm subtypes ([Ibarra-Soria et al., 2018](https://www.nature.com/articles/s41556-017-0013-z)).
+2. Dataset 2 consists of **10.9k genes of 7,240 developing mesoderm cells** collected at embryonic day (E) 8.25 when precursor cells of major organs have been formed ([Pijuan-Sala et al., 2019](https://pubmed.ncbi.nlm.nih.gov/30787436/)).
+3. Dataset 3 consists of **38.9k genes in 230,786 longitudinal human embryonic stem cells (hESCs)** of 13 clusters  ([Elorbany et al., 2022]([https://pubmed.ncbi.nlm.nih.gov/28167799/](https://pubmed.ncbi.nlm.nih.gov/35061661/)). MuTrans evaluation is given at https://github.com/MohsenZand/ipsc_cardiomyocyte.
 
 ### Where to apply TIPS?
 - TIPS connects single-cell instability signals to mechanistically grounded network architecture.
