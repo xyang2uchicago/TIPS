@@ -122,7 +122,7 @@ library(gplots)
 
 if (grepl(".", key, fixed = T)) warnning(paste("pls assign gene symbol to ", key))
 
-# ## heler to paly around the layout to be beautful
+# ## helper to play around with the layout
 make_layout <- function(g, seed) {
     set.seed(seed)
     layout_with_fr(g)
@@ -138,7 +138,7 @@ edge_attr_names(graph_TF_list[["CTS.CP_TF.target_HiGCM"]])
 
 
 res <- fill_TF_targeting_predicted_edges(graph_TF_list,
-    linkeage_name = "CM", graph_list,
+    linkage_name = "CM", graph_list,
     sce, celltype_col = celltype_col, CT_cluster_id = CP_cluster,
     descendant_cluster_id = CM_cluster, TF_symbol = key,
     HVG = rownames(sce)
@@ -152,7 +152,7 @@ names(res)
 
 
 res <- fill_TF_targeting_predicted_edges(graph_TF_list,
-    linkeage_name = "CF", graph_list,
+    linkage_name = "CF", graph_list,
     sce, celltype_col = celltype_col, CT_cluster_id = CP_cluster,
     descendant_cluster_id = CF_cluster, TF_symbol = key,
     HVG = rownames(sce)
@@ -184,7 +184,7 @@ for (pull in c("CM", "CF")) {
     predict <- prioritize_edge_change(g1, edge_change_df = change_df, top_n = 5, title = paste0(pull, "_pull_subnetwork_", key))
     # => TIPS_delta_edge_reweighting_CF_pull_subnetwork.pdf
 
-    tmp <- cbind(linkeage = pull, change_df, ChIP = key)
+    tmp <- cbind(linkage = pull, change_df, ChIP = key)
 
     final_table <- rbind(final_table, tmp)
 }

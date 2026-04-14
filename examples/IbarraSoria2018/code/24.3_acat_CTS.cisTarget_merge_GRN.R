@@ -40,7 +40,7 @@ key_TFs # [1] "CBFB"   "ETV2"   "GATA4"  "HMGA2"  "PRDM6"  "RBFOX2"
 
 final_table <- read.table(file = file, header = TRUE, sep = "\t")
 head(final_table)
-#   linkeage  from    to          w1            w2       delta  abs_delta
+#   linkage  from    to          w1            w2       delta  abs_delta
 # 1       CM GATA6  TBX5  0.14273740  0.0538731312 -0.08886427 0.08886427
 # 2       CM  CBFB GATA6  0.03651142 -0.0056903109 -0.04220173 0.04220173
 # 3       CM  CBFB  TBX5 -0.01286985 -0.0002101566  0.01265969 0.01265969
@@ -66,7 +66,7 @@ source("../../../../../R/celltype_specific_weight_v10.R")
 
 # g = graph_from_data_frame(final_table[,c('from','to')], directed = FALSE)
 
-g_merged <- make_merged_TIPS_graph(subset(final_table, linkeage == "CM"),
+g_merged <- make_merged_TIPS_graph(subset(final_table, linkage == "CM"),
     CHD = CHD,
     added_TF = setdiff(key_TFs, V(graph_list[[paste0("CTS_", CTS_ID)]])$name %>% toupper()), top_n_label = 5,
     g_string = graph_list[[paste0("CTS_", CTS_ID)]]
@@ -103,7 +103,7 @@ cisTarget.res_HiG[grepl("HMGA2", cisTarget.res_HiG$TF_highConf) | grepl("HMGA2",
 # 0
 
 ## 3) 3) Is HMGA2 supported by many distinct motifs or only one recurring composite?
-hits_hmga <- subset(final_table, linkeage == "CM" & grepl("HMGA2", TF_highConf))
+hits_hmga <- subset(final_table, linkage == "CM" & grepl("HMGA2", TF_highConf))
 sort(tapply(hits_hmga$NES, hits_hmga$motif, max), decreasing = TRUE)
 # transfac_pro__M07320
 #                 3.81

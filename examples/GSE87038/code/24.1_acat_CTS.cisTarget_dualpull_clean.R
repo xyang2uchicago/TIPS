@@ -91,7 +91,7 @@ if (length(files) > 0) {
     fileName <- grep("_v3.tsv", files, value = TRUE)
     mat <- read.table(fileName, sep = "\t", header = T, check.names = FALSE)
 
-    saved_variables <- readRDS(file = "scATAC_cistTarget_variables.rds")
+    saved_variables <- readRDS(file = "scATAC_cisTarget_variables.rds")
 
     # Recreate variables
     x <- saved_variables$x
@@ -105,7 +105,7 @@ if (length(files) > 0) {
     keys
     # [1] "PARP1"            "HOXD3"            "ZSCAN9"           "CEBPB;PDX1;STAT6" "TCF3"
     # [6] "POU3F3"
-    length(tmp) # 12
+    length(tmp) # 9
 
 
     ## add to the binary annotation matrix the motif-based TF-target annotations
@@ -117,15 +117,13 @@ if (length(files) > 0) {
         mat[, paste0("cisTarget_", key, ".motif_target")] <- ifelse(rownames(mat) %in% genes, "1", "0")
     }
 
-    # 0
-
     ####################################################
     ### extract subnetworks and add seed_key-bound links ###
     ####################################################
-    # literature review to identify topest TF here as a key to followup predictions
+    # literature review to identify top TF here as a key to followup predictions
 
 
-    dim(mat) # [1] 54 62  all CTS.8 genes !!
+    dim(mat) # [1] 54 71  all CTS.8 genes !!
     colnames(mat)
     # ...
     # [30] "cisTarget_PARP1.motif_target"
@@ -216,7 +214,7 @@ if (length(files) > 0) {
     mat <- as.data.frame(mat)
 
     ##  filter out the key_TFs that come from one motif thus will share target genes for the downstream predictions	=======================
-    ## ====== note taht this step need manually watch, such as selecting the TFs of the same motif that are most close to the seed TF ======
+    ## ====== note that this step is manual, such as selecting the TFs of the same motif that are most close to the seed TF ======
     # (x = which(grepl(seed_TF[3], colnames(mat)) | grepl(seed_TF[2], colnames(mat)) | grepl(seed_TF[3], colnames(mat)) ) )  # TF candidateds for CTS.CP
     (x <- intersect(which(grepl("cisTarget_", colnames(mat))), which(Reduce("|", lapply(key_TFs, function(p) grepl(p, colnames(mat), fixed = F))))))
     x
@@ -246,7 +244,7 @@ if (length(files) > 0) {
             mat[, paste0(key, "_CM_candidate")] <- ifelse(mat[, "CM_hi"] == 1 & mat[, x[j]] == 1, 1, 0)
             # 4) must be open at PCW8_CF or PCW19_CF for CF_hi
             mat[, paste0(key, "_CF_candidate")] <- ifelse(mat[, "CF_hi"] == 1 & mat[, x[j]] == 1, 1, 0)
-        } # end of for(j in seq_alongs(x))
+        } # end of for(j in seq_along(x))
     } # end of if(length(x)>0)
 
     dim(mat) # 54 71
@@ -258,7 +256,7 @@ if (length(files) > 0) {
         fileName <- paste0("heatmap_blocked_", CTS_name, "_scATAC_cisTarget_", paste(key_TFs, collapse = "_"), "_v3.tsv")
         write.table(mat, file = fileName, sep = "\t", quote = FALSE, row.names = TRUE, col.names = TRUE) # !!!!!!!!!!!!
 
-        saveRDS(list(x = x, key_TFs = key_TFs, motifAnnot_sub = motifAnnot_sub), "scATAC_cistTarget_variables.rds")
+        saveRDS(list(x = x, key_TFs = key_TFs, motifAnnot_sub = motifAnnot_sub), "scATAC_cisTarget_variables.rds")
     } else {
         stop("No key TFs found for ", CTS_name, "\n")
     }
@@ -334,7 +332,7 @@ for (key in key_TFs) {
     key_column <- which(grepl(key, colnames(mat)) & grepl("cisTarget_", colnames(mat)))
     if (key == "HOX") key_in_TFfamily <- "HOXB2" else key_in_TFfamily <- key
 
-    ## further narrow the subset to be open at CP  or descendants
+    ## further narrow the subset to be open at CP or descendants
     graph_TF_list <- identify_TF_targeted_pull_candidate(mat, graph_list, CTS_name, CHD,
         key = key,
         keep_selfloop = TRUE, # whether to keep the self-loop of the key
@@ -369,7 +367,7 @@ for (key in key_TFs) {
 # CM_ID = paste0('HiG_',CM_cluster) %>% gsub('\\.[1-9]','',.)
 # CF_ID = paste0('HiG_',CF_cluster) %>% gsub('\\.[1-9]','',.)
 
-# ## heler to paly around the layout to be beautful
+# ## helper to play around with the layout
 make_layout <- function(g, seed) {
     set.seed(seed)
     layout_with_fr(g)
@@ -386,7 +384,7 @@ for (key in key_TFs) {
     # [1] "weight"         "corexp_sign"    "coexp_target"   "norm_PPI_score" "color"          "lty"
 
     res <- fill_TF_targeting_predicted_edges(graph_TF_list,
-        linkeage_name = "CM", graph_list,
+        linkage_name = "CM", graph_list,
         sce, celltype_col = celltype_col, CT_cluster_id = CP_cluster,
         descendant_cluster_id = CM_cluster, TF_symbol = key_in_TFfamily,
         HVG = rownames(sce)
@@ -396,7 +394,7 @@ for (key in key_TFs) {
 
 
     res <- fill_TF_targeting_predicted_edges(graph_TF_list,
-        linkeage_name = "CF", graph_list,
+        linkage_name = "CF", graph_list,
         sce, celltype_col = celltype_col, CT_cluster_id = CP_cluster,
         descendant_cluster_id = CF_cluster, TF_symbol = key_in_TFfamily,
         HVG = rownames(sce)
@@ -451,7 +449,7 @@ for (f in files) {
         unlist() %>%
         unique()
 
-    change_df <- cbind(linkeage = pull, change_df, TF_highConf = tmp$TF_highConf, motif = tmp$motif, NES = tmp$NES)
+    change_df <- cbind(linkage = pull, change_df, TF_highConf = tmp$TF_highConf, motif = tmp$motif, NES = tmp$NES)
     change_df$TF_highConf[which(change_df$from != key_in_TFfamily & change_df$to != key_in_TFfamily)] <- ""
     change_df$motif[which(change_df$from != key_in_TFfamily & change_df$to != key_in_TFfamily)] <- ""
     change_df$NES[which(change_df$from != key_in_TFfamily & change_df$to != key_in_TFfamily)] <- ""
@@ -471,7 +469,7 @@ write.table(final_table,
 key_in_TFfamily <- "HMGA2"
 graph_TF_list <- readRDS(file = paste0("PPI_graph_", key_in_TFfamily, "_GRN_prediction_", CTS_name, "_v3.rds"))
 res <- fill_TF_targeting_predicted_edges(graph_TF_list,
-    linkeage_name = "CF", graph_list,
+    linkage_name = "CF", graph_list,
     sce, celltype_col = celltype_col, CT_cluster_id = CP_cluster,
     descendant_cluster_id = CF_cluster, TF_symbol = key_in_TFfamily,
     HVG = rownames(sce),
@@ -481,7 +479,7 @@ E(res[[2]])$weight # [1] 0.02714859
 E(res[[1]])$weight # [1] 0
 
 res <- fill_TF_targeting_predicted_edges(graph_TF_list,
-    linkeage_name = "CF", graph_list,
+    linkage_name = "CF", graph_list,
     sce, celltype_col = celltype_col, CT_cluster_id = CP_cluster,
     descendant_cluster_id = CF_cluster, TF_symbol = key_in_TFfamily,
     HVG = rownames(sce),

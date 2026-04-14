@@ -250,7 +250,7 @@ if (length(files) > 0) {
     # 1) must be CP_hi, CM_hi or CF_hi
     # 2) must be targets of seed_TF
 
-    # note that 'All Hox proteins bind this same consensus site with approximately equal affinity'
+    # note that 'All Hox proteins bind to this same consensus site with approximately equal affinity'
     # https://pmc.ncbi.nlm.nih.gov/articles/PMC10216783/#:~:text=All%20Hox%20proteins%20bind%20this,et%20al.%2C%202010).
 
     ## step 1.2) filter out the key_TFs that come from one motif thus will share target genes for the downstream predictions
@@ -422,7 +422,7 @@ for (key in key_TFs) {
     # [1] "weight"         "corexp_sign"    "coexp_target"   "norm_PPI_score" "color"          "lty"
 
     res <- fill_TF_targeting_predicted_edges(graph_TF_list,
-        linkeage_name = "CM", graph_list,
+        linkage_name = "CM", graph_list,
         sce, celltype_col = celltype_col, CT_cluster_id = CP_cluster,
         descendant_cluster_id = CM_cluster, TF_symbol = key_in_TFfamily,
         HVG = rownames(sce)
@@ -432,7 +432,7 @@ for (key in key_TFs) {
 
 
     res <- fill_TF_targeting_predicted_edges(graph_TF_list,
-        linkeage_name = "CF", graph_list,
+        linkage_name = "CF", graph_list,
         sce, celltype_col = celltype_col, CT_cluster_id = CP_cluster,
         descendant_cluster_id = CF_cluster, TF_symbol = key_in_TFfamily,
         HVG = rownames(sce)
@@ -504,7 +504,7 @@ for (f in files) {
         unlist() %>%
         unique()
 
-    change_df <- cbind(linkeage = pull, change_df, TF_highConf = tmp$TF_highConf, motif = tmp$motif, NES = tmp$NES)
+    change_df <- cbind(linkage = pull, change_df, TF_highConf = tmp$TF_highConf, motif = tmp$motif, NES = tmp$NES)
     change_df$TF_highConf[which(change_df$from != key_in_TFfamily & change_df$to != key_in_TFfamily)] <- ""
     change_df$motif[which(change_df$from != key_in_TFfamily & change_df$to != key_in_TFfamily)] <- ""
     change_df$NES[which(change_df$from != key_in_TFfamily & change_df$to != key_in_TFfamily)] <- ""

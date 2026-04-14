@@ -18,7 +18,7 @@ db <- "GSE87038"
 
 db_species <- 10090 # 10090 for mouse, 9606 for human
 
-download_files <- TRUE
+download_files <- FALSE
 
 # Download data files
 if(download_files){
@@ -228,6 +228,9 @@ for (i in names(DEG)) {
     graph <- delete_edge_attr(graph, "combined_score") # Remove combined_score as there is no use for it.
 
     # Fix case issues if needed (for mouse genes)
+    # String_db sometimes returns its preferred gene symbol which can
+    # be entirely uppercased. However this is just string's alias for the gene
+    # you inputted.
     if (all(mapped$symbol %in% toupper(DEG[[i]]))) V(graph)$name <- DEG[[i]][match(V(graph)$name, toupper(DEG[[i]]))]
 
     graph_list[[i]] <- graph
@@ -277,14 +280,13 @@ for (i in names(CTS)) {
 
 ## lastly, build for CTS
 # refer to 6.3_DE.statistics_CTS.R
-markers.up_all <- readRDS("../data/markers.up_all_ttest.rds")
 
 # CTS
 for (i in names(CTS)) {
-    j <- if (grepl("\\.", i) && grepl("^[0-9]+$", sub("^[^.]*\\.", "", i))) sub("\\..*$", "", i) else i
-    diff_exp <- markers.up_all[[j]][CTS[[i]], ]
-    diff_exp$symbol <- rownames(diff_exp)
-    mapped <- string_db$map(diff_exp, "symbol", removeUnmappedRows = TRUE)
+
+    CTS_genes <- data.frame(symbol = CTS[[i]])
+
+    mapped <- string_db$map(CTS_genes, "symbol", removeUnmappedRows = TRUE)
     mapped %>% dim()
     # [1] 84  21
     length(unique(mapped$symbol))
@@ -298,10 +300,13 @@ for (i in names(CTS)) {
     all(mapped[match(V(graph)$name, mapped$STRING_id), ]$STRING_id == V(graph)$name) # TRUE
     V(graph)$name <- mapped[match(V(graph)$name, mapped$STRING_id), ]$symbol
     # The 'scores' column reflects the strength of the differential expression for each gene based on the Wilcoxon rank-sum test. A high score suggests that the gene's expression is significantly different between the groups under comparison.
-    V(graph)$weight <- diff_exp[match(V(graph)$name, diff_exp$symbol), ]$summary.logFC
-    V(graph)$FDR <- diff_exp[match(V(graph)$name, diff_exp$symbol), ]$FDR
+    # V(graph)$weight <- diff_exp[match(V(graph)$name, diff_exp$symbol), ]$summary.logFC
+    # V(graph)$FDR <- diff_exp[match(V(graph)$name, diff_exp$symbol), ]$FDR
     E(graph)$weight <- E(graph)$combined_score / 1000
     graph <- delete_edge_attr(graph, "combined_score") # Remove combined_score as there is no use for it.
+
+    # Fix case issues if needed (for mouse genes)
+    if (all(mapped$symbol %in% toupper(CTS[[i]]))) V(graph)$name <- CTS[[i]][match(V(graph)$name, toupper(CTS[[i]]))]
 
     graph_list[[paste0("CTS_", i)]] <- graph
 }

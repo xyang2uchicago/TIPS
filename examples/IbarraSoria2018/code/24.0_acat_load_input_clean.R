@@ -482,7 +482,7 @@ names(ISL1)[16] = 'iPSC_CPC.open'
 	dim(mat) #[1] 37  25
 
 	##  step 1) binary annotation  
-	## ### block the genes instead of hcluster (new_strategy: must have ISL1-CP binding while in this step regardless promoter accessibility
+	## ### block the genes instead of cluster (new_strategy: must have ISL1-CP binding while in this step regardless promoter accessibility
 	# USED to be consistent with mouse dataset !! 
 	mat = as.data.frame(mat)
 	mat[,'ISL1_CP_bound'] = ifelse( (mat[,'Gao2019_gene_Isl1_E825E9.bound'] == 1 | 
