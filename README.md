@@ -19,8 +19,9 @@ Figure 1B
 <br>
 <br>
 <img src="https://github.com/xyang2uchicago/TIPS/blob/main/imgs/Fig3_TIPS_analysis_strategy.jpg" width="33%" height="auto">
-</p>
+<br>
 Figure 1C
+</p>
 <br>
 
 ### Why TIPS?
