@@ -38,9 +38,9 @@ We applied TIPS to three datasets regarding early mesoderm specifications (see [
 3. Dataset 3 consists of **38.9k genes in 230,786 longitudinal human embryonic stem cells (hESCs)** of 13 clusters  ([Elorbany et al., 2022]([https://pubmed.ncbi.nlm.nih.gov/28167799/](https://pubmed.ncbi.nlm.nih.gov/35061661/)). MuTrans evaluation is given at https://github.com/MohsenZand/ipsc_cardiomyocyte.
 
 ### Where to apply TIPS?
-- TIPS connects single-cell instability signals to mechanistically grounded network architecture.
-- Apply it to complex developmental trajectories with transient transition states (e.g., cardiogenesis).
-- Apply it to disease settings where cells deviate from normal trajectories and occupy transitional or plastic states.
+- TIPS connects single-cell **instability signals** to mechanistically grounded **network architecture**.
+- Apply it to complex **developmental trajectories** with transient transition states (e.g., cardiogenesis).
+- Apply it to **disease settings** where cells deviate from normal trajectories and occupy transitional or plastic states.
 
 
 ### How to use TIPS analysis? 
