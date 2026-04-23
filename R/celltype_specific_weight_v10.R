@@ -3253,12 +3253,12 @@ return(p)
 # sce: the "SingleCellExperiment" object of the datasets
 # celltype_col: a string to specify the columns of cell cluster
 # descendant_cluster_id: a string of the cluster ID of the descendant of interest
-fill_TF_targeting_predicted_edges = function(graph_TF_list, linkeage_name = 'CM', graph_list, 
+fill_TF_targeting_predicted_edges = function(graph_TF_list, linkage_name = 'CM', graph_list, 
 										sce, celltype_col='cluster', CT_cluster_id = CP_cluster ,
                     descendant_cluster_id = CM_cluster , TF_symbol='ISL1', HVG=NULL,
                     shrink = TRUE
 										 ){
-    if(! paste0("CTS.CP_TF.target_HiG", linkeage_name) %in% names(graph_TF_list)) stop(paste0("the parent PPIN 'CTS.CP_TF.target_HiG", linkeage_name, " is missing from graph_TF_list"))
+    if(! paste0("CTS.CP_TF.target_HiG", linkage_name) %in% names(graph_TF_list)) stop(paste0("the parent PPIN 'CTS.CP_TF.target_HiG", linkage_name, " is missing from graph_TF_list"))
 
     CM_ID = paste0('HiG_', descendant_cluster_id)
 	
@@ -3271,7 +3271,7 @@ fill_TF_targeting_predicted_edges = function(graph_TF_list, linkeage_name = 'CM'
 		}
 
 	# for CM-pull
-	g1 = graph_TF_list[[paste0("CTS.CP_TF.target_HiG", linkeage_name)]]
+	g1 = graph_TF_list[[paste0("CTS.CP_TF.target_HiG", linkage_name)]]
   g_descendant_sub = graph_list[[CM_ID]]
   
   ## check if all nodes are in the HVG 
@@ -3350,11 +3350,11 @@ fill_TF_targeting_predicted_edges = function(graph_TF_list, linkeage_name = 'CM'
 #' \code{abs_delta}, \code{direction}, \code{status}, and \code{rank}.
 #'
 #' @param final_table A data.frame of edge changes. Must contain at least columns:
-#'   \code{linkeage}, \code{from}, \code{to}, \code{delta}, \code{abs_delta},
+#'   \code{linkage}, \code{from}, \code{to}, \code{delta}, \code{abs_delta},
 #'   \code{direction}, \code{status}, \code{rank}. Additional columns are allowed.
 #'
 #' @param descendant Character scalar. Which lineage to keep (matched against the
-#'   \code{linkeage} column), e.g. \code{"CM"} or \code{"CF"}. Default \code{"CM"}.
+#'   \code{linkage} column), e.g. \code{"CM"} or \code{"CF"}. Default \code{"CM"}.
 #'
 #' @param CHD Character vector of CHD genes to highlight as red nodes. Default \code{character(0)}.
 #'
@@ -3432,7 +3432,7 @@ make_merged_TIPS_graph <- function(final_table,
                                    g_string=NULL,
                                    normalize_case = TRUE) {
   library(dplyr)
-  req <- c("linkeage","from","to","delta","abs_delta","direction","status","rank")
+  req <- c("linkage","from","to","delta","abs_delta","direction","status","rank")
   stopifnot(all(req %in% colnames(final_table)))
 
   ## two helper functions
