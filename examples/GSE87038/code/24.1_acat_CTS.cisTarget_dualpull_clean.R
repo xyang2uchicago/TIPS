@@ -1,5 +1,5 @@
 # Set True if running 24.0 the first time
-rebuild_mat <- FALSE
+rebuild_mat <- TRUE
 source("/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/code/24.0_acat_load_input_clean.R")
 
 source("../../../../R/celltype_specific_weight_v10.R")

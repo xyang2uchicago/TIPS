@@ -81,7 +81,7 @@ plot(
 )
 mtext("CMvsCP edges labeled by delta (top abs_delta)", side = 1, line = -1, cex = 1.2)
 
-dev.copy2pdf(file="PPI_graph_merged_GRN_prediction_CTS_cardiac.a_CM_final.pdf")
+dev.copy2pdf(file="PPI_graph_merged_GRN_prediction_CTS_8_CM_final.pdf")
 
 
 
