@@ -12,6 +12,7 @@ library(gridExtra) # to arrange plots
 wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/"
 setwd(paste0(wd, "results/PPI_weight/"))
 inputdir <- paste0(wd, "data/")
+shared_path <- paste0(wd, "../Shared_Data/")
 
 celltype_specific_weight_version <- '10'
 # source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
@@ -42,7 +43,7 @@ other_cardiac_id <- setdiff(ids, c(CT_id, noncardiac_id))
 ###################
 ## assess CHD scores across PPI_cat
 #################
-CHD <- readRDS(file = paste0(inputdir, "CHD_Cilia_Genelist.rds"))
+CHD <- readRDS(file = paste0(shared_path, "CHD_Cilia_Genelist.rds"))
 names(CHD)
 CHD <- CHD$Griffin2023_PCGC_AllCurated
 

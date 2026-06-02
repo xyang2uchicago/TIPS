@@ -14,6 +14,7 @@ library(sm)
 ########## BEGINNING OF USER INPUT ##########
 
 wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/"
+shared_path <- paste0(wd, "../Shared_Data/")
 celltype_specific_weight_version <- '10'
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
@@ -36,7 +37,7 @@ s = "combined" # specificity method
 # original pdf: normalized.node.strength_GSE87038_v2.pdf
 ################################################################
 {
-CHD = readRDS(file = paste0(inputdir, "CHD_Cilia_Genelist.rds"))
+CHD = readRDS(file = paste0(shared_path, "CHD_Cilia_Genelist.rds"))
 
 df = readRDS(file = "df_PAGERANK_strength_ANND.rewiring.P.rds")
 
@@ -157,7 +158,7 @@ vertex(p_attack4)
 # original pdf: PageRank_GSE870383_v2.pdf
 ################################################################
 {
-CHD = readRDS( file=paste0(inputdir, 'CHD_Cilia_Genelist.rds'))
+CHD = readRDS( file=paste0(shared_path, 'CHD_Cilia_Genelist.rds'))
 
 df = readRDS(file='df_PAGERANK_strength_ANND.rewiring.P.rds')  #!!!!!!!!!!!!!!!!!!!!!!!
 

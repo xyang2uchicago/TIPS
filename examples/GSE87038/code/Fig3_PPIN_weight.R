@@ -14,6 +14,7 @@ library(sm)
 ########## BEGINNING OF USER INPUT ##########
 
 wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/"
+shared_path <- paste0(wd, "../Shared_Data/")
 celltype_specific_weight_version <- '10'
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
@@ -62,7 +63,7 @@ df = rbind(subset(df, PPI_cat=='CTS'),
 					)
 df$label=df$gene
 
-CHD = readRDS( file=paste0(inputdir, 'CHD_Cilia_Genelist.rds'))
+CHD = readRDS( file=paste0(shared_path, 'CHD_Cilia_Genelist.rds'))
 
 df_median = df %>% group_by(signature) %>%
 					summarise(median_normalized_strength = median(normalized.strength, na.rm = TRUE))
@@ -96,7 +97,7 @@ vertex(violin_median_normalized.strength_wilcox)
 # original pdf: normalized.node.strength_GSE87038_v2.pdf
 ################################################################
 {
-CHD = readRDS(file = paste0(inputdir, "CHD_Cilia_Genelist.rds"))
+CHD = readRDS(file = paste0(shared_path, "CHD_Cilia_Genelist.rds"))
 
 df = readRDS(file = "df_PAGERANK_strength_ANND.rewiring.P.rds")
 
@@ -554,7 +555,7 @@ vertex(boxplot_AUC_vertex_attack)
 df_BC <- read.table(file = "df_betweeness.tsv", sep = "\t", header = T)
 df_BC$PPI_cat <- factor(df_BC$PPI_cat, levels = c("CTS", "HiGCTS", "HiG"))
 
-CHD <- readRDS(file = paste0(inputdir, "CHD_Cilia_Genelist.rds"))
+CHD <- readRDS(file = paste0(shared_path, "CHD_Cilia_Genelist.rds"))
 df_BC$PCGC_AllCurated <- toupper(df_BC$gene) %in% toupper(unlist(CHD["Griffin2023_PCGC_AllCurated"]))
 
 # Calculate top 5 significant genes within each box
@@ -601,7 +602,7 @@ vertex(boxplot_bc_log10)
 # original pdf: PageRank_GSE870383_v2.pdf
 ################################################################
 {
-CHD = readRDS( file=paste0(inputdir, 'CHD_Cilia_Genelist.rds'))
+CHD = readRDS( file=paste0(shared_path, 'CHD_Cilia_Genelist.rds'))
 
 df = readRDS(file='df_PAGERANK_strength_ANND.rewiring.P.rds')  #!!!!!!!!!!!!!!!!!!!!!!!
 

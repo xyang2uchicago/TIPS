@@ -1,5 +1,6 @@
 wd <- "/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/"
 setwd(paste0(wd, "results/"))
+shared_path <- paste0(wd, "../Shared_Data/")
 
 
 library(clusterProfiler) # clusterProfiler v4.6.0
@@ -45,10 +46,10 @@ setdiff(toupper(TF_mouse), TF_human)
 
 input_path <- "../data/"
 
-coding_genes <- readRDS(file = paste0(input_path, "coding_genes.rds")) %>% unique()
+coding_genes <- readRDS(file = paste0(shared_path, "coding_genes.rds")) %>% unique()
 length(coding_genes) # 19930
 names(coding_genes) <- NULL
-CHD <- readRDS(paste0(input_path, "CHD_Cilia_Genelist.rds"))
+CHD <- readRDS(paste0(shared_path, "CHD_Cilia_Genelist.rds"))
 CHD <- unlist(CHD[c("Griffin2023_PCGC_AllCurated")])
 
 source("/Users/felixyu/Documents/GitHub/TIPS/R/celltype_specific_weight_v10.R")

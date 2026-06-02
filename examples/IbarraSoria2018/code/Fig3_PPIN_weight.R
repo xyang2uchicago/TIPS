@@ -12,6 +12,7 @@ library(brainGraph)
 library(pracma)
 
 wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/"
+shared_path <- paste0(wd, "../Shared_Data/")
 setwd(paste0(wd, 'results/PPI_weight/'))
 inputdir = "../../data/"
 
@@ -47,7 +48,7 @@ graph_list <- readRDS(file)
 
 signature_levels = c(names(graph_list))
 
-CHD = readRDS( file=paste0(inputdir, 'CHD_Cilia_Genelist.rds'))
+CHD = readRDS( file=paste0(shared_path, 'CHD_Cilia_Genelist.rds'))
 
 ###################################################
 # Fig A ) normalized node strength analysis
@@ -94,7 +95,7 @@ vertex(violin_median_normalized.strength_wilcox)
 # original pdf: normalized.node.strength_GSE87038_v2.pdf
 ################################################################
 {
-CHD = readRDS(file = paste0(inputdir, "CHD_Cilia_Genelist.rds"))
+CHD = readRDS(file = paste0(shared_path, "CHD_Cilia_Genelist.rds"))
 
 df = readRDS(file = "df_PAGERANK_strength_ANND.rewiring.P.rds")
 
@@ -547,7 +548,7 @@ vertex(boxplot_AUC_vertex_attack)
 df_BC <- read.table(file = "df_betweeness.tsv", sep = "\t", header = T)
 df_BC$PPI_cat <- factor(df_BC$PPI_cat, levels = c("CTS", "HiGCTS", "HiG"))
 
-CHD <- readRDS(file = paste0(inputdir, "CHD_Cilia_Genelist.rds"))
+CHD <- readRDS(file = paste0(shared_path, "CHD_Cilia_Genelist.rds"))
 df_BC$PCGC_AllCurated <- toupper(df_BC$gene) %in% toupper(unlist(CHD["Griffin2023_PCGC_AllCurated"]))
 
 # Calculate top 5 significant genes within each box
@@ -594,7 +595,7 @@ vertex(boxplot_bc_log10)
 # original pdf: PageRank_IbarraSoria2018_v2.pdf
 ################################################################
 {
-CHD = readRDS( file=paste0(inputdir, 'CHD_Cilia_Genelist.rds'))
+CHD = readRDS( file=paste0(shared_path, 'CHD_Cilia_Genelist.rds'))
 
 df = readRDS(file='df_PAGERANK_strength_ANND.rewiring.P.rds')  #!!!!!!!!!!!!!!!!!!!!!!!
 

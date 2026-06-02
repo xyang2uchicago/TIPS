@@ -21,6 +21,7 @@ seed_TF <- c("ISL1")
 
 db_specifc_result_path <- paste0(wd, "results/")
 db_specifc_input_path <- paste0(wd, "data/")
+shared_path <- paste0(wd, "../Shared_Data/")
 # db_specifc_CTS_path = 'E:/Git_Holly/BioTIP/examples/result/gastrulationE8.25_Pijuan-Sala2019/C_SNNGraph_allcells/' # TODO
 db_specifc_CTS_path <- paste0(wd, "data/")
 
@@ -48,7 +49,7 @@ CTS_name <- paste0("CTS_", CTS_ID)
 ## the v38 gtf was doenloaded from on 3/12/2021
 ## https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/gencode.v38.annotation.gtf.gz
 
-coding_genes <- readRDS(file = paste0(input_path, "coding_genes.rds")) %>% unique()
+coding_genes <- readRDS(file = paste0(shared_path, "coding_genes.rds")) %>% unique()
 length(coding_genes) # 19930
 names(coding_genes) <- NULL
 head(coding_genes, 3)
@@ -65,7 +66,7 @@ length(TF_human) # 1333
 
 
 # CHD = readRDS( file='D:/projects/DS/result/CHD/CHD_Cilia_Genelist.rds')
-CHD <- readRDS(paste0(input_path, "CHD_Cilia_Genelist.rds"))
+CHD <- readRDS(paste0(shared_path, "CHD_Cilia_Genelist.rds"))
 names(CHD)
 CHD <- CHD$Griffin2023_PCGC_AllCurated
 length(CHD) # 295
@@ -73,7 +74,7 @@ length(CHD) # 295
 ########################################################
 ##  input 2.2   maps -- shared ---
 # bw_dir = 'F:/projects/scATAC/data/GSE181346_heart/GSE181346_processed_data/'
-maps <- read.delim(file = paste0(input_path, "readme_filename_map_xy.txt"), sep = "\t", header = TRUE, comment.char = "#", stringsAsFactors = FALSE)
+maps <- read.delim(file = paste0(shared_path, "readme_filename_map_xy.txt"), sep = "\t", header = TRUE, comment.char = "#", stringsAsFactors = FALSE)
 dim(maps) # [1] 44  5
 head(maps)
 #           file_name                      identity NA. identity_simple category
@@ -438,7 +439,8 @@ if (rebuild_mat) {
     annotation_sub$CF_hi <- ifelse(annotation_sub$name %in% DEG[[CF_cluster]], "1", "0")
 
     int <- c(
-        "CMES_hi", "CP_hi", "CM_hi", "CF_hi", "PCW6CP_access",
+        # "CMES_hi",
+        "CP_hi", "CM_hi", "CF_hi", "PCW6CP_access",
         "PCW8_CM_access", "PCW19_CM_access",
         "PCW8_CF_access", "PCW19_CF_access",
         "PCW8_SMC_access", "PCW19_SMC_access",
@@ -481,7 +483,7 @@ if (rebuild_mat) {
     mat[, "CP_hi"] <- ifelse(rownames(mat) %in% DEG[[CP_cluster]], "1", "0")
     mat[, "CM_hi"] <- ifelse(rownames(mat) %in% DEG[[CM_cluster]], "1", "0")
     mat[, "CF_hi"] <- ifelse(rownames(mat) %in% DEG[[CF_cluster]], "1", "0")
-    mat[, "CMES_hi"] <- ifelse(rownames(mat) %in% DEG[[CMES_cluster]], "1", "0")
+    # mat[, "CMES_hi"] <- ifelse(rownames(mat) %in% DEG[[CMES_cluster]], "1", "0")
 
 
     ########################################################
@@ -491,7 +493,7 @@ if (rebuild_mat) {
     # in which we did:
     # 1) define consistent peaks (present in at least 2 replciates)
     # 2) annotatePeak to the nearest proximal genes (within ±1 kb of transcription start sites, excluding “Distal Intergenic” peaks, hg19) to define ISL1-bound targets.
-    ISL1_set <- readRDS(file = paste0(db_specifc_input_path, "GSE195476_ISL1/ISL1_set.rds"))
+    ISL1_set <- readRDS(file = paste0(shared_path, "GSE195476_ISL1/ISL1_set.rds"))
     lengths(ISL1_set)
     # ISL1_NKO_d6CP    ISL1_WT_d18MNP      ISL1_WT_d6CP    NKX25_NKO_d6CP
     # 1987              2917              1724               266
@@ -513,7 +515,7 @@ if (rebuild_mat) {
     ##  input 5 -- shared --- published ISL1-CP binding
     ## Gao2019 Isl1 chipseq set
     # ISL1 targets were defined by assigning each ISL1 ChIP-seq peak to the nearest gene TSS, as previously reported.
-    load(paste0(db_specifc_input_path, "GSE80383_Isl1/ISL1_Mm2Hg.GS_uniqueSymbol_FC1.2_padj0.05.RData"))
+    load(paste0(shared_path, "GSE80383_Isl1/ISL1_Mm2Hg.GS_uniqueSymbol_FC1.2_padj0.05.RData"))
     names(ISL1)
     #  [1] "Isl1.embryo.bound"         "Isl1.iPSC.bound"           "Isl1KO.E8.75.up"           "Isl1KO.E8.75.dn"
     #  [5] "Isl1.E8.75.DEG"            "Isl1KO.E10.5RV.OFT.up"     "Isl1KO.E10.5RV.OFT.dn"     "Isl1.E10.5RV.OFT.DEG"
@@ -630,7 +632,8 @@ if (!file.exists(file = "cisTarget_targets_in_all_CTS.rds")) {
         download.file(
             url,
             destfile = dest_file,
-            mode = "wb"
+            mode = "wb",
+            method = "libcurl"
         )
 
         cat("Downloaded to:", dest_file, "\n")

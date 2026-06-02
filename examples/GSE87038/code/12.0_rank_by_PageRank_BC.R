@@ -1,5 +1,6 @@
 wd <- "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/"
 setwd(paste0(wd, "results/"))
+shared_path <- paste0(wd, "../Shared_Data/")
 
 
 library(clusterProfiler) # clusterProfiler v4.6.0
@@ -45,10 +46,10 @@ setdiff(toupper(TF_mouse), TF_human)
 
 input_path <- "../data/"
 
-coding_genes <- readRDS(file = paste0(input_path, "coding_genes.rds")) %>% unique()
+coding_genes <- readRDS(file = paste0(shared_path, "coding_genes.rds")) %>% unique()
 length(coding_genes) # 19930
 names(coding_genes) <- NULL
-CHD <- readRDS(paste0(input_path, "CHD_Cilia_Genelist.rds"))
+CHD <- readRDS(paste0(shared_path, "CHD_Cilia_Genelist.rds"))
 CHD <- unlist(CHD[c("Griffin2023_PCGC_AllCurated")])
 
 source("/Users/felixyu/Documents/GitHub/TIPS/R/celltype_specific_weight_v10.R")
@@ -141,8 +142,8 @@ res_bw <- rank_TF_CHD_in_PPIN(df_betweenness, CHD, TF_human,
 ##################################################
 ## identify among the top_TF_rank (=3) TFs BetweennessCentrality > 0
 
-(keyTF_cardiac.a <- subset(res_pr[["HiGCTS_8"]])$gene) #   "ISL1" "IRX3" "ALX1"
+(keyTF_8 <- subset(res_pr[["HiGCTS_8"]])$gene) #   "ISL1" "IRX3" "ALX1"
 
-(keyTF_cardiac.a <- intersect(keyTF_cardiac.a, subset(res_bw[["HiGCTS_8"]], BetweennessCentrality > 0)$gene)) #  "ISL1"
+(keyTF_8 <- intersect(keyTF_8, subset(res_bw[["HiGCTS_8"]], BetweennessCentrality > 0)$gene)) #  "ISL1"
 
-seed_TF <- keyTF_cardiac.a
+seed_TF <- keyTF_8

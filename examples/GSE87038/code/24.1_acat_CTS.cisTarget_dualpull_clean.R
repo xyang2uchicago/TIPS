@@ -19,7 +19,6 @@ celltype_col # [1] "label"
 CP_cluster # '8'
 CM_cluster # '17'
 CF_cluster # '16'
-CMES_cluster # '4'
 
 lengths(CTS) # a lsit
 #   7 11 15 16  8  16.1
@@ -197,6 +196,7 @@ if (length(files) > 0) {
     # HMGA2 is in DEG of 8
     # KLF6 is in DEG of 17
     # KLF6 is in DEG of 16
+    # RARB is in CTS of 8
 
 
     for (i in x) {
