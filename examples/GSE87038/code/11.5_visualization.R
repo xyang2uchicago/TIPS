@@ -9,12 +9,14 @@ library(gridExtra) # to arrange plots
 
 ########## BEGINNING OF USER INPUT ##########
 
-wd = "/Users/felixyu/Documents/GSE87038_weighted/"
+wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/"
 setwd(paste0(wd, "results/PPI_weight/"))
 inputdir <- paste0(wd, "data/")
+shared_path <- paste0(wd, "../Shared_Data/")
 
 celltype_specific_weight_version <- '10'
-source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
+# source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
+source(paste0('../../code/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
 db <- "GSE87038"
 
@@ -23,7 +25,7 @@ s <- "combined" # specificity method
 CT_id <- c("7", "8", "11", "13", "15", "16", "16.1") # critical transition clusters
 noncardiac_id <- c("1", "5", "6", "7", "9", "10", "13", "15") # Non-cardiac clusters
 
-excluded <- c("HiGCTS_13") # network too small, don't graph
+excluded <- c("HiGCTS_13", "CTS_13") # network too small, don't graph
 
 ########## END OF USER INPUT ##########
 
@@ -41,7 +43,7 @@ other_cardiac_id <- setdiff(ids, c(CT_id, noncardiac_id))
 ###################
 ## assess CHD scores across PPI_cat
 #################
-CHD <- readRDS(file = paste0(inputdir, "CHD_Cilia_Genelist.rds"))
+CHD <- readRDS(file = paste0(shared_path, "CHD_Cilia_Genelist.rds"))
 names(CHD)
 CHD <- CHD$Griffin2023_PCGC_AllCurated
 
@@ -56,7 +58,7 @@ for (int in c(paste0("HiGCTS_", CT_id))) {
         next
     }
     g <- graph_list[[int]]
-	g = graph_list[[int]]
+    graph_attr(g, "name") <- int
 	
 	p_listoflist[[int]]  = plot_weighted_PPIN(g, layout = "fr", 
 		CHD = CHD, node_size_title = "|Wilcox score|")
@@ -65,11 +67,52 @@ for (int in c(paste0("HiGCTS_", CT_id))) {
 (names(p_listoflist))
 # [1] "HiGCTS_7"    "HiGCTS_8"    "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1"
 
-pdf(file = paste0("network_view_PPI_", db, ".pdf"), width = 12, height = 12)
-print(grid.arrange(grobs = list(p_listoflist[[1]], p_listoflist[[2]]), ncol = 2))
-print(grid.arrange(grobs = list(p_listoflist[[3]], p_listoflist[[4]]), ncol = 2))
-print(grid.arrange(grobs = list(p_listoflist[[5]], p_listoflist[[6]]), ncol = 2))
+n <- length(p_listoflist)
+pdf(file = paste0("network_view_PPI_HiGCTS_", db, ".pdf"), width = 12, height = 12)
+for (i in seq(1, n, by = 2)) {
+  grobs <- p_listoflist[i:min(i + 1, n)]
+  print(grid.arrange(grobs = grobs, ncol = 2))
+}
 dev.off()
+
+p_listoflist = list()
+for (k in c(CT_id)) {
+
+    int <- paste0("CTS_", k)
+
+    if (int %in% excluded) {
+        next
+    }
+
+    g <- graph_list[[int]]
+    graph_attr(g, "name") <- int
+
+    HiG_int <- paste0("HiGCTS_", k)
+    HiGCTS  <- graph_list[[HiG_int]]
+
+    HiG <- V(g)$name %in% V(HiGCTS)$name
+
+    V(g)$is_HiG <- HiG
+
+    p_listoflist[[int]] = plot_weighted_PPIN(
+        g,
+        layout = "fr",
+        CHD = CHD,
+        node_size_title = "|Wilcox score|"
+    )
+}
+
+(names(p_listoflist))
+# [1] "HiGCTS_7"    "HiGCTS_8"    "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1"
+
+n <- length(p_listoflist)
+pdf(file = paste0("network_view_PPI_CTS_", db, ".pdf"), width = 12, height = 12)
+for (i in seq(1, n, by = 2)) {
+  grobs <- p_listoflist[i:min(i + 1, n)]
+  print(grid.arrange(grobs = grobs, ncol = 2))
+}
+dev.off()
+
 
 #########################################################
 ## OPTION: plot for HiG PPIN, too dense to show
@@ -81,7 +124,7 @@ graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_simplified_", s,
 p_list_HiG <- list()
 for (int in grep("^HiG_", names(graph_list), value = TRUE)) {
 		g = graph_list[[int]]
-		
+		graph_attr(g, "name") <- int
 		p_list_HiG[[int]]  = plot_weighted_PPIN(g, layout = "fr", 
 		CHD = CHD, node_size_title = "|Wilcox score|")
 }

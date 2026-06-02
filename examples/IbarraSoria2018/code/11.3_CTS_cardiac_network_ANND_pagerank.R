@@ -12,10 +12,11 @@ library(brainGraph)
 
 ########## BEGINNING OF USER INPUT ##########
 
-wd = "/Users/felixyu/Documents/IbarraSoria2018/"
+wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/"
 
 setwd(paste0(wd, "results/PPI_weight/"))
 inputdir <- paste0(wd, "data/")
+shared_path <- paste0(wd, "../Shared_Data/")
 
 PPI_color_palette <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
 
@@ -350,13 +351,13 @@ df <- df %>%
 # [10] "p.annd"                      "strength"                    "rank_by_strength"           
 # [13] "normalized.strength"         "rank_by_normalized.strength" "rank_by_ANND"               
 # [16] "rank_by_p.ANND"  
-saveRDS(df, file = "df_PAGERANK_strength_ANND.rewring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
-write.table(df, file = "df_PAGERANK_strength_ANND.rewring.P.tsv", sep = "\t", row.names = F) # !!!!!!!!
+saveRDS(df, file = "df_PAGERANK_strength_ANND.rewiring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
+write.table(df, file = "df_PAGERANK_strength_ANND.rewiring.P.tsv", sep = "\t", row.names = F) # !!!!!!!!
 
 ##########################
 ## add the column of betweenness centrality
 ##########################
-df <- readRDS(file = "df_PAGERANK_strength_ANND.rewring.P.rds")
+df <- readRDS(file = "df_PAGERANK_strength_ANND.rewiring.P.rds")
 
 # igraph::betweenness() uses distance graph weights, but E(g) uses connection weights, thus we invert it.
 betweenness_list <- lapply(graph_list, function(x) betweenness(x, weights = 1/E(x)$weight))
@@ -379,7 +380,7 @@ write.table(df_BC, file = "df_betweeness.tsv", sep = "\t", row.names = F) # !!!!
 df_BC <- read.table(file = "df_betweeness.tsv", sep = "\t", header = T)
 df_BC$PPI_cat <- factor(df_BC$PPI_cat, levels = c("CTS", "HiGCTS", "HiG"))
 
-CHD <- readRDS(file = paste0(inputdir, "CHD_Cilia_Genelist.rds"))
+CHD <- readRDS(file = paste0(shared_path, "CHD_Cilia_Genelist.rds"))
 df_BC$PCGC_AllCurated <- toupper(df_BC$gene) %in% toupper(unlist(CHD["Griffin2023_PCGC_AllCurated"]))
 
 # Calculate top 5 significant genes within each box
@@ -596,7 +597,7 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 ########### plot PageRank ############
-df <- readRDS(file = "df_PAGERANK_strength_ANND.rewring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
+df <- readRDS(file = "df_PAGERANK_strength_ANND.rewiring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
 (dim(df)) # [1] 8067   16
 
 ## reorder df$df$signature to be #E7298A #7570B3 and #E6AB02
@@ -606,7 +607,7 @@ df <- rbind(
     subset(df, PPI_cat == "HiG")
 )
 
-CHD <- readRDS(file = paste0(inputdir, "CHD_Cilia_Genelist.rds"))
+CHD <- readRDS(file = paste0(shared_path, "CHD_Cilia_Genelist.rds"))
 df$PCGC_AllCurated <- toupper(df$gene) %in% toupper(unlist(CHD["Griffin2023_PCGC_AllCurated"]))
 
 # Calculate top 5 significant genes within each box
@@ -828,7 +829,7 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ########### plot ANND (NOT USED   ) ############
 {
-    df <- readRDS(file = "df_PAGERANK_strength_ANND.rewring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
+    df <- readRDS(file = "df_PAGERANK_strength_ANND.rewiring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
 
     df$label <- df$gene
     subset(df, signature == "HiGCTS_cardiac.a")
@@ -846,7 +847,7 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         arrange(desc(annd)) %>% # Sort in descending order of annd
         slice_head(n = 5) # Take the top 5 rows for each signature
     # subset the CHD genes within top 5
-    CHD <- readRDS(file = paste0(inputdir, "CHD_Cilia_Genelist.rds"))
+    CHD <- readRDS(file = paste0(shared_path, "CHD_Cilia_Genelist.rds"))
 
     top_genes_CHD <- subset(top_genes, toupper(gene) %in% toupper(unlist(CHD[c("Griffin2023_PCGC_AllCurated")])))
     (dim(top_genes)) # 100  17
@@ -945,7 +946,7 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ############# plot normalized.strength (NO between-category difference! ) ###########
 {
-    df <- readRDS(file = "df_PAGERANK_strength_ANND.rewring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
+    df <- readRDS(file = "df_PAGERANK_strength_ANND.rewiring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
     df <- rbind(
         subset(df, PPI_cat == "CTS"),
         subset(df, PPI_cat == "HiGCTS"),
@@ -956,7 +957,7 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     df$label <- df$gene
     subset(df, signature == "HiGCTS_cardiac.a")
 
-    CHD <- readRDS(file = paste0(inputdir, "CHD_Cilia_Genelist.rds"))
+    CHD <- readRDS(file = paste0(shared_path, "CHD_Cilia_Genelist.rds"))
     df$PCGC_AllCurated <- toupper(df$gene) %in% toupper(unlist(CHD["Griffin2023_PCGC_AllCurated"]))
 
     # Step 1: Filter top 5 genes by normalized.strength within each signature
@@ -1227,7 +1228,7 @@ for (id in CTS) {
 }
 #####
 
-df <- readRDS(file = "df_PAGERANK_strength_ANND.rewring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
+df <- readRDS(file = "df_PAGERANK_strength_ANND.rewiring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
 (colnames(df))
 #  [1] "signature"                   "gene"                        "PageRank"                    "PPI_cat"                     "EigenCentrality"             "p.PageRank"
 #  [7] "rank_by_p.PR"                "rank_by_PR"                  "annd"                        "p.annd"                      "strength"                    "rank_by_strength"

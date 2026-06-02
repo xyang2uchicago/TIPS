@@ -12,7 +12,7 @@ library("SingleCellExperiment")
 ########## BEGINNING OF USER INPUT ##########
 
 # Set working directory
-wd <- "/Users/felixyu/Documents/IbarraSoria2018/"
+wd <- "/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/"
 setwd(paste0(wd, "results/"))
 
 # Database settings
@@ -99,17 +99,6 @@ saveRDS(markers.up, file = "../data/markers.up_ttest_min.prop0.25.rds")
 
 dim(markers.up[[1]]) # just to check dimensions
 
-# Compute all markers without min.prop filter ---
-markers.up_all <- findMarkers(
-    sce,
-    test = "t",
-    groups = sce$subcelltype,
-    min.prop = NULL,
-    direction = "up"
-)
-saveRDS(markers.up_all, file = "../data/markers.up_all_ttest.rds")
-dim(markers.up_all[[1]])
-
 DEG <- readRDS(file = paste0("../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.05.rds"))
 lengths(DEG)
 
@@ -174,6 +163,9 @@ for (i in names(DEG)) {
     graph <- delete_edge_attr(graph, "combined_score") # Remove combined_score as there is no use for it.
 
     # Fix case issues if needed (for mouse genes)
+    # String_db sometimes returns its preferred gene symbol which can
+    # be entirely uppercased. However this is just string's alias for the gene
+    # you inputted.
     if (all(mapped$symbol %in% toupper(DEG[[i]]))) V(graph)$name <- DEG[[i]][match(V(graph)$name, toupper(DEG[[i]]))]
 
     graph_list[[i]] <- graph
@@ -220,16 +212,12 @@ for (i in names(CTS)) {
     graph_list[[paste0("HiGCTS_", i)]] <- graph
 }
 
-markers.up_all <- readRDS("../data/markers.up_all_ttest.rds")
-
 # CTS
 for (i in names(CTS)) {
-    # Get unique cluster ids for clusters containing subclusters labeled by numerical id
-    j <- if (grepl("\\.", i) && grepl("^[0-9]+$", sub("^[^.]*\\.", "", i))) sub("\\..*$", "", i) else i
 
-    diff_exp <- markers.up_all[[j]][CTS[[i]], ]
-    diff_exp$symbol <- rownames(diff_exp)
-    mapped <- string_db$map(diff_exp, "symbol", removeUnmappedRows = TRUE)
+    CTS_genes <- data.frame(symbol = CTS[[i]])
+
+    mapped <- string_db$map(CTS_genes, "symbol", removeUnmappedRows = TRUE)
     mapped %>% dim()
     # [1] 84  21
     length(unique(mapped$symbol))
@@ -243,10 +231,13 @@ for (i in names(CTS)) {
     all(mapped[match(V(graph)$name, mapped$STRING_id), ]$STRING_id == V(graph)$name) # TRUE
     V(graph)$name <- mapped[match(V(graph)$name, mapped$STRING_id), ]$symbol
     # The 'scores' column reflects the strength of the differential expression for each gene based on the Wilcoxon rank-sum test. A high score suggests that the gene's expression is significantly different between the groups under comparison.
-    V(graph)$weight <- diff_exp[match(V(graph)$name, diff_exp$symbol), ]$summary.logFC
-    V(graph)$FDR <- diff_exp[match(V(graph)$name, diff_exp$symbol), ]$FDR
+    # V(graph)$weight <- diff_exp[match(V(graph)$name, diff_exp$symbol), ]$summary.logFC
+    # V(graph)$FDR <- diff_exp[match(V(graph)$name, diff_exp$symbol), ]$FDR
     E(graph)$weight <- E(graph)$combined_score / 1000
     graph <- delete_edge_attr(graph, "combined_score") # Remove combined_score as there is no use for it.
+
+    # Fix case issues if needed (for mouse genes)
+    if (all(mapped$symbol %in% toupper(CTS[[i]]))) V(graph)$name <- CTS[[i]][match(V(graph)$name, toupper(CTS[[i]]))]
 
     graph_list[[paste0("CTS_", i)]] <- graph
 }

@@ -12,7 +12,7 @@ library(ggpubr)
  
 ########## BEGINNING OF USER INPUT ##########
 
-wd = "/Users/felixyu/Documents/GSE87038_weighted/"
+wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/"
 setwd(paste0(wd, "results/PPI_weight/"))
 
 celltype_specific_weight_version <- '10'

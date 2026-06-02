@@ -25,7 +25,7 @@ library(igraph)
 
 ########## BEGINNING OF USER INPUT ##########
 
-wd = "/Users/felixyu/Documents/IbarraSoria2018/"
+wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/"
 setwd(paste0(wd, "results/"))
 
 celltype_specific_weight_version <- '10'
@@ -257,7 +257,7 @@ dev.copy2pdf(file='community_number.pdf', width=10)
  
  
 ############################################
-# edge weigh distribution analysis across PPI categories (HiG, HiGCTS, CTS)
+# edge weight distribution analysis across PPI categories (HiG, HiGCTS, CTS)
 # showing no categry difference
 ############################################
  

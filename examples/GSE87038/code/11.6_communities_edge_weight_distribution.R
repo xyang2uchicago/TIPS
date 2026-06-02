@@ -25,7 +25,7 @@ library(igraph)
 
 ########## BEGINNING OF USER INPUT ##########
 
-wd = "/Users/felixyu/Documents/GSE87038_weighted/"
+wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/"
 setwd(paste0(wd, "results/"))
 
 db <- "GSE87038"
@@ -252,7 +252,7 @@ dev.copy2pdf(file='community_number.pdf', width=10)
  
  
 ############################################
-# edge weigh distribution analysis across PPI categories (HiG, HiGCTS, CTS)
+# edge weight distribution analysis across PPI categories (HiG, HiGCTS, CTS)
 # showing no categry difference
 ############################################
  
@@ -267,7 +267,7 @@ dev.copy2pdf(file='community_number.pdf', width=10)
 # MAIN ANALYSIS EXECUTION
 # ==============================================================================
 # Extract edge weight data by PPI category
-edge_data <- extract_edge_weights_by_category(graph_list, PPI_color_palette, as.character(CT_id))
+edge_data <- extract_edge_weights_by_category(graph_list_notsimplified, PPI_color_palette, as.character(CT_id))
 (head(edge_data, 3))
 #   sample PPI_cat edge_weight num_edges cluster_ID cluster_cat
 # 1  HiG_1     HiG       0.211      4978          1      stable

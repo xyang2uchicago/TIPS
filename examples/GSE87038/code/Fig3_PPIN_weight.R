@@ -13,7 +13,8 @@ library(sm)
 
 ########## BEGINNING OF USER INPUT ##########
 
-wd = "/Users/felixyu/Documents/GSE87038_weighted/"
+wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/"
+shared_path <- paste0(wd, "../Shared_Data/")
 celltype_specific_weight_version <- '10'
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
@@ -55,14 +56,14 @@ signature_levels = c(names(graph_list))
 # original pdf: normalized.node.strength_GSE87038_v2.pdf
 ################################################################
 {
-df = readRDS(file='df_PAGERANK_strength_ANND.rewring.P.rds')  #!!!!!!!!!!!!!!!!!!!!!!!
+df = readRDS(file='df_PAGERANK_strength_ANND.rewiring.P.rds')  #!!!!!!!!!!!!!!!!!!!!!!!
 df = rbind(subset(df, PPI_cat=='CTS'),
 					subset(df, PPI_cat=='HiGCTS'),
 					subset(df, PPI_cat=='HiG')
 					)
 df$label=df$gene
 
-CHD = readRDS( file=paste0(inputdir, 'CHD_Cilia_Genelist.rds'))
+CHD = readRDS( file=paste0(shared_path, 'CHD_Cilia_Genelist.rds'))
 
 df_median = df %>% group_by(signature) %>%
 					summarise(median_normalized_strength = median(normalized.strength, na.rm = TRUE))
@@ -96,9 +97,9 @@ vertex(violin_median_normalized.strength_wilcox)
 # original pdf: normalized.node.strength_GSE87038_v2.pdf
 ################################################################
 {
-CHD = readRDS(file = paste0(inputdir, "CHD_Cilia_Genelist.rds"))
+CHD = readRDS(file = paste0(shared_path, "CHD_Cilia_Genelist.rds"))
 
-df = readRDS(file = "df_PAGERANK_strength_ANND.rewring.P.rds")
+df = readRDS(file = "df_PAGERANK_strength_ANND.rewiring.P.rds")
 
 # Keep only desired PPI categories in the correct order
 df = rbind(
@@ -202,7 +203,7 @@ print(boxplot_transition_strength)
 # original pdf: PageRank_GSE870383_v2.pdf
 ################################################################
 {
-df = readRDS(file='df_PAGERANK_strength_ANND.rewring.P.rds')  #!!!!!!!!!!!!!!!!!!!!!!!
+df = readRDS(file='df_PAGERANK_strength_ANND.rewiring.P.rds')  #!!!!!!!!!!!!!!!!!!!!!!!
 df = rbind(subset(df, PPI_cat=='CTS'),
 					subset(df, PPI_cat=='HiGCTS'),
 					subset(df, PPI_cat=='HiG')
@@ -363,12 +364,12 @@ fold_change <- robustness.dt %>%
 #   PPI_cat fold_change_edge fold_change_vertex
 #   <fct>              <dbl>              <dbl>
 # 1 CTS                1.04                1.66
-# 2 HiGCTS             1.00                1.68
+# 2 HiGCTS             1.00                1.67
 # 3 HiG                0.913               1.09
 
 ### additionally, wilcox-test the between-group changes among observed PPINs
 tmp = subset(robustness.dt,measure=='btwn.cent')
-dim(tmp) #[1] 8245    9
+(dim(tmp)) # 160115     10
 wilcox.test(subset(tmp,PPI_cat=='HiG')$comp.pct, subset(tmp,PPI_cat=='CTS')$comp.pct)
 # W = 1961908, p-value < 2.2e-16
 
@@ -400,9 +401,9 @@ sig_results_ppi <- lapply(ppi_comparisons, function(cmp) {
 
 (sig_results_ppi)
 #   group1 group2            p p_stars
-# 1    HiG HiGCTS 5.746002e-11    ****
-# 2    HiG    CTS 8.242192e-28    ****
-# 3    CTS HiGCTS 4.910623e-01      ns
+# 1    HiG HiGCTS 3.155646e-11    ****
+# 2    HiG    CTS 4.063640e-28    ****
+# 3    CTS HiGCTS 5.285741e-01      ns
 
 }
 
@@ -427,7 +428,7 @@ head(robustness.dt, 3)
 
 
 robustness.dt$measure %>% unique
-#[1] "random"     "btwn.cent"
+# "random"     "btwn.cent"
 robustness.dt = subset(robustness.dt ,measure != 'degree')
 robustness.dt$experiment = ifelse(grepl('edge', robustness.dt$type), 'edge', 'vertex')
 robustness.dt$measure= factor(robustness.dt$measure, levels = c("random" ,  "btwn.cent"))
@@ -554,7 +555,7 @@ vertex(boxplot_AUC_vertex_attack)
 df_BC <- read.table(file = "df_betweeness.tsv", sep = "\t", header = T)
 df_BC$PPI_cat <- factor(df_BC$PPI_cat, levels = c("CTS", "HiGCTS", "HiG"))
 
-CHD <- readRDS(file = paste0(inputdir, "CHD_Cilia_Genelist.rds"))
+CHD <- readRDS(file = paste0(shared_path, "CHD_Cilia_Genelist.rds"))
 df_BC$PCGC_AllCurated <- toupper(df_BC$gene) %in% toupper(unlist(CHD["Griffin2023_PCGC_AllCurated"]))
 
 # Calculate top 5 significant genes within each box
@@ -601,9 +602,9 @@ vertex(boxplot_bc_log10)
 # original pdf: PageRank_GSE870383_v2.pdf
 ################################################################
 {
-CHD = readRDS( file=paste0(inputdir, 'CHD_Cilia_Genelist.rds'))
+CHD = readRDS( file=paste0(shared_path, 'CHD_Cilia_Genelist.rds'))
 
-df = readRDS(file='df_PAGERANK_strength_ANND.rewring.P.rds')  #!!!!!!!!!!!!!!!!!!!!!!!
+df = readRDS(file='df_PAGERANK_strength_ANND.rewiring.P.rds')  #!!!!!!!!!!!!!!!!!!!!!!!
 
 df = rbind(subset(df, PPI_cat=='CTS'),
 					subset(df, PPI_cat=='HiGCTS'),
@@ -621,7 +622,7 @@ tb = df5[, c('signature','gene','PPI_cat','rank_by_PR','PCGC_AllCurated')]
 write.table(tb, file= 'table_top5_pagerank_perPPI.tsv', sep='\t', row.names=F)
  	  
 df5_CHD = subset(df5, PCGC_AllCurated==TRUE)
-(dim(df5_CHD))  # [1] 15 18
+(dim(df5_CHD))  # 15 18
 
 boxplot_pagerank <- ggplot(df, aes(x = signature, y = PageRank, colour = PPI_cat)) +
     geom_boxplot(show.legend = TRUE) + # Enable legend for the boxplot
@@ -678,12 +679,10 @@ for(g_name in unique(correct_n_edges$graph_id)){
 	graph_list[[g_name]] = delete_vertices(graph_list_notsimplified[[g_name]], vertices_to_remove)
 }
 N = sapply(graph_list_notsimplified, vcount)
-((N0-N)[which(N0-N>0)])
-# named numeric(0)
 
-graph_list_notsimplified <- lapply(graph_list_notsimplified, simplify, edge.attr.comb ='max') #!!!!!!!!!!!!!!!!!!!
-N2 = sapply(graph_list_notsimplified, vcount)
-(all(N==N2))   # [1] TRUE 
+graph_list <- lapply(graph_list_notsimplified, simplify, edge.attr.comb ='max') #!!!!!!!!!!!!!!!!!!!
+N2 = sapply(graph_list, vcount)
+(all(N==N2))   #  TRUE 
 
 edge_data <- extract_edge_weights_by_category(graph_list, PPI_color_palette, CT_id)
 (head(edge_data, 3))
