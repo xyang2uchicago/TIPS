@@ -147,17 +147,6 @@ saveRDS(DEG, file = paste0("../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "
 saveRDS(markers.up, file = "../data/markers.up_ttest_min.prop0.25.rds")
 dim(markers.up[[1]])
 
-
-markers.up_all <- findMarkers(sce,
-    test = "t", # if wilcox test rather than t-test, get AUC rather than lfc
-    groups = sce$label,
-    min.prop = NULL,
-    direction = "up"
-) # , block=mnn.all$sample)
-saveRDS(markers.up_all, file = "../data/markers.up_all_ttest.rds")
-dim(markers.up[[1]])
-
-
 DEG <- readRDS(file = paste0("../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.05.rds"))
 lengths(DEG)
 
