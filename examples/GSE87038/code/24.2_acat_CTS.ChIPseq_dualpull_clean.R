@@ -3,11 +3,12 @@ source("/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/code/24.0_acat_lo
 
 seed_TF # "ISL1"
 names(graph_list)
-# [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"       "HiG_6"       "HiG_9"
-#  [8] "HiG_10"      "HiG_12"      "HiG_14"      "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"
-# [15] "HiG_11"      "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"    "HiGCTS_11"
-# [22] "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_8"    "CTS_7"       "CTS_11"      "CTS_15"
-# [29] "CTS_16"      "CTS_16.1"    "CTS_13"      "CTS_8"
+# [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"       "HiG_6"
+# [7] "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"      "HiG_17"      "HiG_18"
+# [13] "HiG_19"      "HiG_7"       "HiG_11"      "HiG_15"      "HiG_16"      "HiG_13"
+# [19] "HiG_8"       "HiGCTS_7"    "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1"
+# [25] "HiGCTS_8"    "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"      "CTS_16.1"
+# [31] "CTS_8"
 names(DEG)
 #  [1] "1"  "2"  "3"  "4"  "5"  "6"  "9"  "10" "12" "14" "17" "18" "19" "7"  "11" "15" "16" "13" "8"
 
@@ -44,19 +45,19 @@ key <- key_TFs <- "ISL1"
 # Step1 binary annotation for genes expresion, accessibility (see 24.0xxx.R
 fileName <- paste0("../binary_annot_", CTS_name, "_scATAC_Maven2023_gene_ISL1_v3.tsv")
 mat <- read.table(fileName, sep = "\t", header = T)
-dim(mat) # [1] 54  29
+dim(mat) # [1] 54 28
 
 colnames(mat)
-#  [1] "CMES_hi"                          "CP_hi"                            "CM_hi"
-#  [4] "CF_hi"                            "PCW6CP_access"                    "PCW8_CM_access"
-#  [7] "PCW19_CM_access"                  "PCW8_CF_access"                   "PCW19_CF_access"
-# [10] "PCW8_SMC_access"                  "PCW19_SMC_access"                 "PCW6_CM_access"
-# [13] "PCW6_CF_access"                   "PCW6_SMC_access"                  "iEPC_access"
-# [16] "CTS_cardiac.a"                    "Maven2023_gene_ISL1_up_E"         "Maven2023_gene_ISL1_up_T"
-# [19] "Maven2023_gene_ISL1_up_L"         "Maven2023_gene_ISL1_dn_E"         "Maven2023_gene_ISL1_dn_T"
-# [22] "Maven2023_gene_ISL1_dn_L"         "Maven2023_gene_ISL1_WT_d6CP"      "Gao2019_gene_Isl1_E825E9.bound"
-# [25] "Gao2019_gene_Isl1.iCPC_CPC.bound" "ISL1_CP_bound"                    "ISL1_CP_candidate"
-# [28] "ISL1_CM_candidate"                "ISL1_CF_candidate"
+# [1] "CP_hi"                            "CM_hi"                            "CF_hi"
+# [4] "PCW6CP_access"                    "PCW8_CM_access"                   "PCW19_CM_access"
+# [7] "PCW8_CF_access"                   "PCW19_CF_access"                  "PCW8_SMC_access"
+# [10] "PCW19_SMC_access"                 "PCW6_CM_access"                   "PCW6_CF_access"
+# [13] "PCW6_SMC_access"                  "iEPC_access"                      "CTS_8"
+# [16] "Maven2023_gene_ISL1_up_E"         "Maven2023_gene_ISL1_up_T"         "Maven2023_gene_ISL1_up_L"
+# [19] "Maven2023_gene_ISL1_dn_E"         "Maven2023_gene_ISL1_dn_T"         "Maven2023_gene_ISL1_dn_L"
+# [22] "Maven2023_gene_ISL1_WT_d6CP"      "Gao2019_gene_Isl1_E825E9.bound"   "Gao2019_gene_Isl1.iCPC_CPC.bound"
+# [25] "ISL1_CP_bound"                    "ISL1_CP_candidate"                "ISL1_CM_candidate"
+# [28] "ISL1_CF_candidate"
 
 
 ####################################################

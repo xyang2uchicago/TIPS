@@ -9,11 +9,7 @@ setwd(paste0(updir, "/cisTarget_predicted_", CTS_ID))
 
 library(igraph)
 library(dplyr)
-library(igraph)
 
-# db_specifc_input_path <- "/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/results"
-# file <- paste0(db_specifc_input_path, "/PPI_weight/IbarraSoria2018_STRING_graph_perState_simplified_combinedweighted.rds")
-# graph_list <- readRDS(file)
 names(graph_list)
 
 

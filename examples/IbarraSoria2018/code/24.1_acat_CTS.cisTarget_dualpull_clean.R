@@ -5,7 +5,7 @@ source("/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/code/24.0_
 source("../../../../R/celltype_specific_weight_v10.R")
 
 ## check the loaded objects =========================
-seed_TF # 'ISL1'  # by top PageRank in code 12.xxxx
+seed_TF # 'MEF2C' 'GATA4' 'MSX2'  # by top PageRank in code 12.xxxx
 names(graph_list)
 # [1] "HiG_blood"                  "HiG_cardiac.b"              "HiG_cardiac.c"
 #  [4] "HiG_endothelial.a"          "HiG_endothelial.c"          "HiG_endothelial.d"
@@ -35,7 +35,7 @@ lengths(CTS)
 #                  33                   37
 class(sce) # [1] "SingleCellExperiment"
 
-dim(mat) # dim(mat)[1] 37  29
+dim(mat) # [1] 37 29
 
 (updir <- getwd())
 # "/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/results/GSE181346_heart_scATAC"
@@ -49,12 +49,8 @@ setwd(paste0(updir, "/cisTarget_predicted_", CTS_ID))
 ########################################################
 ##  input 6 -- data-driven --- RcisTarget predicted PRRX1 targets
 library(RcisTarget)
-packageVersion("RcisTarget") # ‘1.18.2’
+packageVersion("RcisTarget") # ‘1.29.0’
 library(data.table)
-
-data(package = "RcisTarget") # list which motif-annotation objects you actually have
-# data(motifAnnotations_hgnc_v9)  ## mouse: data(motifAnnotations_mgi)
-# dim(motifAnnotations_hgnc_v9)  # [1] 163192      7
 
 data(motifAnnotations_hgnc)
 dim(motifAnnotations) # [1] 253096      8
@@ -169,7 +165,7 @@ if (length(files) > 0) {
     # literature review to identify topest TF here as a key to followup predictions
 
 
-    dim(mat) # [1] 37  82  all CTS.cardiac.a genes !!
+    dim(mat) # [1] 37 82  all CTS.cardiac.a genes
     colnames(mat)
     # [1] "CMES_hi"
     # [2] "CP_hi"
@@ -354,10 +350,10 @@ for (key in motif_TF_highConf) { # !!!!!!!!
 # direct motif:  cisTarget_RBFOX2.motif_target  used from multiple potentoal matches
 
 ##########################################################
-## -- subset of CTS[['CP']] that are
-## PRRX1-target
+## -- subset of CTS[['cardiac.a']] that are
+## cisTarget-predicted TF target
 ## exclusively highly expressed (HiG) in CM or CF
-## further narrow the subset to be open at CP, but the bone PPIN of CTS at CP does NOT require CP accessibility, considering PRRX1's pioneering role
+## further narrowed to genes open at CP, with the TF's pioneering role allowing no CP accessibility requirement
 library(BioNet)
 packageVersion("BioNet") # '1.56.0'
 library(igraph)
@@ -365,7 +361,7 @@ library(tibble)
 
 
 mat <- read.table(paste0("heatmap_blocked_", CTS_name, "_scATAC_cisTarget_", paste(key_TFs, collapse = "_"), "_v3.tsv"), sep = "\t", header = T, check.names = FALSE)
-dim(mat) # [1] 54  71
+dim(mat) # [1] 37 100
 
 for (key in key_TFs) {
     key_column <- which(grepl(key, colnames(mat)) & grepl("cisTarget_", colnames(mat)))
@@ -380,13 +376,12 @@ for (key in key_TFs) {
         edge_colored_by_Maven2023_ISL1KO = FALSE,
         key_in_TFfamily = key_in_TFfamily
     )
-    # saveRDS(graph_TF_list, file='PPI_graph_PRRX1_GRN_prediction.rds')
     saveRDS(graph_TF_list, file = paste0("PPI_graph_", key_in_TFfamily, "_GRN_prediction_", CTS_name, "_v3.rds"))
 }
 
 names(graph_TF_list)
-# [1] "CTSHiG.CP_TF.target"       "CTS.CP_TF.target_HiGCM"   "CTS.CP_TF.target_HiGCF"
-# [4] "CTSHiG.CP_PRRX1.CP.bound_CPopen"
+# [1] "CTSHiG.CP_TF.target"        "CTS.CP_TF.target_HiGCM"    "CTS.CP_TF.target_HiGCF"
+# [4] "CTSHiG.CP_TF.target_CPopen"
 
 
 for (key in key_TFs) {
@@ -395,7 +390,7 @@ for (key in key_TFs) {
     graph_TF_list <- readRDS(file = paste0("PPI_graph_", key_in_TFfamily, "_GRN_prediction_", CTS_name, "_v3.rds"))
     plot_TF_targeted_pull_candidate(graph_TF_list, key_in_TFfamily, CTS_name, saveFigure = TRUE)
 }
-# => PPI_graph_GATA4_GRN_prediction_CTS_CP_v3.pdf;
+# => PPI_graph_<key_TF>_GRN_prediction_CTS_cardiac.a_v3.pdf
 
 
 ##########################################################

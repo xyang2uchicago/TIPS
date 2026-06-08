@@ -59,7 +59,7 @@ db_specifc_output_path <- paste0(wd, "results/PPI_weight/")
 
 df_PageRank <- readRDS(file = paste0(db_specifc_output_path, "df_PAGERANK_strength_ANND.rewiring.P.rds"))
 
-dim(df_PageRank) # 8060   16
+dim(df_PageRank) # 6366   16
 colnames(df_PageRank)
 # [1] "signature"                   "gene"
 # [3] "PageRank"                    "PPI_cat"
@@ -70,18 +70,26 @@ colnames(df_PageRank)
 # [13] "normalized.strength"         "rank_by_normalized.strength"
 # [15] "rank_by_ANND"                "rank_by_p.ANND"
 table(df_PageRank$signature)
-#      CTS_11      CTS_13      CTS_15      CTS_16    CTS_16.1       CTS_7
-#          32          50          60          34          67          23
-#       CTS_8       HiG_1      HiG_10      HiG_11      HiG_12      HiG_13
-#          48         300         418         437         338         403
-#      HiG_14      HiG_15      HiG_16      HiG_17      HiG_18      HiG_19
-#         358         406         519         522         451         523
-#       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6       HiG_7
-#         435         406         301         316         510         335
-#       HiG_8       HiG_9   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1
-#         329         355          14          24           8          22
-#    HiGCTS_7    HiGCTS_8
-#           9           7
+#              CTS_cardiac.a          CTS_endothelial.b
+#                         30                         28
+#                  HiG_blood              HiG_cardiac.a
+#                        417                        403
+#              HiG_cardiac.b              HiG_cardiac.c
+#                        407                        443
+#          HiG_endothelial.a          HiG_endothelial.b
+#                        455                        416
+#          HiG_endothelial.c          HiG_endothelial.d
+#                        478                        425
+# HiG_extraembryonicMesoderm    HiG_mesodermProgenitors
+#                        361                        351
+#        HiG_mixedMesoderm.a        HiG_mixedMesoderm.b
+#                        328                        365
+#     HiG_pharyngealMesoderm   HiG_presomiticMesoderm.a
+#                        369                        335
+#   HiG_presomiticMesoderm.b        HiG_somiticMesoderm
+#                        409                        323
+#           HiGCTS_cardiac.a       HiGCTS_endothelial.b
+#                         12                         11
 
 
 df_PageRank$gene <- toupper(df_PageRank$gene)
@@ -95,23 +103,31 @@ res_pr <- rank_TF_CHD_in_PPIN(df_PageRank, CHD, TF_human,
 
 #############################
 df_betweenness <- read.table(file = paste0(db_specifc_output_path, "df_betweeness.tsv"), sep = "\t", header = T)
-dim(df_betweenness) # 8213    5
+dim(df_betweenness) # 6427    5
 colnames(df_betweenness)
 # [1] "signature"             "BetweennessCentrality" "gene"
 # [4] "rank_by_BC"            "PPI_cat"
 table(df_betweenness$signature)
-#      CTS_11      CTS_13      CTS_15      CTS_16    CTS_16.1       CTS_7
-#          51          60          66          39          79          31
-#       CTS_8       HiG_1      HiG_10      HiG_11      HiG_12      HiG_13
-#          54         303         422         441         341         403
-#      HiG_14      HiG_15      HiG_16      HiG_17      HiG_18      HiG_19
-#         364         406         524         523         455         527
-#       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6       HiG_7
-#         435         411         304         320         512         336
-#       HiG_8       HiG_9   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1
-#         332         358          19          30          13          30
-#    HiGCTS_7    HiGCTS_8
-#          14          10
+#              CTS_cardiac.a          CTS_endothelial.b
+#                         37                         33
+#                  HiG_blood              HiG_cardiac.a
+#                        420                        407
+#              HiG_cardiac.b              HiG_cardiac.c
+#                        409                        444
+#          HiG_endothelial.a          HiG_endothelial.b
+#                        455                        418
+#          HiG_endothelial.c          HiG_endothelial.d
+#                        480                        426
+# HiG_extraembryonicMesoderm    HiG_mesodermProgenitors
+#                        367                        356
+#        HiG_mixedMesoderm.a        HiG_mixedMesoderm.b
+#                        329                        369
+#     HiG_pharyngealMesoderm   HiG_presomiticMesoderm.a
+#                        371                        338
+#   HiG_presomiticMesoderm.b        HiG_somiticMesoderm
+#                        412                        327
+#           HiGCTS_cardiac.a       HiGCTS_endothelial.b
+#                         13                         16
 
 df_betweenness$gene <- toupper(df_betweenness$gene)
 
@@ -129,24 +145,3 @@ res_bw <- rank_TF_CHD_in_PPIN(df_betweenness, CHD, TF_human,
 (keyTF_cardiac.a <- subset(res_pr[["HiGCTS_cardiac.a"]])$gene) #  "MEF2C" "GATA4" "MSX2"
 
 (keyTF_cardiac.a <- intersect(keyTF_cardiac.a, subset(res_bw[["HiGCTS_cardiac.a"]], BetweennessCentrality > 0)$gene)) #  "MEF2C" "GATA4" "MSX2"
-
-# rank_TF_CHD_in_PPIN(df_betweenness, CHD, TF_mouse,
-# signatures=c('HiG_8','CTS_8', 'HiGCTS_8'),
-# key = 'BetweennessCentrality',
-# gene_top_n = 5, int_top_n = 20, saveFigure=TRUE)
-
-# combined_table <- df_PageRank %>%
-# filter(grepl("_8", signature)) %>%
-# select(signature, gene, PageRank) %>%
-# left_join(
-# df_betweenness %>%
-# filter(grepl("_8", signature)) %>%
-# select(signature, gene, BetweennessCentrality),
-# by = c("signature", "gene")
-# ) %>%
-# mutate(
-# is_CHD = tolower(gene) %in% tolower(CHD),
-# is_TF  = gene %in% TF_mouse
-# )
-
-# write.table(combined_table, "pagerank_betweenness_combined_8.txt", sep = "\t", row.names = FALSE, quote = FALSE)

@@ -7,11 +7,12 @@ source("../../../../R/celltype_specific_weight_v10.R")
 ## check the loaded objects =========================
 seed_TF # 'ISL1'  # by top PageRank in code 12.xxxx
 names(graph_list)
-# [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"       "HiG_6"       "HiG_9"
-#  [8] "HiG_10"      "HiG_12"      "HiG_14"      "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"
-# [15] "HiG_11"      "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"    "HiGCTS_11"
-# [22] "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_8"    "CTS_7"       "CTS_11"      "CTS_15"
-# [29] "CTS_16"      "CTS_16.1"    "CTS_13"      "CTS_8"
+# [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"       "HiG_6"
+# [7] "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"      "HiG_17"      "HiG_18"
+# [13] "HiG_19"      "HiG_7"       "HiG_11"      "HiG_15"      "HiG_16"      "HiG_13"
+# [19] "HiG_8"       "HiGCTS_7"    "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1"
+# [25] "HiGCTS_8"    "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"      "CTS_16.1"
+# [31] "CTS_8"
 names(DEG)
 #  [1] "1"  "2"  "3"  "4"  "5"  "6"  "9"  "10" "12" "14" "17" "18" "19" "7"  "11" "15" "16" "13" "8"
 
@@ -26,23 +27,22 @@ lengths(CTS) # a lsit
 
 class(sce) # [1] "SingleCellExperiment"
 
-dim(mat) # [1] 54  29
+dim(mat) # [1] 54 28
 colnames(mat)
-#  [1] "CMES_hi"                          "CP_hi"                            "CM_hi"
-#  [4] "CF_hi"                            "PCW6CP_access"                    "PCW8_CM_access"
-#  [7] "PCW19_CM_access"                  "PCW8_CF_access"                   "PCW19_CF_access"
-# [10] "PCW8_SMC_access"                  "PCW19_SMC_access"                 "PCW6_CM_access"
-# [13] "PCW6_CF_access"                   "PCW6_SMC_access"                  "iEPC_access"
-# [16] "CTS_cardiac.a"                    "Maven2023_gene_ISL1_up_E"         "Maven2023_gene_ISL1_up_T"
-# [19] "Maven2023_gene_ISL1_up_L"         "Maven2023_gene_ISL1_dn_E"         "Maven2023_gene_ISL1_dn_T"
-# [22] "Maven2023_gene_ISL1_dn_L"         "Maven2023_gene_ISL1_WT_d6CP"      "Gao2019_gene_Isl1_E825E9.bound"
-# [25] "Gao2019_gene_Isl1.iCPC_CPC.bound" "ISL1_CP_bound"                    "ISL1_CP_candidate"
-# [28] "ISL1_CM_candidate"                "ISL1_CF_candidate"
-
+# [1] "CP_hi"                            "CM_hi"                            "CF_hi"
+# [4] "PCW6CP_access"                    "PCW8_CM_access"                   "PCW19_CM_access"
+# [7] "PCW8_CF_access"                   "PCW19_CF_access"                  "PCW8_SMC_access"
+# [10] "PCW19_SMC_access"                 "PCW6_CM_access"                   "PCW6_CF_access"
+# [13] "PCW6_SMC_access"                  "iEPC_access"                      "CTS_8"
+# [16] "Maven2023_gene_ISL1_up_E"         "Maven2023_gene_ISL1_up_T"         "Maven2023_gene_ISL1_up_L"
+# [19] "Maven2023_gene_ISL1_dn_E"         "Maven2023_gene_ISL1_dn_T"         "Maven2023_gene_ISL1_dn_L"
+# [22] "Maven2023_gene_ISL1_WT_d6CP"      "Gao2019_gene_Isl1_E825E9.bound"   "Gao2019_gene_Isl1.iCPC_CPC.bound"
+# [25] "ISL1_CP_bound"                    "ISL1_CP_candidate"                "ISL1_CM_candidate"
+# [28] "ISL1_CF_candidate"
 
 seed_TF # 'ISL1'
 CTS_ID # '8'
-CTS_name #' CTS_8'
+CTS_name # 'CTS_8'
 
 ## set subfold =======================
 (updir <- getwd())
@@ -58,12 +58,8 @@ NES_threshold <- 3
 ########################################################
 ##  input 6 -- data-driven --- RcisTarget predicted TF that are enriched among CTS genes
 library(RcisTarget)
-packageVersion("RcisTarget") # ‘1.18.2’
+packageVersion("RcisTarget") # ‘1.29.0’
 library(data.table)
-
-data(package = "RcisTarget") # list which motif-annotation objects you actually have
-# data(motifAnnotations_hgnc_v9)  ## mouse: data(motifAnnotations_mgi)
-# dim(motifAnnotations_hgnc_v9)  # [1] 163192      7
 
 data(motifAnnotations_hgnc)
 dim(motifAnnotations) # [1] 253096      8
@@ -83,7 +79,7 @@ write.table(subset(cisTarget.res, NES >= NES_threshold & geneSet %in% c(CP_clust
 ########################################################
 ##   --- binary flag CTS genes
 
-dim(mat) # 54 29
+dim(mat) # [1] 54 28
 ### = load the binary annotation matrix build in code 24.0xxx ============================
 files <- list.files(pattern = "^heatmap_blocked_CTS_") %>% grep("_v3.tsv", ., value = TRUE)
 if (length(files) > 0) {
@@ -341,14 +337,12 @@ for (key in key_TFs) {
         edge_colored_by_Maven2023_ISL1KO = FALSE,
         key_in_TFfamily = key_in_TFfamily
     )
-    # saveRDS(graph_TF_list, file='PPI_graph_PRRX1_GRN_prediction.rds')
-
     saveRDS(graph_TF_list, file = paste0("PPI_graph_", key_in_TFfamily, "_GRN_prediction_", CTS_name, "_v3.rds"))
 }
 
 names(graph_TF_list)
-# [1] "CTSHiG.CP_TF.target"       "CTS.CP_TF.target_HiGCM"   "CTS.CP_TF.target_HiGCF"
-# [4] "CTSHiG.CP_PRRX1.CP.bound_CPopen"
+# [1] "CTSHiG.CP_TF.target"        "CTS.CP_TF.target_HiGCM"    "CTS.CP_TF.target_HiGCF"
+# [4] "CTSHiG.CP_TF.target_CPopen"
 
 
 for (key in key_TFs) {
@@ -357,7 +351,7 @@ for (key in key_TFs) {
     graph_TF_list <- readRDS(file = paste0("PPI_graph_", key_in_TFfamily, "_GRN_prediction_", CTS_name, "_v3.rds"))
     plot_TF_targeted_pull_candidate(graph_TF_list, key_in_TFfamily, CTS_name, saveFigure = TRUE)
 }
-# => PPI_graph_GATA4_GRN_prediction_CTS_CP_v3.pdf;
+# => PPI_graph_<key_TF>_GRN_prediction_CTS_8_v3.pdf
 
 
 ##########################################################

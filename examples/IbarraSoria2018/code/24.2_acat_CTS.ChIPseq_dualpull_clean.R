@@ -26,13 +26,13 @@ CTS_ID <- "cardiac.a"
 CTS_name <- paste0("CTS_", CTS_ID)
 
 lengths(CTS)
-#       endothelial.b            cardiac.a presomiticMesoderm.a        endothelial.b
-#                  33                   37                   71                   32
+#   cardiac.a endothelial.b
+#          37            33
 
 class(sce) # [1] "SingleCellExperiment"
 
 (updir <- getwd())
-# "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/results/GSE181346_heart_scATAC/ChIPseq_predicted_cardiac.a"
+# "/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/results/GSE181346_heart_scATAC/ChIPseq_predicted_cardiac.a"
 # create the directory if it doesn't exist
 dir.create(file.path(updir, paste0("ChIPseq_predicted_", CTS_ID)),
     showWarnings = FALSE, recursive = TRUE
@@ -51,7 +51,7 @@ key <- key_TFs <- "ISL1"
 # Step1 binary annotation for genes expresion, accessibility (see 24.0xxx.R
 fileName <- paste0("../binary_annot_", CTS_name, "_scATAC_Maven2023_gene_ISL1_v3.tsv")
 mat <- read.table(fileName, sep = "\t", header = T)
-dim(mat) # [1] 37  100
+dim(mat) # [1] 37 29
 
 print(colnames(mat))
 #  [1] "CMES_hi"                          "CP_hi"                            "CM_hi"
@@ -87,7 +87,7 @@ dev.off()
 
 
 ##########################################################
-## -- subset of CTS[['CP.1']] that are
+## -- subset of CTS[['cardiac.a']] that are
 ## ISL1-target
 ## exclusively highly expressed (HiG) in CM or CF
 ## further narrow the subset to be open at CP, but the bone PPIN of CTS at CP does NOT require CP accessibility, considering Isl1's pioneering role
@@ -123,7 +123,7 @@ library(gplots)
     graph_TF_list <- readRDS(file = paste0("PPI_graph_", key, "_GRN_prediction_", CTS_name, "_v3.rds"))
 
     plot_TF_targeted_pull_candidate(graph_TF_list, key, CTS_name, saveFigure = TRUE)
-    # => PPI_graph_ISL1_GRN_prediction_CTS_CP.1_v3.pdf
+    # => PPI_graph_ISL1_GRN_prediction_CTS_cardiac.a_v3.pdf
 }
 
 
