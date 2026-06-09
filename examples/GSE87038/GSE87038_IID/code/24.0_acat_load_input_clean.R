@@ -1,3 +1,11 @@
+library(EnrichedHeatmap)
+library(rtracklayer)
+library(GenomicRanges)
+library(ggplot2)
+library(dplyr)
+library(purrr)
+library(SingleCellExperiment)
+
 ########## BEGINNING OF USER INPUT ##########
 wd <- "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/GSE87038_IID/"
 setwd(paste0(wd, "results/PijuanSara2019_vsCF18/GSE181346_heart_scATAC/"))
@@ -17,14 +25,6 @@ rebuild_mat <- TRUE
 heatmap_coding_target_only <- TRUE
 ########## END OF USER INPUT ##########
 CTS_name <- paste0("CTS_", CTS_ID)
-
-library(EnrichedHeatmap)
-library(rtracklayer)
-library(GenomicRanges)
-library(ggplot2)
-library(dplyr)
-library(purrr)
-library(SingleCellExperiment)
 
 ### the gene expression dataset to calculate the delta edge for newly added edges between TF and CTS_target
 load(paste0(db_specifc_input_path, "sce_E8.25_uncorrected.RData"))
