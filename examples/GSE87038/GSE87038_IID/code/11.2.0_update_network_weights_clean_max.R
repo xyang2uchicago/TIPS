@@ -11,7 +11,7 @@ library(stringr)
 ########## BEGINNING OF USER INPUT ##########
 
 wd <- "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/GSE87038_IID/"
-outdir <- file.path(wd, "data")
+outdir <- paste0(wd, "results/PPI_weight/")
 dir.create(outdir, recursive = TRUE, showWarnings = FALSE)
 setwd(outdir)
 

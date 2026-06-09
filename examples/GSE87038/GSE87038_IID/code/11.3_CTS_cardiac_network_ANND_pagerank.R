@@ -24,7 +24,7 @@ s <- "combined" # specificity method
 
 ########## END OF USER INPUT ##########
 
-file <- file.path(inputdir, paste0(db, "_IID_graph_perState_simplified_", s, "weighted.rds"))
+file <- paste0(db, "_IID_graph_perState_simplified_", s, "weighted.rds")
 graph_list <- readRDS(file)
 
 (names(graph_list))
@@ -355,13 +355,13 @@ df <- df %>%
 # [13] "normalized.strength"         "rank_by_normalized.strength"
 # [15] "rank_by_ANND"                "rank_by_p.ANND"
 
-saveRDS(df, file = "IID_df_PAGERANK_strength_ANND.rewring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
-write.table(df, file = "IID_df_PAGERANK_strength_ANND.rewring.P.tsv", sep = "\t", row.names = F) # !!!!!!!!
+saveRDS(df, file = "IID_df_PAGERANK_strength_ANND.rewiring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
+write.table(df, file = "IID_df_PAGERANK_strength_ANND.rewiring.P.tsv", sep = "\t", row.names = F) # !!!!!!!!
 
 ##########################
 ## add the column of betweenness centrality
 ##########################
-df <- readRDS(file = "IID_df_PAGERANK_strength_ANND.rewring.P.rds")
+df <- readRDS(file = "IID_df_PAGERANK_strength_ANND.rewiring.P.rds")
 
 # igraph::betweenness() uses distance graph weights, but E(g) uses connection weights, thus we invert it.
 betweenness_list <- lapply(graph_list, function(x) betweenness(x, weights = 1 / E(x)$weight))
@@ -592,7 +592,7 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 ########### plot PageRank ############
-df <- readRDS(file = "IID_df_PAGERANK_strength_ANND.rewring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
+df <- readRDS(file = "IID_df_PAGERANK_strength_ANND.rewiring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
 (dim(df)) # [1] 6786   16
 
 df <- rbind(
@@ -803,7 +803,7 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ########### plot ANND (NOT USED   ) ############
 {
-  df <- readRDS(file = "IID_df_PAGERANK_strength_ANND.rewring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
+  df <- readRDS(file = "IID_df_PAGERANK_strength_ANND.rewiring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
 
   df$label <- df$gene
 
@@ -920,7 +920,7 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ############# plot normalized.strength (NO between-category difference! ) ###########
 {
-  df <- readRDS(file = "IID_df_PAGERANK_strength_ANND.rewring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
+  df <- readRDS(file = "IID_df_PAGERANK_strength_ANND.rewiring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
   df <- rbind(
     subset(df, PPI_cat == "CTS"),
     subset(df, PPI_cat == "HiGCTS"),
@@ -1188,7 +1188,7 @@ for (id in CTS) {
 }
 #####
 
-df <- readRDS(file = "IID_df_PAGERANK_strength_ANND.rewring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
+df <- readRDS(file = "IID_df_PAGERANK_strength_ANND.rewiring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
 (colnames(df))
 #  [1] "signature"                   "gene"                        "PageRank"                    "PPI_cat"                     "EigenCentrality"             "p.PageRank"
 #  [7] "rank_by_p.PR"                "rank_by_PR"                  "annd"                        "p.annd"                      "strength"                    "rank_by_strength"
