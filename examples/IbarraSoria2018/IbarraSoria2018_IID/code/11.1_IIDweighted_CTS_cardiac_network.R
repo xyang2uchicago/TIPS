@@ -27,7 +27,7 @@ CTS <- res$CTS.candidate[which(res$significant)]
 names(CTS)
 
 ########## END OF USER INPUT ##########
-#downloaded from GitHub
+# downloaded from GitHub
 DEG <- readRDS(file = paste0(db, "_DEG_perState_min.prop0.25_lfc", logFC.cut <- 0.6, "_FDFR0.05.rds"))
 lengths(DEG)
 #                  blood              cardiac.b              cardiac.c
@@ -49,13 +49,13 @@ lengths(DEG)
 library(igraph)
 library(data.table)
 
-#This file downloaded from: 
+# This file downloaded from:
 iid_file <- Sys.glob("../data/PPIN/human_annotated_PPIs.txt.gz")
 (length(iid_file))
 stopifnot(length(iid_file) == 1)
 
-iid <- fread(iid_file[1], sep="\t", header=TRUE)
-iid <- iid[mouse == 1];
+iid <- fread(iid_file[1], sep = "\t", header = TRUE)
+iid <- iid[mouse == 1]
 
 iid[, n_exp_pmids := as.integer(n_exp_pmids)]
 iid[is.na(n_exp_pmids), n_exp_pmids := 0L]
@@ -84,35 +84,37 @@ g_iid_global <- graph_from_data_frame(
 )
 
 (cat("Built g_iid_global:", igraph::vcount(g_iid_global), "nodes,", igraph::ecount(g_iid_global), "edges\n"))
-#Built g_iid_global: 17182 nodes, 1517715 edges
+# Built g_iid_global: 17182 nodes, 1517715 edges
 
 graph_list <- list()
 
 get_iid_subnetwork <- function(g_global, hits) {
-    hits <- toupper(hits)
-    hits <- unique(hits[!is.na(hits) & hits != ""])
-    hits <- intersect(hits, V(g_global)$name)
-    if (length(hits) < 2) return(make_empty_graph())
-    induced_subgraph(g_global, vids = hits)
+  hits <- toupper(hits)
+  hits <- unique(hits[!is.na(hits) & hits != ""])
+  hits <- intersect(hits, V(g_global)$name)
+  if (length(hits) < 2) {
+    return(make_empty_graph())
+  }
+  induced_subgraph(g_global, vids = hits)
 }
 
 
 # HiG
 for (i in names(DEG)) {
-    # Filter differentially expressed genes based on logFC and FDR thresholds
-    diff_exp <- markers.up[[i]]
-    diff_exp$symbol <- rownames(diff_exp)
-    diff_exp <- subset(diff_exp, summary.logFC > logFC.cut & FDR < 0.01)
+  # Filter differentially expressed genes based on logFC and FDR thresholds
+  diff_exp <- markers.up[[i]]
+  diff_exp$symbol <- rownames(diff_exp)
+  diff_exp <- subset(diff_exp, summary.logFC > logFC.cut & FDR < 0.01)
 
-    hits <- diff_exp$symbol
+  hits <- diff_exp$symbol
 
-    # Get the subnetwork
-    graph <- get_iid_subnetwork(g_iid_global, hits)
+  # Get the subnetwork
+  graph <- get_iid_subnetwork(g_iid_global, hits)
 
   # Add node attributes (only for nodes that exist in the graph)
   if (vcount(graph) > 0) {
     V(graph)$weight <- diff_exp[match(V(graph)$name, diff_exp$symbol), "summary.logFC"]
-    V(graph)$FDR    <- diff_exp[match(V(graph)$name, diff_exp$symbol), "FDR"]
+    V(graph)$FDR <- diff_exp[match(V(graph)$name, diff_exp$symbol), "FDR"]
   }
 
   if (vcount(graph) > 0 && all(toupper(V(graph)$name) %in% toupper(DEG[[i]]))) {
@@ -127,29 +129,29 @@ for (i in names(DEG)) {
 # build for (up-regulated_marker intersecting CTS)
 # HiGCTS
 for (i in names(CTS)) {
-    # Get unique cluster ids for clusters containing subclusters labeled by numerical id
-    j <- if (grepl("\\.", i) && grepl("^[0-9]+$", sub("^[^.]*\\.", "", i))) sub("\\..*$", "", i) else i
+  # Get unique cluster ids for clusters containing subclusters labeled by numerical id
+  j <- if (grepl("\\.", i) && grepl("^[0-9]+$", sub("^[^.]*\\.", "", i))) sub("\\..*$", "", i) else i
 
-    # Get the full marker table for that cluster
-    deg_table <- markers.up[[j]]
-    deg_table$symbol <- rownames(deg_table)
+  # Get the full marker table for that cluster
+  deg_table <- markers.up[[j]]
+  deg_table$symbol <- rownames(deg_table)
 
-    # Intersect with CTS
-    deg_table <- deg_table[deg_table$symbol %in% CTS[[i]], ]
+  # Intersect with CTS
+  deg_table <- deg_table[deg_table$symbol %in% CTS[[i]], ]
 
-    # Filter on significance
-    diff_exp <- subset(deg_table, summary.logFC > logFC.cut & FDR < 0.01)
+  # Filter on significance
+  diff_exp <- subset(deg_table, summary.logFC > logFC.cut & FDR < 0.01)
 
-    hits <- diff_exp$symbol
-    graph <- get_iid_subnetwork(g_iid_global, hits)
+  hits <- diff_exp$symbol
+  graph <- get_iid_subnetwork(g_iid_global, hits)
 
 
-    if (vcount(graph) > 0) {
+  if (vcount(graph) > 0) {
     V(graph)$weight <- diff_exp[match(V(graph)$name, diff_exp$symbol), "summary.logFC"]
-    V(graph)$FDR    <- diff_exp[match(V(graph)$name, diff_exp$symbol), "FDR"]
-    }
+    V(graph)$FDR <- diff_exp[match(V(graph)$name, diff_exp$symbol), "FDR"]
+  }
 
-    graph_list[[paste0("HiGCTS_", i)]] <- graph
+  graph_list[[paste0("HiGCTS_", i)]] <- graph
 }
 
 ## lastly, build for CTS
@@ -158,20 +160,20 @@ markers.up_all <- readRDS(file = paste0(db, "_markers.up_all_ttest.rds"))
 
 # CTS
 for (i in names(CTS)) {
-    j <- if (grepl("\\.", i) && grepl("^[0-9]+$", sub("^[^.]*\\.", "", i))) sub("\\..*$", "", i) else i
-    diff_exp <- markers.up_all[[j]][CTS[[i]], ]
-    diff_exp$symbol <- rownames(diff_exp)
+  j <- if (grepl("\\.", i) && grepl("^[0-9]+$", sub("^[^.]*\\.", "", i))) sub("\\..*$", "", i) else i
+  diff_exp <- markers.up_all[[j]][CTS[[i]], ]
+  diff_exp$symbol <- rownames(diff_exp)
 
-    hits <- diff_exp$symbol
-    graph <- get_iid_subnetwork(g_iid_global, hits)
+  hits <- diff_exp$symbol
+  graph <- get_iid_subnetwork(g_iid_global, hits)
 
 
-    if (vcount(graph) > 0) {
+  if (vcount(graph) > 0) {
     V(graph)$weight <- diff_exp[match(V(graph)$name, diff_exp$symbol), "summary.logFC"]
-    V(graph)$FDR    <- diff_exp[match(V(graph)$name, diff_exp$symbol), "FDR"]
-    }
+    V(graph)$FDR <- diff_exp[match(V(graph)$name, diff_exp$symbol), "FDR"]
+  }
 
-    graph_list[[paste0("CTS_", i)]] <- graph
+  graph_list[[paste0("CTS_", i)]] <- graph
 }
 
 
@@ -188,10 +190,10 @@ names(graph_list)
 # [19] "CTS_endothelial.b"          "CTS_cardiac.a"
 
 df_graph_info <- data.frame(
-    name = names(graph_list),
-    vcount = sapply(graph_list, igraph::vcount),
-    ecount = sapply(graph_list, igraph::ecount),
-    stringsAsFactors = FALSE
+  name = names(graph_list),
+  vcount = sapply(graph_list, igraph::vcount),
+  ecount = sapply(graph_list, igraph::ecount),
+  stringsAsFactors = FALSE
 )
 # (df_graph_info)
 #                                                  name vcount ecount
@@ -224,12 +226,12 @@ graph_list <- lapply(graph_list, simplify) # !!!!!!!!!!!!!!!!!!! # FIXED
 
 # Check which graphs have duplicate vertex names
 graphs_with_duplicates <- sapply(graph_list, function(g) {
-    vertex_names <- toupper(V(g)$name)
-    if (is.null(vertex_names)) {
-        # If no names, use vertex indices
-        vertex_names <- V(g)
-    }
-    any(duplicated(vertex_names))
+  vertex_names <- toupper(V(g)$name)
+  if (is.null(vertex_names)) {
+    # If no names, use vertex indices
+    vertex_names <- V(g)
+  }
+  any(duplicated(vertex_names))
 })
 
 # See which graphs have duplicates
@@ -242,24 +244,24 @@ vertex_names <- toupper(V(g1)$name)
 (duplicated_names <- unique(vertex_names[duplicated(vertex_names)]))
 # character(0)
 if (length(duplicated_names) > 0) {
-    for (dup_name in duplicated_names) {
-        dup_indices <- which(vertex_names == dup_name)
-        all(incident(g1, dup_indices[1], mode = "all") == incident(g1, dup_indices[2], mode = "all"))
+  for (dup_name in duplicated_names) {
+    dup_indices <- which(vertex_names == dup_name)
+    all(incident(g1, dup_indices[1], mode = "all") == incident(g1, dup_indices[2], mode = "all"))
 
-        edges <- incident(g1, dup_indices[1], mode = "all")
-        edge_list1 <- get.edgelist(g1)[edges, ]
-        edge_list1 %>% dim() # [1] 290   2
-        weights1 <- E(g1)[edges]$weight
+    edges <- incident(g1, dup_indices[1], mode = "all")
+    edge_list1 <- get.edgelist(g1)[edges, ]
+    edge_list1 %>% dim() # [1] 290   2
+    weights1 <- E(g1)[edges]$weight
 
-        edges <- incident(g1, dup_indices[2], mode = "all")
-        edge_list2 <- get.edgelist(g1)[edges, ]
-        edge_list2 %>% dim() # [1] 64  2
-        weights2 <- E(g1)[edges]$weight
+    edges <- incident(g1, dup_indices[2], mode = "all")
+    edge_list2 <- get.edgelist(g1)[edges, ]
+    edge_list2 %>% dim() # [1] 64  2
+    weights2 <- E(g1)[edges]$weight
 
-        all(edge_list2[, 2] %in% edge_list1[, 2]) # FALSE !!
-    }
+    all(edge_list2[, 2] %in% edge_list1[, 2]) # FALSE !!
+  }
 }
-cat('end\n')
+cat("end\n")
 
 
 # w <- unlist(lapply(graph_list, function(g) E(g)$weight))

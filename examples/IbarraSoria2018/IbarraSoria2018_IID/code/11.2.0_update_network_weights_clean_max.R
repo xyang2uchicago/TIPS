@@ -33,7 +33,7 @@ step3 <- TRUE # compare edgeweight distributions across networks
 step4 <- TRUE # ISL1-network focused distribution
 
 source("/Users/felixyu/Documents/GitHub/TIPS/R/celltype_specific_weight_v10.R")
-source(paste0('https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/heads/master/R/BioTIP_update_', BioTIP_version, '.R'))
+source(paste0("https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/heads/master/R/BioTIP_update_", BioTIP_version, ".R"))
 
 load(file.path(wd, "data", "sce_16subtype.RData"))
 
@@ -74,7 +74,7 @@ assayName <- "logcounts"
 # -----------------------------
 graph_list <- readRDS(file.path(wd, "data", paste0(db, "_IID_graph_perState_notsimplified.rds")))
 
-graph_list <- lapply(graph_list, function(g){
+graph_list <- lapply(graph_list, function(g) {
   V(g)$name <- toupper(V(g)$name)
   g
 })
@@ -92,19 +92,19 @@ split_by_prefix <- function(graph_list, prefix) {
 }
 
 graph_families <- list(
-  HiG   = split_by_prefix(graph_list, "HiG"),
-  HiGCTS= split_by_prefix(graph_list, "HiGCTS"),
-  CTS   = split_by_prefix(graph_list, "CTS")
+  HiG = split_by_prefix(graph_list, "HiG"),
+  HiGCTS = split_by_prefix(graph_list, "HiGCTS"),
+  CTS = split_by_prefix(graph_list, "CTS")
 )
 
 subtype_order <- unique(as.character(colData(sce)$subcelltype))
 colData(sce)$subcelltype <- factor(as.character(colData(sce)$subcelltype), levels = subtype_order)
 
 
-isl1_subtype <- sub("^[^_]*_", "", isl1_cluster)  # -> "cardiac.a"
+isl1_subtype <- sub("^[^_]*_", "", isl1_cluster) # -> "cardiac.a"
 cat("ISL1 focal subtype:", isl1_subtype, "\n")
 
-lapply(graph_families, length) #HiG: 16 HiGCTS: 2 CTS: 2
+lapply(graph_families, length) # HiG: 16 HiGCTS: 2 CTS: 2
 
 names(graph_list)
 #  [1] "HiG_blood"                  "HiG_cardiac.b"
@@ -126,7 +126,7 @@ edge_counts
 #          HiG_endothelial.c          HiG_endothelial.d
 #                       3966                       3247
 # HiG_extraembryonicMesoderm    HiG_mesodermProgenitors
-#                       2654                       2187 
+#                       2654                       2187
 #        HiG_mixedMesoderm.a        HiG_mixedMesoderm.b
 #                       2134                       2750
 #     HiG_pharyngealMesoderm   HiG_presomiticMesoderm.a
@@ -171,7 +171,7 @@ for (fam in names(graph_families)) {
 
 # --- Name matching check: HiG ---
 # Graphs not in sce subcelltype levels: 0
-# sce subcelltype levels missing graphs: 0 
+# sce subcelltype levels missing graphs: 0
 # -----------------------------------
 
 # --- Name matching check: HiGCTS ---
@@ -202,7 +202,8 @@ library(hexbin)
 
 subtype_order <- unique(colData(sce)$subcelltype)
 colData(sce)$subcelltype <- factor(colData(sce)$subcelltype,
-                                   levels = subtype_order)
+  levels = subtype_order
+)
 
 # Helper: "HiGCTS_cardiac.a" -> "cardiac.a"
 net_to_subtype <- function(net_name) sub("^[^_]*_", "", net_name)
@@ -235,7 +236,8 @@ if (step1) {
   }
 
   saveRDS(network_specificity_list,
-          file = "network_specificity_list.rds")
+    file = "network_specificity_list.rds"
+  )
 }
 
 ############################################################
@@ -258,7 +260,6 @@ if (step2) {
   }
 
   for (s in specificity_methods) {
-
     weighted_graph_list <- update_network_weights(
       graph_list,
       network_specificity_list,
@@ -268,7 +269,8 @@ if (step2) {
     )
 
     saveRDS(weighted_graph_list,
-            file = paste0(db, "_IID_graph_perState_simplified_", s, "weighted.rds"))
+      file = paste0(db, "_IID_graph_perState_simplified_", s, "weighted.rds")
+    )
   }
 }
 
@@ -279,11 +281,9 @@ if (step3) {
   pdf(file = "2018_compare_specificity_method_vs_PPIscores.pdf")
 
   for (net_name in names(graph_list)) {
-
     plot_data <- NULL
 
     for (s in specificity_methods) {
-
       weighted_graph_list <- readRDS(
         paste0(db, "_IID_graph_perState_simplified_", s, "weighted.rds")
       )
@@ -309,14 +309,20 @@ if (step3) {
       plot_data <- rbind(plot_data, temp_data)
     }
 
-    p2 <- ggplot(plot_data,
-                 aes(x = norm_PPI_score,
-                     y = log_weight)) +
+    p2 <- ggplot(
+      plot_data,
+      aes(
+        x = norm_PPI_score,
+        y = log_weight
+      )
+    ) +
       stat_binhex(bins = 50, alpha = 0.7) +
       geom_point(
         data = subset(plot_data, is_isl1 == TRUE),
-        aes(x = norm_PPI_score,
-            y = log_weight),
+        aes(
+          x = norm_PPI_score,
+          y = log_weight
+        ),
         color = "red",
         size = 1.5
       ) +
@@ -342,12 +348,10 @@ if (step3) {
 ############################################################
 
 if (step4) {
-
   net_name <- isl1_cluster
   plot_data <- NULL
 
   for (s in specificity_methods) {
-
     weighted_graph_list <- readRDS(
       paste0(db, "_IID_graph_perState_simplified_", s, "weighted.rds")
     )
@@ -374,15 +378,20 @@ if (step4) {
   }
 
   if (nrow(plot_data) > 0) {
+    pdf(file = paste0(
+      "2018_compare_specificity_method_",
+      isl1_cluster,
+      "_vs_PPIscores.pdf"
+    ))
 
-    pdf(file = paste0("2018_compare_specificity_method_",
-                      isl1_cluster,
-                      "_vs_PPIscores.pdf"))
-
-    p3 <- ggplot(subset(plot_data, is_isl1 == TRUE),
-                 aes(x = norm_PPI_score,
-                     y = log_weight,
-                     color = as.factor(norm_PPI_score))) +
+    p3 <- ggplot(
+      subset(plot_data, is_isl1 == TRUE),
+      aes(
+        x = norm_PPI_score,
+        y = log_weight,
+        color = as.factor(norm_PPI_score)
+      )
+    ) +
       geom_point() +
       facet_wrap(~method, scales = "free") +
       theme_minimal() +

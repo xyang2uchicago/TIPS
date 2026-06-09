@@ -71,7 +71,7 @@ colnames(df_PageRank)
 table(df_PageRank$signature)
 #              CTS_cardiac.a          CTS_endothelial.b
 #                         19                          7
-#                  HiG_blood              HiG_cardiac.a 
+#                  HiG_blood              HiG_cardiac.a
 #                        360                        360
 #              HiG_cardiac.b              HiG_cardiac.c
 #                        374                        405
@@ -86,7 +86,7 @@ table(df_PageRank$signature)
 #     HiG_pharyngealMesoderm   HiG_presomiticMesoderm.a
 #                        331                        296
 #   HiG_presomiticMesoderm.b        HiG_somiticMesoderm
-#                        361                        289 
+#                        361                        289
 #           HiGCTS_cardiac.a       HiGCTS_endothelial.b
 #                          8                          2
 
@@ -94,9 +94,9 @@ table(df_PageRank$signature)
 df_PageRank$gene <- toupper(df_PageRank$gene)
 
 res_pr <- rank_TF_CHD_in_PPIN(df_PageRank, CHD, TF_human,
-    signatures = c("HiG_cardiac.a", "CTS_cardiac.a", "HiGCTS_cardiac.a"),
-    key = "PageRank",
-    top_TF_rank = 3, gene_top_n = 20, saveFigure = TRUE
+  signatures = c("HiG_cardiac.a", "CTS_cardiac.a", "HiGCTS_cardiac.a"),
+  key = "PageRank",
+  top_TF_rank = 3, gene_top_n = 20, saveFigure = TRUE
 )
 #  => CP_rank_gene_by_pageRank.pdf
 
@@ -115,7 +115,7 @@ table(df_betweenness$signature)
 #                        391                        421
 #          HiG_endothelial.a          HiG_endothelial.b
 #                        424                        389
-#          HiG_endothelial.c          HiG_endothelial.d 
+#          HiG_endothelial.c          HiG_endothelial.d
 #                        447                        392
 # HiG_extraembryonicMesoderm    HiG_mesodermProgenitors
 #                        345                        330
@@ -131,9 +131,9 @@ table(df_betweenness$signature)
 df_betweenness$gene <- toupper(df_betweenness$gene)
 
 res_bw <- rank_TF_CHD_in_PPIN(df_betweenness, CHD, TF_human,
-    signatures = c("HiG_cardiac.a", "CTS_cardiac.a", "HiGCTS_cardiac.a"),
-    key = "BetweennessCentrality",
-    top_TF_rank = 3, gene_top_n = 20, saveFigure = TRUE
+  signatures = c("HiG_cardiac.a", "CTS_cardiac.a", "HiGCTS_cardiac.a"),
+  key = "BetweennessCentrality",
+  top_TF_rank = 3, gene_top_n = 20, saveFigure = TRUE
 )
 #  => CP_rank_gene_by_BetweennessCentrality.pdf
 
@@ -143,7 +143,7 @@ res_bw <- rank_TF_CHD_in_PPIN(df_betweenness, CHD, TF_human,
 
 (keyTF_cardiac.a <- subset(res_pr[["CTS_cardiac.a"]])$gene) #  [1] "GATA4" "TBX5"  "MSX2"
 
-#(keyTF_cardiac.a <- intersect(keyTF_cardiac.a, subset(res_bw[["HiGCTS_cardiac.a"]], BetweennessCentrality > 0)$gene)) #  "MEF2C" "GATA4" "MSX2"
+# (keyTF_cardiac.a <- intersect(keyTF_cardiac.a, subset(res_bw[["HiGCTS_cardiac.a"]], BetweennessCentrality > 0)$gene)) #  "MEF2C" "GATA4" "MSX2"
 
 seed_TF_2018 <- keyTF_cardiac.a
 

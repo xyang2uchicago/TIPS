@@ -75,16 +75,16 @@ table(df_PageRank$signature)
 #       379       292       348       315       342       458       453       399
 #    HiG_19     HiG_2     HiG_3     HiG_4     HiG_5     HiG_6     HiG_7     HiG_8
 #       446       373       357       253       264       449       278       278
-#     HiG_9 HiGCTS_15 
+#     HiG_9 HiGCTS_15
 #       303        11
 
 
 df_PageRank$gene <- toupper(df_PageRank$gene)
 
 res_pr <- rank_TF_CHD_in_PPIN(df_PageRank, CHD, TF_human,
-    signatures = c("HiG_8", "CTS_8"),
-    key = "PageRank",
-    top_TF_rank = 3, gene_top_n = 20, saveFigure = TRUE
+  signatures = c("HiG_8", "CTS_8"),
+  key = "PageRank",
+  top_TF_rank = 3, gene_top_n = 20, saveFigure = TRUE
 )
 #  => CP_rank_gene_by_pageRank.pdf
 
@@ -101,15 +101,15 @@ table(df_betweenness$signature)
 #       400       309       367       333       359       477       475       420
 #    HiG_19     HiG_2     HiG_3     HiG_4     HiG_5     HiG_6     HiG_7     HiG_8
 #       470       393       376       270       281       465       291       292
-#     HiG_9 HiGCTS_15 
+#     HiG_9 HiGCTS_15
 #       316        28
 
 df_betweenness$gene <- toupper(df_betweenness$gene)
 
 res_bw <- rank_TF_CHD_in_PPIN(df_betweenness, CHD, TF_human,
-    signatures = c("HiG_8", "CTS_8"),
-    key = "BetweennessCentrality",
-    top_TF_rank = 3, gene_top_n = 20, saveFigure = TRUE
+  signatures = c("HiG_8", "CTS_8"),
+  key = "BetweennessCentrality",
+  top_TF_rank = 3, gene_top_n = 20, saveFigure = TRUE
 )
 #  => CP_rank_gene_by_BetweennessCentrality.pdf
 
@@ -142,9 +142,9 @@ res_bw <- rank_TF_CHD_in_PPIN(df_betweenness, CHD, TF_human,
 seed_TF <- keyTF_cardiac.a
 
 ####
-#STRING originally used HiGCTS_8, IID doesnt have that so we are using CTS_8 instead. Need to double check with Xinan
-#if this is a safe replacement, or if I should try using 2018 instead.
-#If HiG would be used instead, we would get "NKX2-5" for 136 and 138
+# STRING originally used HiGCTS_8, IID doesnt have that so we are using CTS_8 instead. Need to double check with Xinan
+# if this is a safe replacement, or if I should try using 2018 instead.
+# If HiG would be used instead, we would get "NKX2-5" for 136 and 138
 
 library(dplyr)
 library(tidyr)
@@ -177,7 +177,7 @@ common_sigs <- intersect(names(res_pr), names(res_bw))
 
 keyTF_pr_summary <- bind_rows(lapply(common_sigs, function(sig) {
   pr_genes <- res_pr[[sig]]$gene
-  
+
   data.frame(
     signature = sig,
     genes = if (length(pr_genes) == 0) "" else paste(pr_genes, collapse = ", "),
@@ -189,7 +189,7 @@ keyTF_overlap_summary <- bind_rows(lapply(common_sigs, function(sig) {
   pr_genes <- res_pr[[sig]]$gene
   bw_genes <- res_bw[[sig]]$gene[res_bw[[sig]]$BetweennessCentrality > 0]
   overlap_genes <- intersect(pr_genes, bw_genes)
-  
+
   data.frame(
     signature = sig,
     genes = if (length(overlap_genes) == 0) "" else paste(overlap_genes, collapse = ", "),
@@ -205,8 +205,8 @@ print(as_tibble(keyTF_pr_summary), n = Inf)
 #  2 CTS_15    "GATA1, TAL1, CEBPD"
 #  3 CTS_16    "HOXB7, CEBPD, ZEB1"
 #  4 CTS_16.1  "RUNX1"
-#  5 CTS_7     "SPI1, KLF1, GATA2" 
-#  6 CTS_8     "NR2F1, IRX5, ALX1" 
+#  5 CTS_7     "SPI1, KLF1, GATA2"
+#  6 CTS_8     "NR2F1, IRX5, ALX1"
 #  7 HiG_1     "MYCN"
 #  8 HiG_10    "JUN"
 #  9 HiG_11    "JUN"
@@ -229,14 +229,14 @@ print(as_tibble(keyTF_pr_summary), n = Inf)
 # 26 HiGCTS_15 ""
 print(as_tibble(keyTF_overlap_summary), n = Inf)
 # A tibble: 26 × 2
-#    signature genes        
+#    signature genes
 #    <chr>     <chr>
 #  1 CTS_11    ""
 #  2 CTS_15    "GATA1"
 #  3 CTS_16    "HOXB7, ZEB1"
 #  4 CTS_16.1  "RUNX1"
 #  5 CTS_7     "SPI1"
-#  6 CTS_8     "IRX5, ALX1" 
+#  6 CTS_8     "IRX5, ALX1"
 #  7 HiG_1     ""
 #  8 HiG_10    ""
 #  9 HiG_11    "JUN"

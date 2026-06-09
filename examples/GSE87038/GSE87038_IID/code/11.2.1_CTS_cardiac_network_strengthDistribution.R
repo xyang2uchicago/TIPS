@@ -18,11 +18,11 @@ PPI_size_palette <- c("CTS" = 1, "HiGCTS" = 0.75, "HiG" = 0.25)
 
 db <- "GSE87038"
 
-celltype_specific_weight_version <- '10'
-source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
+celltype_specific_weight_version <- "10"
+source(paste0("https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v", celltype_specific_weight_version, ".R"))
 
 CT_id <- c("7", "8", "11", "13", "15", "16") # critical transition clusters
-CT_id_formatted <- paste0("(_", CT_id, ")") %>% paste(collapse="|")
+CT_id_formatted <- paste0("(_", CT_id, ")") %>% paste(collapse = "|")
 
 ########## END OF USER INPUT ##########
 
@@ -31,13 +31,13 @@ graph_list <- readRDS(file.path(inputdir, paste0(db, "_IID_graph_perState_notsim
 graph_list <- graph_list[names(graph_list) != "CTS_13"]
 (N0 <- sapply(graph_list, vcount))
 #       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6
-#         273         393         376         270         281         465 
+#         273         393         376         270         281         465
 #       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18
 #         316         380         309         333         475         420
 #      HiG_19       HiG_7      HiG_11      HiG_15      HiG_16      HiG_13
 #         470         291         400         359         477         367
 #       HiG_8    HiGCTS_7   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1
-#         292          10          17          28          11          28 
+#         292          10          17          28          11          28
 #   HiGCTS_13    HiGCTS_8       CTS_7      CTS_11      CTS_15      CTS_16
 #          12           9          26          46          60          34
 #    CTS_16.1       CTS_8
@@ -49,13 +49,13 @@ graph_list <- graph_list[names(graph_list) != "CTS_13"]
 # dup_graphs <- dup_name_counts[dup_name_counts > 0]
 
 # dup_name_counts
-# #       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6 
-# #           0           0           0           0           0           0 
+# #       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6
+# #           0           0           0           0           0           0
 # #       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18
 # #           0           0           0           0           0           0
 # #      HiG_19       HiG_7      HiG_11      HiG_15      HiG_16      HiG_13
 # #           0           0           0           0           0           0
-# #       HiG_8    HiGCTS_7   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1 
+# #       HiG_8    HiGCTS_7   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1
 # #           0           0           0           0           0           0
 # #   HiGCTS_13    HiGCTS_8       CTS_7      CTS_11      CTS_15      CTS_16
 # #           0           0           0           0           0           0
@@ -101,7 +101,7 @@ graph_list <- graph_list[names(graph_list) != "CTS_13"]
 #  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"
 #  [6] "HiG_6"       "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"
 # [11] "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"       "HiG_11"
-# [16] "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"   
+# [16] "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"
 # [21] "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_13"
 # [26] "HiGCTS_8"    "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"
 # [31] "CTS_16.1"    "CTS_8"
@@ -110,23 +110,23 @@ edge_counts <- sapply(graph_list, ecount)
 #       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6
 #        2254        3987        2959        2249        2056        4706
 #       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18
-#        2758        3608        2430        2891        4503        3948 
+#        2758        3608        2430        2891        4503        3948
 #      HiG_19       HiG_7      HiG_11      HiG_15      HiG_16      HiG_13
 #        3399        2523        4158        3660        5008        3490
 #       HiG_8    HiGCTS_7   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1
 #        2279           0           2          10           6           6
 #   HiGCTS_13    HiGCTS_8       CTS_7      CTS_11      CTS_15      CTS_16
-#           3           1          10          18          50          28 
+#           3           1          10          18          50          28
 #    CTS_16.1       CTS_8
 #          57          65
 
 graphs_with_duplicates <- sapply(graph_list, function(g) {
-    vertex_names <- V(g)$name
-    if (is.null(vertex_names)) {
-        # If no names, use vertex indices
-        vertex_names <- V(g)
-    }
-    any(duplicated(vertex_names))
+  vertex_names <- V(g)$name
+  if (is.null(vertex_names)) {
+    # If no names, use vertex indices
+    vertex_names <- V(g)
+  }
+  any(duplicated(vertex_names))
 })
 
 # See which graphs have duplicates
@@ -134,37 +134,36 @@ graphs_with_duplicates <- sapply(graph_list, function(g) {
 # named integer(0)
 
 V_deg <- lapply(graph_list, function(x) {
-    {
-        igraph::strength(x, weights = E(x)$weight) / (vcount(x) - 1)
-    } %>% sort(., decreasing = T)
+  {
+    igraph::strength(x, weights = E(x)$weight) / (vcount(x) - 1)
+  } %>% sort(., decreasing = T)
 }) %>%
-    lapply(., function(x) {
-        x %>%
-            as.data.frame(strength = x) %>%
-            mutate(gene = names(x), id = seq_along(x))
-    }) %>%
-    rbindlist(., idcol = names(.))
+  lapply(., function(x) {
+    x %>%
+      as.data.frame(strength = x) %>%
+      mutate(gene = names(x), id = seq_along(x))
+  }) %>%
+  rbindlist(., idcol = names(.))
 colnames(V_deg)[1:2] <- c("signature", "nor_strength")
 V_deg$PPI_cat <- lapply(names(V_deg$signature), function(x) unlist(strsplit(x, split = "_"))[1]) %>%
-    unlist() %>%
-    factor(., levels = c("CTS", "HiGCTS", "HiG"))
+  unlist() %>%
+  factor(., levels = c("CTS", "HiGCTS", "HiG"))
 
 # Aggregate strength Calculation:  this calculates the average strength for each signature (graph)
 df <- aggregate(V_deg$nor_strength, by = list(V_deg$signature), FUN = mean) %>%
-    mutate(k = aggregate(V_deg$id, by = list(V_deg$signature), FUN = max)[, 2]) %>%
-    arrange(desc(x))
+  mutate(k = aggregate(V_deg$id, by = list(V_deg$signature), FUN = max)[, 2]) %>%
+  arrange(desc(x))
 df$PPI_cat <- lapply(df$Group.1, function(x) unlist(strsplit(x, "_"))[1]) %>%
-    unlist() %>%
-    factor(., levels = c("CTS", "HiGCTS", "HiG"))
+  unlist() %>%
+  factor(., levels = c("CTS", "HiGCTS", "HiG"))
 
 g_strength <- ggplot(data = df, aes(x = k, y = x, col = PPI_cat)) +
-    scale_color_manual(values = PPI_color_palette) +
-    geom_point(shape = 18, size = 5) +
-    xlab("number of nodes per PPI_cat") +
-    theme(legend.position = c(1, 1), legend.justification = c(0, 1)) +
-    ylab("average GRN normalized strength") +
-    ggtitle(db)
-
+  scale_color_manual(values = PPI_color_palette) +
+  geom_point(shape = 18, size = 5) +
+  xlab("number of nodes per PPI_cat") +
+  theme(legend.position = c(1, 1), legend.justification = c(0, 1)) +
+  ylab("average GRN normalized strength") +
+  ggtitle(db)
 
 
 # cumulative (normalized= FALSE!!)strength distribution to a power law fit ########################
@@ -172,17 +171,17 @@ g_strength <- ggplot(data = df, aes(x = k, y = x, col = PPI_cat)) +
 #### normalized = FALSE by default
 
 V_deg_dis <- lapply(graph_list, function(x) strength_distribution(x, normalized = FALSE, cumulative = TRUE)) %>%
-    lapply(., function(x) {
-        x %>%
-            as.data.frame(strength_distribution = x) %>%
-            mutate(k = seq_along(x))
-    }) %>%
-    rbindlist(., idcol = names(.))
+  lapply(., function(x) {
+    x %>%
+      as.data.frame(strength_distribution = x) %>%
+      mutate(k = seq_along(x))
+  }) %>%
+  rbindlist(., idcol = names(.))
 
 colnames(V_deg_dis)[1:2] <- c("signature", "strength_distribution")
 V_deg_dis$PPI_cat <- lapply(V_deg_dis$signature, function(x) unlist(strsplit(x, "_"))[1]) %>%
-    unlist() %>%
-    factor(., levels = c("CTS", "HiGCTS", "HiG"))
+  unlist() %>%
+  factor(., levels = c("CTS", "HiGCTS", "HiG"))
 
 (table(V_deg_dis$PPI_cat))
 #    CTS HiGCTS    HiG
@@ -192,8 +191,8 @@ V_deg_dis$cluster <- lapply(V_deg_dis$signature, function(x) unlist(strsplit(x, 
 all(V_deg_dis$signature %in% names(graph_list))
 V_deg_dis$n_nodes <- 0
 for (i in seq_along(graph_list)) {
-    j <- which(V_deg_dis$signature == names(graph_list)[i])
-    V_deg_dis$n_nodes[j] <- vcount(graph_list[[i]])
+  j <- which(V_deg_dis$signature == names(graph_list)[i])
+  V_deg_dis$n_nodes[j] <- vcount(graph_list[[i]])
 }
 
 ## To provide insights into the distribution of node strengths in each signature and how the strength distribution varies across "transitory" and "steady" PPI_cats,
@@ -201,23 +200,23 @@ for (i in seq_along(graph_list)) {
 # showing how many (the cumulative fraction of) nodes in each signature  having a strength greater than or equal to k (the strength),
 # with lines shaped based on the signature's PPI_cat ("transitory" or "steady")
 g_strength_dis <- ggplot(
-    data = V_deg_dis %>% filter(strength_distribution > 0),
-    aes(x = k, y = strength_distribution, color = cluster, type = PPI_cat, size = PPI_cat)
+  data = V_deg_dis %>% filter(strength_distribution > 0),
+  aes(x = k, y = strength_distribution, color = cluster, type = PPI_cat, size = PPI_cat)
 ) + #
-    geom_line(aes(linetype = PPI_cat)) +
-    xlab("cumulative  strength distribution") +
-    scale_size_manual(values = PPI_size_palette) + # Set line width
-    geom_text( # data=V_deg_dis_text,
-        aes(label = n_nodes, color = cluster), # interaction(PPI_cat, cluster)),
-        hjust = 1.1, vjust = 0.5, check_overlap = TRUE, size = 3
-    ) + # Adding text for n_nodes
-    theme(legend.position = c(0.2, 0.75), legend.justification = c(1, 1), legend.text = element_text(size = 5)) +
-    coord_trans(x = "log10", y = "log10")
+  geom_line(aes(linetype = PPI_cat)) +
+  xlab("cumulative  strength distribution") +
+  scale_size_manual(values = PPI_size_palette) + # Set line width
+  geom_text( # data=V_deg_dis_text,
+    aes(label = n_nodes, color = cluster), # interaction(PPI_cat, cluster)),
+    hjust = 1.1, vjust = 0.5, check_overlap = TRUE, size = 3
+  ) + # Adding text for n_nodes
+  theme(legend.position = c(0.2, 0.75), legend.justification = c(1, 1), legend.text = element_text(size = 5)) +
+  coord_trans(x = "log10", y = "log10")
 
 ggsave("strength_distribution_w_vsize.pdf", g_strength_dis, width = 11, height = 10)
 (n_nodes <- lapply(graph_list, vcount) %>% unlist())
 #       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6
-#         273         393         376         270         281         465 
+#         273         393         376         270         281         465
 #       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18
 #         316         380         309         333         475         420
 #      HiG_19       HiG_7      HiG_11      HiG_15      HiG_16      HiG_13
@@ -230,21 +229,21 @@ ggsave("strength_distribution_w_vsize.pdf", g_strength_dis, width = 11, height =
 #          73          51
 
 V_deg_nor_dis <- lapply(graph_list, function(g) {
-    deg <- strength(g, weights = E(g)$weight)
-    deg_table <- table(deg)
-    df <- data.frame(
-        k = as.numeric(names(deg_table)), # the strength values
-        freq = as.numeric(deg_table) # how many vertices have each strength value
-    )
-    df$nor_strength <- df$freq / sum(df$freq) # normalized frequency (probability); sum(df$freq)= vcount(g)
-    df$nor_strength_cum <- rev(cumsum(rev(df$nor_strength))) # cumulative probability distribution
-    df
+  deg <- strength(g, weights = E(g)$weight)
+  deg_table <- table(deg)
+  df <- data.frame(
+    k = as.numeric(names(deg_table)), # the strength values
+    freq = as.numeric(deg_table) # how many vertices have each strength value
+  )
+  df$nor_strength <- df$freq / sum(df$freq) # normalized frequency (probability); sum(df$freq)= vcount(g)
+  df$nor_strength_cum <- rev(cumsum(rev(df$nor_strength))) # cumulative probability distribution
+  df
 }) %>%
-    data.table::rbindlist(idcol = "signature")
+  data.table::rbindlist(idcol = "signature")
 
 V_deg_nor_dis$PPI_cat <- lapply(V_deg_nor_dis$signature, function(x) unlist(strsplit(x, "_"))[1]) %>%
-    unlist() %>%
-    factor(., levels = c("CTS", "HiGCTS", "HiG"))
+  unlist() %>%
+  factor(., levels = c("CTS", "HiGCTS", "HiG"))
 
 (table(V_deg_nor_dis$PPI_cat))
 #    CTS HiGCTS    HiG
@@ -254,8 +253,8 @@ V_deg_nor_dis$cluster <- lapply(V_deg_nor_dis$signature, function(x) unlist(strs
 all(V_deg_nor_dis$signature %in% names(graph_list))
 V_deg_nor_dis$n_nodes <- 0
 for (i in seq_along(graph_list)) {
-    j <- which(V_deg_nor_dis$signature == names(graph_list)[i])
-    V_deg_nor_dis$n_nodes[j] <- vcount(graph_list[[i]])
+  j <- which(V_deg_nor_dis$signature == names(graph_list)[i])
+  V_deg_nor_dis$n_nodes[j] <- vcount(graph_list[[i]])
 }
 
 ## To provide insights into the distribution of node strengths in each signature and how the strength distribution varies across "transitory" and "steady" PPI_cats,
@@ -263,35 +262,35 @@ for (i in seq_along(graph_list)) {
 # showing how many (the cumulative fraction of) nodes in each signature  having a strength greater than or equal to k (the strength),
 # with lines shaped based on the signature's PPI_cat ("transitory" or "steady")
 g_strength_dis <- V_deg_nor_dis %>%
-    filter(k > 0, nor_strength_cum > 0) %>% # !!!!!!!!! NEW !!!!!!
-    ggplot(aes(x = k, y = nor_strength_cum, color = cluster, linetype = PPI_cat, size = PPI_cat)) +
-    geom_line() +
-    scale_size_manual(values = PPI_size_palette) + # Set line width
-    xlab("Normalized strength level") +
-    ylab("cumulative normalized  strength distribution") +
-    geom_text(aes(label = n_nodes), hjust = 1.1, vjust = 0.5, check_overlap = TRUE, size = 3) +
-    theme(
-        legend.position = c(0.2, 0.75),
-        legend.justification = c(1, 1),
-        legend.text = element_text(size = 5)
-    ) +
-    coord_trans(x = "log10", y = "log10")
+  filter(k > 0, nor_strength_cum > 0) %>% # !!!!!!!!! NEW !!!!!!
+  ggplot(aes(x = k, y = nor_strength_cum, color = cluster, linetype = PPI_cat, size = PPI_cat)) +
+  geom_line() +
+  scale_size_manual(values = PPI_size_palette) + # Set line width
+  xlab("Normalized strength level") +
+  ylab("cumulative normalized  strength distribution") +
+  geom_text(aes(label = n_nodes), hjust = 1.1, vjust = 0.5, check_overlap = TRUE, size = 3) +
+  theme(
+    legend.position = c(0.2, 0.75),
+    legend.justification = c(1, 1),
+    legend.text = element_text(size = 5)
+  ) +
+  coord_trans(x = "log10", y = "log10")
 print(g_strength_dis)
 
 g_strength_dis2 <- V_deg_nor_dis %>%
-    filter(k > 0, nor_strength_cum > 0) %>% # !!!!!!!!! NEW !!!!!!
-    ggplot(aes(x = k, y = nor_strength_cum, color = PPI_cat, linetype = PPI_cat, size = PPI_cat)) +
-    geom_line(aes(group = signature, linetype = PPI_cat)) +
-    scale_color_manual(values = PPI_color_palette) +
-    scale_size_manual(values = PPI_size_palette) + # Set line width
-    xlab("Normalized strength level") +
-    ylab("Fraction of nodes having a normalized strength ≥ x") +
-    theme(
-        legend.position = c(0.2, 0.75),
-        legend.justification = c(1, 1),
-        legend.text = element_text(size = 5)
-    ) +
-    coord_trans(x = "log10", y = "log10")
+  filter(k > 0, nor_strength_cum > 0) %>% # !!!!!!!!! NEW !!!!!!
+  ggplot(aes(x = k, y = nor_strength_cum, color = PPI_cat, linetype = PPI_cat, size = PPI_cat)) +
+  geom_line(aes(group = signature, linetype = PPI_cat)) +
+  scale_color_manual(values = PPI_color_palette) +
+  scale_size_manual(values = PPI_size_palette) + # Set line width
+  xlab("Normalized strength level") +
+  ylab("Fraction of nodes having a normalized strength ≥ x") +
+  theme(
+    legend.position = c(0.2, 0.75),
+    legend.justification = c(1, 1),
+    legend.text = element_text(size = 5)
+  ) +
+  coord_trans(x = "log10", y = "log10")
 print(g_strength_dis2)
 
 pdf(file = "normalized_strength_distribution.pdf")
@@ -304,33 +303,33 @@ dev.off()
 
 
 g_strength_dis <- ggplot(
-    data = V_deg_dis %>% filter(strength_distribution > 0),
-    aes(x = k, y = strength_distribution, color = cluster, type = PPI_cat, size = PPI_cat)
+  data = V_deg_dis %>% filter(strength_distribution > 0),
+  aes(x = k, y = strength_distribution, color = cluster, type = PPI_cat, size = PPI_cat)
 ) + #
-    geom_line(aes(linetype = PPI_cat)) +
-    xlab(" strength level (x)") +
-    scale_size_manual(values = PPI_size_palette) + # Set line width
-    ylab("Fraction of nodes having a strength ≥ x") +
-    theme(legend.position = c(0.2, 0.75), legend.justification = c(1, 1), legend.text = element_text(size = 5)) +
-    coord_trans(x = "log10", y = "log10")
+  geom_line(aes(linetype = PPI_cat)) +
+  xlab(" strength level (x)") +
+  scale_size_manual(values = PPI_size_palette) + # Set line width
+  ylab("Fraction of nodes having a strength ≥ x") +
+  theme(legend.position = c(0.2, 0.75), legend.justification = c(1, 1), legend.text = element_text(size = 5)) +
+  coord_trans(x = "log10", y = "log10")
 print(g_strength_dis)
 
 g_strength_dis2 <- ggplot(
-    data = V_deg_dis %>% filter(strength_distribution > 0),
-    aes(x = k, y = strength_distribution, color = PPI_cat, size = PPI_cat)
+  data = V_deg_dis %>% filter(strength_distribution > 0),
+  aes(x = k, y = strength_distribution, color = PPI_cat, size = PPI_cat)
 ) + #
-    geom_line(aes(group = signature, linetype = PPI_cat)) +
-    xlab(" strength level (x)") +
-    scale_color_manual(values = PPI_color_palette) +
-    scale_size_manual(values = PPI_size_palette) + # Set line width
-    ylab("Fraction of nodes having a strength ≥ x") +
-    theme(legend.position = c(0.2, 0.75), legend.justification = c(1, 1), legend.text = element_text(size = 5)) +
-    coord_trans(x = "log10", y = "log10")
+  geom_line(aes(group = signature, linetype = PPI_cat)) +
+  xlab(" strength level (x)") +
+  scale_color_manual(values = PPI_color_palette) +
+  scale_size_manual(values = PPI_size_palette) + # Set line width
+  ylab("Fraction of nodes having a strength ≥ x") +
+  theme(legend.position = c(0.2, 0.75), legend.justification = c(1, 1), legend.text = element_text(size = 5)) +
+  coord_trans(x = "log10", y = "log10")
 print(g_strength_dis2)
 
 pdf(file = paste0("strength_", db, ".pdf"))
 print(g_strength)
-print(g_strength_dis2)#doesnt show CTS scores
+print(g_strength_dis2) # doesnt show CTS scores
 # > V_deg_dis %>%
 # +   dplyr::filter(strength_distribution > 0) %>%
 # +   dplyr::count(signature, PPI_cat, name = "n_points") %>%
@@ -372,9 +371,9 @@ print(g_strength_dis2)#doesnt show CTS scores
 # 33:      HiG_13     HiG        5
 #       signature PPI_cat n_points
 #          <char>  <fctr>    <int>
-#Notice how HiGCTS and CTS signatures have only 1 point in the strength distribution plot, this is due to the sparsity in nodes
-#With less than 2 n points, no curve is drawn and thus the strength distribution plot for CTS and HiGCTS signatures are not shown in the cumulative strength distribution plot, which is a limitation of this plot when applied to small networks.
-#We can show the data, but the plot will have to be drawn differently, right now using the strength_distribution() function we currently use plots discrete points that the strenghts are then lumped into and connected to, but with small ranging continous data, this doesnt work
+# Notice how HiGCTS and CTS signatures have only 1 point in the strength distribution plot, this is due to the sparsity in nodes
+# With less than 2 n points, no curve is drawn and thus the strength distribution plot for CTS and HiGCTS signatures are not shown in the cumulative strength distribution plot, which is a limitation of this plot when applied to small networks.
+# We can show the data, but the plot will have to be drawn differently, right now using the strength_distribution() function we currently use plots discrete points that the strenghts are then lumped into and connected to, but with small ranging continous data, this doesnt work
 
 print(g_strength_dis)
 dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -396,37 +395,37 @@ V_deg_dis$normalized_strength_distribution <- V_deg_dis$strength_distribution / 
 
 # Density Plot / Kernel Density Estimate (KDE)
 ggplot(V_deg_dis, aes(x = normalized_strength_distribution, fill = PPI_cat)) +
-    geom_density(alpha = 0.5) + # Create density plot
-    labs(x = "Normalized strength Distribution", y = "Density", title = "Density Plot: strength Distribution by Width Category") +
-    theme_minimal() +
-    scale_fill_manual(values = PPI_color_palette)
+  geom_density(alpha = 0.5) + # Create density plot
+  labs(x = "Normalized strength Distribution", y = "Density", title = "Density Plot: strength Distribution by Width Category") +
+  theme_minimal() +
+  scale_fill_manual(values = PPI_color_palette)
 # Boxplot by Categories (NOT USED)
 g1 <- ggplot(V_deg_dis, aes(x = factor(PPI_cat), y = normalized_strength_distribution, fill = PPI_cat)) +
-    geom_boxplot() +
-    labs(x = "PPIN Category", y = "Normalized strength Distribution", title = "PPINs for all clusters") +
-    theme_minimal() +
-    scale_fill_manual(values = PPI_color_palette) +
-    stat_compare_means(
-        method = "wilcox",
-        comparisons = list(c("CTS", "HiGCTS"), c("CTS", "HiG"), c("HiGCTS", "HiG")),
-        p.adjust.method = "BH", # Adjust p-values using Benjamini-Hochberg (BH) method
-        label = "p.signif"
-    )
+  geom_boxplot() +
+  labs(x = "PPIN Category", y = "Normalized strength Distribution", title = "PPINs for all clusters") +
+  theme_minimal() +
+  scale_fill_manual(values = PPI_color_palette) +
+  stat_compare_means(
+    method = "wilcox",
+    comparisons = list(c("CTS", "HiGCTS"), c("CTS", "HiG"), c("HiGCTS", "HiG")),
+    p.adjust.method = "BH", # Adjust p-values using Benjamini-Hochberg (BH) method
+    label = "p.signif"
+  )
 # Boxplot by Categories (NEW,  USED)
 g2 <- ggplot(
-    subset(V_deg_dis, grepl(CT_id_formatted, signature)),
-    aes(x = factor(PPI_cat), y = normalized_strength_distribution, fill = PPI_cat)
+  subset(V_deg_dis, grepl(CT_id_formatted, signature)),
+  aes(x = factor(PPI_cat), y = normalized_strength_distribution, fill = PPI_cat)
 ) +
-    geom_boxplot() +
-    labs(x = "PPIN Category", y = "Normalized strength Distribution", title = "PPINs for transition clusters") +
-    theme_minimal() +
-    scale_fill_manual(values = PPI_color_palette) +
-    stat_compare_means(
-        method = "wilcox",
-        comparisons = list(c("CTS", "HiGCTS"), c("CTS", "HiG"), c("HiGCTS", "HiG")),
-        p.adjust.method = "BH", # Adjust p-values using Benjamini-Hochberg (BH) method
-        label = "p.signif"
-    )
+  geom_boxplot() +
+  labs(x = "PPIN Category", y = "Normalized strength Distribution", title = "PPINs for transition clusters") +
+  theme_minimal() +
+  scale_fill_manual(values = PPI_color_palette) +
+  stat_compare_means(
+    method = "wilcox",
+    comparisons = list(c("CTS", "HiGCTS"), c("CTS", "HiG"), c("HiGCTS", "HiG")),
+    p.adjust.method = "BH", # Adjust p-values using Benjamini-Hochberg (BH) method
+    label = "p.signif"
+  )
 library(gridExtra)
 pdf(file = paste0("boxplot_normalized_strength_", db, ".pdf"), height = 4)
 print(grid.arrange(g1, g2, ncol = 2))
