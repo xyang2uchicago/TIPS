@@ -1,3 +1,4 @@
 .DS_Store
 **/.DS_Store
-examples/GSE87038/data/cistarget/hg38_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather
+**/hg38_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather
+**/PPIN/human_annotated_PPIs.txt.gz
