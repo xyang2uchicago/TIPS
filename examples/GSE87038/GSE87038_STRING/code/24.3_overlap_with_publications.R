@@ -4,7 +4,7 @@ if(length(CF_cluster)==1) EMT_ID  = CF_cluster else EMT_ID = 'C3C16C18C19'
 
 
 rebuild_mat = FALSE
-source('F:/projects/scRNA/source/cardiac_CTS_GRN/GSE87038_Pijuan2019_v9/24.0_acat_load_input_clean_v2.R')
+source("/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/GSE87038_STRING/code/24.0_acat_load_input_clean.R")
 
 celltype_col  # 'leiden_0.5'
 
@@ -28,7 +28,7 @@ lengths(CTS)
 
 (updir = getwd())
 #[1] "F:/projects/scRNA/results/cardiac_CTS_GRN/GSE87038_Pijuan2019_v9/GSE181346_heart_scATAC"
-fpath = paste0('F:/projects/scRNA/results/cardiac_CTS_GRN/GSE87038_Pijuan2019_v9/validation_C8vs', EMT_ID)
+fpath <- paste0(wd, "results/GSE181346_heart_scATAC/validation_C8vs", EMT_ID)
 if(!file.exists(fpath)) dir.create(fpath)
 setwd(fpath)
 
@@ -47,9 +47,9 @@ library(ggExtra)
 ## refer to F:\projects\scRNA\source\cardiac_CTS_GRN\GSE175634_iPSC_CM_weighted_v9\24.4.0_GS_publications_collection.R
 library(dplyr)
 library(tidyr)
-source('E:/Git_Holly/TIPS/R/celltype_specific_weight_v10.R')
+source("/Users/felixyu/Documents/GitHub/TIPS/R/celltype_specific_weight_v10.R")
 
-GP_path = 'D:/projects/DS/data/TF_perturb_CM/doc/'
+GP_path <- shared_path  # TODO: add TF_perturb_CM doc files to Shared_Data/
 
 
 df = read.xlsx(xlsxFile = paste0(GP_path, 'media-2.xlsx'), sheet=8, startRow = 2)  # 250 programs
@@ -63,7 +63,7 @@ head(df[,1:10], 3)
 
 length(unique(unlist(df))) # 25311
 
-GS = readRDS(paste0(shared_input_path, 'published_GS_collection.rds'))
+GS = readRDS(paste0(shared_path, 'published_GS_collection.rds'))
 lengths(GS)
  
 length(union(rownames(sce), unique(unlist(df)))) # 28549

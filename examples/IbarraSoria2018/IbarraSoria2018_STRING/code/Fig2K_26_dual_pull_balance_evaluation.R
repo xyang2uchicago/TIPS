@@ -15,7 +15,7 @@ sig_map <- data.frame(
 
 db = 'IbarraSoria'
 rebuild_mat = FALSE
-source('F:/projects/scRNA/source/cardiac_CTS_GRN/IbarraSoria2018_E8.25_v9/24.0_acat_load_input_clean.R')
+source("/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/IbarraSoria2018_STRING/code/24.0_acat_load_input_clean.R")
 
 seed_TF  #"MEF2C", "GATA4", "MSX2"
 names(graph_list)
@@ -49,7 +49,7 @@ class(sce) # [1] "SingleCellExperiment"
 
 dim(mat) # dim(mat)[1] 37  29
 
-updir = "F:/projects/scRNA/results/cardiac_CTS_GRN/IbarraSoria2018_E8.25_v9/GSE181346_heart_scATAC"
+updir <- "/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/IbarraSoria2018_STRING/results/GSE181346_heart_scATAC"
 setwd(updir)
 setwd('../validation')
 
@@ -61,7 +61,7 @@ library(gplots)
 library(ggExtra)
 
 
-pull_path = 'F:/projects/TIPS/doc/'
+pull_path <- shared_path  # TODO: add STable_final_2026.xlsx to Shared_Data/
 pull_df = read.xlsx(paste0(pull_path, 'STable_final_2026.xlsx'), sheet=15)
 dim(pull_df)  # 122  15
 head(pull_df, 3)

@@ -21,7 +21,7 @@ sig_map <- data.frame(
 db = 'Pijuan_Sala'
 
 rebuild_mat = FALSE
-source('F:/projects/scRNA/source/cardiac_CTS_GRN/GSE87038_Pijuan2019_v9/24.0_acat_load_input_clean_v2.R')
+source("/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/GSE87038_STRING/code/24.0_acat_load_input_clean.R")
 
 celltype_col  # 'leiden_0.5'
 
@@ -45,7 +45,7 @@ lengths(CTS)
 
 (updir = getwd())
 #[1] "F:/projects/scRNA/results/cardiac_CTS_GRN/GSE87038_Pijuan2019_v9/GSE181346_heart_scATAC"
-fpath = paste0('F:/projects/scRNA/results/cardiac_CTS_GRN/GSE87038_Pijuan2019_v9/validation_C8vs', EMT_ID)
+fpath <- paste0(wd, "results/GSE181346_heart_scATAC/validation_C8vs", EMT_ID)
 if(!file.exists(fpath)) dir.create(fpath)
 setwd(fpath)
 
@@ -57,7 +57,7 @@ library(gplots)
 library(ggExtra)
 
 
-pull_path = 'F:/projects/TIPS/doc/'
+pull_path <- shared_path  # TODO: add STable_final_2026.xlsx to Shared_Data/
 pull_df = read.xlsx(paste0(pull_path, 'STable_final_2026.xlsx'), sheet=16)
 dim(pull_df)  # 96  15
 head(pull_df, 3)

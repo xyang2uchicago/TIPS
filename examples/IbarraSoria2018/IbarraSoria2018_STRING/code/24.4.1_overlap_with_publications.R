@@ -1,7 +1,7 @@
 # source('F:/projects/scRNA/source/cardiac_CTS_GRN/IbarraSoria2018_E8.25_v9/C8_vs_C16/24.3_overlap_with_publications.R')
 
 rebuild_mat = FALSE
-source('F:/projects/scRNA/source/cardiac_CTS_GRN/IbarraSoria2018_E8.25_v9/24.0_acat_load_input_clean.R')
+source("/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/IbarraSoria2018_STRING/code/24.0_acat_load_input_clean.R")
 
 celltype_col  # subcelltype
 
@@ -21,7 +21,7 @@ lengths(CTS)
     # cardiac.a endothelial.b 
            # 37            33 
 
-updir = "F:/projects/scRNA/results/cardiac_CTS_GRN/IbarraSoria2018_E8.25_v9/GSE181346_heart_scATAC"
+updir <- "/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/IbarraSoria2018_STRING/results/GSE181346_heart_scATAC"
 setwd(updir)
 setwd('../validation')
 
@@ -37,9 +37,9 @@ library(openxlsx)
 ## refer to F:\projects\scRNA\source\cardiac_CTS_GRN\GSE175634_iPSC_CM_weighted_v9\24.4.0_GS_publications_collection.R
 library(dplyr)
 library(tidyr)
-source('E:/Git_Holly/TIPS/R/celltype_specific_weight_v10.R')
+source("/Users/felixyu/Documents/GitHub/TIPS/R/celltype_specific_weight_v10.R")
 
-GP_path = 'D:/projects/DS/data/TF_perturb_CM/doc/'
+GP_path <- shared_path  # TODO: add TF_perturb_CM doc files to Shared_Data/
 
 
 df = read.xlsx(xlsxFile = paste0(GP_path, 'media-2.xlsx'), sheet=8, startRow = 2)  # 250 programs
@@ -53,7 +53,7 @@ head(df[,1:10], 3)
 
 length(unique(unlist(df))) # 25311
 
-GS = readRDS(paste0(shared_input_path, 'published_GS_collection.rds'))
+GS = readRDS(paste0(shared_path, 'published_GS_collection.rds'))
 lengths(GS)
  
 length(union(rownames(sce), unique(unlist(df)))) # 28549
