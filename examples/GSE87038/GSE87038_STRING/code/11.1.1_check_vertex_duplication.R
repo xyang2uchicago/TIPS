@@ -242,7 +242,7 @@ for (i in sub("^HiG_", "", names(which(graphs_with_duplicates)))) {
 # 4   HiG_19  HN1L      4 10090.ENSMUSP00000024981
 
 ################################################################
-## remove duplciated vertex directly from un-simplified graph ##
+## remove duplicated vertex directly from un-simplified graph ##
 ################################################################
 graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_notsimplified.rds"))
 

@@ -6,12 +6,12 @@ library(igraph)
 
 ########## BEGINNING OF USER INPUT ##########
 
-wd = "C:/Users/felix/Documents/GitHub/TIPS/examples/GSE87038/GSE87038_STRING/"
+wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/GSE87038_STRING/"
 setwd(paste0(wd, "results/PPI_weight/"))
 
 db <- "GSE87038"
 
-specificity_methods <- c("combined") # Other methods: "ratio", "zscore", "diff"
+specificity_methods <- c("combined", "ratio", "zscore", "diff") # Other methods: "ratio", "zscore", "diff"
 
 isl1_cluster <- "HiGCTS_8" # cluster containing ISL1 gene
 
