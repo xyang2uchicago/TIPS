@@ -27,7 +27,7 @@ if(download_files){
     # BioTIP.res.Rdata
     download.file(
         "https://github.com/xyang2uchicago/BioTIP/raw/refs/heads/master/examples/result/gastrulationE8.25_Ibarra-Soria2018/subcelltype/BioTIP.res.RData",
-        "../data/BioTIP.res.RData"
+        "../../data/BioTIP.res.RData"
     )
 
     # STRING db
@@ -48,8 +48,8 @@ if(download_files){
 }
 
 # Load BioTIP results and sce object
-load(file = "../data/BioTIP.res.RData")
-load("../data/sce_16subtype.RData") 
+load(file = "../../data/BioTIP.res.RData")
+load("../../data/sce_16subtype.RData") 
 
 ########## END OF USER INPUT ##########
 
@@ -94,12 +94,12 @@ for (i in c(setdiff(names(markers.up), names(CTS)), unique_CTS_ID)) {
     DEG[[i]] <- rownames(interesting.up[interesting.up$summary.logFC > logFC.cut & interesting.up$FDR < 0.01, ])
 }
 
-saveRDS(DEG, file = paste0("../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.05.rds"))
-saveRDS(markers.up, file = "../data/markers.up_ttest_min.prop0.25.rds")
+saveRDS(DEG, file = paste0("../../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.05.rds"))
+saveRDS(markers.up, file = "../../data/markers.up_ttest_min.prop0.25.rds")
 
 dim(markers.up[[1]]) # just to check dimensions
 
-DEG <- readRDS(file = paste0("../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.05.rds"))
+DEG <- readRDS(file = paste0("../../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.05.rds"))
 lengths(DEG)
 
 ######################################################

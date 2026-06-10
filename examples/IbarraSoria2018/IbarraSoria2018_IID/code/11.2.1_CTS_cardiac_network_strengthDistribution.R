@@ -25,7 +25,7 @@ CT_id_formatted <- paste0("_(", paste(CT_id, collapse = "|"), ")")
 
 ########## END OF USER INPUT ##########
 
-graph_list <- readRDS(file.path(wd, "data", paste0(db, "_IID_graph_perState_notsimplified.rds")))
+graph_list <- readRDS(file.path(wd, "results", paste0(db, "_IID_graph_perState_notsimplified.rds")))
 (N0 <- sapply(graph_list, vcount))
 (N0)
 #                  HiG_blood              HiG_cardiac.b

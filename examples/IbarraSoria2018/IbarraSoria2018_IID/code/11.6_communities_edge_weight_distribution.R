@@ -12,7 +12,7 @@ library(igraph)
 
 wd <- "/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/IbarraSoria2018_IID/"
 setwd(paste0(wd, "results/"))
-inputdir <- file.path(wd, "data/")
+inputdir <- file.path(wd, "results/")
 db <- "IbarraSoria2018"
 
 celltype_specific_weight_version <- "10"

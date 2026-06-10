@@ -233,7 +233,7 @@ s <- "combined" # specificity method
 # original pdf: edge_weight.pdf
 ###################################################
 {
-  graph_list_notsimplified <- readRDS(file = file.path(inputdir, paste0(db, "_IID_graph_perState_notsimplified.rds")))
+  graph_list_notsimplified <- readRDS(file = file.path(wd, "results", paste0(db, "_IID_graph_perState_notsimplified.rds")))
 
   # Remove duplicate vertices
   # correct_n_edges = readRDS(file.path(inputdir, '../correct_n_edges_HiG_STRING2.14.0.rds'))

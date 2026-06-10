@@ -1,16 +1,12 @@
 library("SingleCellExperiment")
-library(Seurat)
 library(dplyr)
 library(scuttle)
 
-## dependence to run BioTIP
 library(igraph)
-require(psych)
-library(stringr)
 
 ########## BEGINNING OF USER INPUT ##########
 
-wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/GSE87038_STRING/"
+wd = "C:/Users/felix/Documents/GitHub/TIPS/examples/GSE87038/GSE87038_STRING/"
 setwd(paste0(wd, "results/PPI_weight/"))
 
 db <- "GSE87038"
@@ -22,9 +18,9 @@ isl1_cluster <- "HiGCTS_8" # cluster containing ISL1 gene
 core_count <- 1 # number of cores used for parallel processing in steps 1 and 2. Use core_count = 1 if on Windows.
 
 step1 <- TRUE # calculate gene correlations and specificity
-step2 <- FALSE # update network edge weights
-step3 <- FALSE # graph comparing specificity methods for all clusters
-step4 <- FALSE # graph comparing specificity methods for isl1_cluster
+step2 <- TRUE # update network edge weights
+step3 <- TRUE # graph comparing specificity methods for all clusters
+step4 <- TRUE # graph comparing specificity methods for isl1_cluster
 
 celltype_specific_weight_version <- '10'
 BioTIP_version <- '06232025'

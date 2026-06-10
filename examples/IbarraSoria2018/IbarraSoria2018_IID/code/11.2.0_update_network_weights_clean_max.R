@@ -72,7 +72,7 @@ assayName <- "logcounts"
 # -----------------------------
 # 1) Read IID graphs
 # -----------------------------
-graph_list <- readRDS(file.path(wd, "data", paste0(db, "_IID_graph_perState_notsimplified.rds")))
+graph_list <- readRDS(file.path(wd, "results", paste0(db, "_IID_graph_perState_notsimplified.rds")))
 
 graph_list <- lapply(graph_list, function(g) {
   V(g)$name <- toupper(V(g)$name)

@@ -2,3 +2,7 @@
 **/.DS_Store
 **/hg38_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather
 **/PPIN/human_annotated_PPIs.txt.gz
+.claude/
+examples/GSE116893/data/malignant_leiden.rds
+examples/GSE116893/data/seurat_rna_malignant_harmony_cellstateannotated.rds
+examples/GSE116893/data/sce.rds

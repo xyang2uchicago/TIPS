@@ -44,7 +44,7 @@ setdiff(toupper(TF_mouse), TF_human)
 #  [97] "ZFP420"        "ZFP422"        "ZFP423"        "ZFP426"        "ZFP429"        "ZFP438"
 # ....
 
-input_path <- "../data/"
+input_path <- "../../data/"
 
 coding_genes <- readRDS(file = paste0(shared_path, "coding_genes.rds")) %>% unique()
 length(coding_genes) # 19930

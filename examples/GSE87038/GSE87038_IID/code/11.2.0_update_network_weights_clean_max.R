@@ -55,7 +55,7 @@ if (!"logcounts" %in% assayNames(sce)) {
 }
 assayName <- "logcounts"
 
-graph_list <- readRDS(file.path(wd, "data", paste0(db, "_IID_graph_perState_notsimplified.rds")))
+graph_list <- readRDS(file.path(wd, "results", paste0(db, "_IID_graph_perState_notsimplified.rds")))
 
 graph_list <- graph_list[names(graph_list) != "CTS_13"]
 

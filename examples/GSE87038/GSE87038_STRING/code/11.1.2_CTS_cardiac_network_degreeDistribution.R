@@ -10,7 +10,7 @@ library(igraph)
 
 ########## BEGINNING OF USER INPUT ##########
 
-wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/GSE87038_STRING/"
+wd = "C:/Users/felix/Documents/GitHub/TIPS/examples/GSE87038/GSE87038_STRING/"
 setwd(paste0(wd, "results/"))
 PPI_color_palette <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
 
@@ -84,18 +84,18 @@ names(graph_list)
 # [31] "CTS_16.1"    "CTS_13"      "CTS_8"
 edge_counts <- sapply(graph_list, ecount)
 edge_counts
-#       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6
-#        4978        9544        7120        5362        5808       10993
-#       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18
-#        6937        8655        5828        7004       11719        8543
-#      HiG_19       HiG_7      HiG_11      HiG_15      HiG_16      HiG_13
-#        7827        7572        9301        8632       10581        8508
-#       HiG_8    HiGCTS_7   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1
-#        5880          17          15          54          10          31
-#   HiGCTS_13    HiGCTS_8       CTS_7      CTS_11      CTS_15      CTS_16
-#           9          10          52          54         207          70
-#    CTS_16.1      CTS_13       CTS_8
-#         210         147         165
+#       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6 
+#        4978        9544        7120        5362        5808       10993 
+#       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18 
+#        6937        8655        5828        7004       11719        8543 
+#      HiG_19       HiG_7      HiG_11      HiG_15      HiG_16      HiG_13 
+#        7827        7572        9301        8632       10581        8508 
+#       HiG_8    HiGCTS_7   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1 
+#        5880          17          15          54          10          31 
+#   HiGCTS_13    HiGCTS_8       CTS_7      CTS_11      CTS_15      CTS_16 
+#           9          10          52          54         207          70 
+#    CTS_16.1      CTS_13       CTS_8 
+#         210         147         165 
 
 # Identify and print duplicate vertex indices for each graph, should return nothing if all duplicates are removed
 for (g_name in names(graph_list)) {
@@ -197,18 +197,18 @@ g_degree_dis <- ggplot(
 print(g_degree_dis)
 dev.copy2pdf(file = "degree_distribution_w_vsize.pdf")
 (n_nodes <- lapply(graph_list, vcount) %>% unlist())
-#       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6
-#         303         435         411         304         320         512
-#       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18
-#         358         422         341         364         524         455
-#      HiG_19       HiG_7      HiG_11      HiG_15      HiG_16      HiG_13
-#         527         336         441         406         524         403
-#       HiG_8    HiGCTS_7   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1
-#         332          14          19          30          13          30
-#   HiGCTS_13    HiGCTS_8       CTS_7      CTS_11      CTS_15      CTS_16
-#          13          10          31          51          66          39
-#    CTS_16.1      CTS_13       CTS_8
-#          79          60          54
+#       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6 
+#         303         435         411         304         320         512 
+#       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18 
+#         358         422         341         364         523         455 
+#      HiG_19       HiG_7      HiG_11      HiG_15      HiG_16      HiG_13 
+#         527         336         441         406         524         403 
+#       HiG_8    HiGCTS_7   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1 
+#         332          14          19          30          13          30 
+#   HiGCTS_13    HiGCTS_8       CTS_7      CTS_11      CTS_15      CTS_16 
+#          13          10          31          51          66          39 
+#    CTS_16.1      CTS_13       CTS_8 
+#          79          60          54 
 
 
 # cumulative NORMALIZED degree distribution to a power law fit ########################
@@ -235,8 +235,8 @@ V_deg_nor_dis$PPI_cat <- lapply(V_deg_nor_dis$signature, function(x) unlist(strs
     factor(., levels = c("CTS", "HiGCTS", "HiG"))
 
 table(V_deg_nor_dis$PPI_cat)
-# CTS HiGCTS    HiG
-# 80     33   1033
+#    CTS HiGCTS    HiG 
+#    104     44   2087 
 V_deg_nor_dis$cluster <- lapply(V_deg_nor_dis$signature, function(x) unlist(strsplit(x, "_"))[2]) %>% unlist()
 
 all(V_deg_nor_dis$signature %in% names(graph_list))
