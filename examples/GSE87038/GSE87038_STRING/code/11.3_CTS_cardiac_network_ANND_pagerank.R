@@ -1236,7 +1236,7 @@ df_compare <- data.frame(
 df_compare$PPI_cat <- lapply(df_compare$signature, function(x) unlist(strsplit(x, split = "_"))[1]) %>%
     unlist() %>%
     factor(., levels = c("CTS", "HiGCTS", "HiG"))
-ggplot(df_compare, aes(x = n_sig.pagerank, y = n_sig.annd)) +
+p_compare <- ggplot(df_compare, aes(x = n_sig.pagerank, y = n_sig.annd)) +
     geom_point(aes(shape = PPI_cat, colour = PPI_cat), show.legend = FALSE) +
     scale_color_manual(values = PPI_color_palette) +
     geom_text_repel(aes(label = signature), hjust = -0.1, vjust = 0) +
