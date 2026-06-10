@@ -150,10 +150,10 @@ for (i in names(graph_list)) {
         pr_P[[i]][j] <- length(which(subset(tmp, gene == j)$PageRank >= page[[i]][j])) / N
     }
 }
-saveRDS(pr_P, file = "GSE87038_PageRank_Pvalue_by_rewiring.rds")
+saveRDS(pr_P, file = paste0(db, "_PageRank_Pvalue_by_rewiring.rds"))
 
 
-pr_P <- readRDS(file = "GSE87038_PageRank_Pvalue_by_rewiring.rds")
+pr_P <- readRDS(file = paste0(db, "_PageRank_Pvalue_by_rewiring.rds"))
 tmp <- lapply(pr_P, function(x) data.frame(p.PageRank = x, gene = names(x))) %>%
     rbindlist(., idcol = names(.))
 colnames(tmp)[1] <- "signature"
@@ -260,9 +260,9 @@ for (i in names(graph_list)) {
         annd_P[[i]][j] <- length(which(subset(tmp, gene == j)$knn >= annd_observed[[i]][j])) / N
     }
 }
-saveRDS(annd_P, file = "GSE87038_annd_Pvalue_by_rewiring.rds")
+saveRDS(annd_P, file = paste0(db, "_annd_Pvalue_by_rewiring.rds"))
 
-annd_P <- readRDS(file = "GSE87038_annd_Pvalue_by_rewiring.rds")
+annd_P <- readRDS(file = paste0(db, "_annd_Pvalue_by_rewiring.rds"))
 
 (unique(df$PPI_cat)) # CTS    HiGCTS HiG
 
@@ -648,7 +648,7 @@ violin_median_bc_wilcox_ln <- ggplot(df_median, aes(x = PPI_cat, y = log10(bc.me
     ggtitle("wilcox-test, median BC+1")
 
 # Combine the boxplot and density plot
-pdf(file = "BetweennessCentrality_GSE87038_v2.pdf", height = 10)
+pdf(file = paste0("BetweennessCentrality_", db, "_v2.pdf"), height = 10)
 print(grid.arrange(pr_repel, density_median_bc_plot + coord_flip(), ncol = 2, widths = c(3, 1)))
 print(grid.arrange(violin_median_bc_wilcox, pr, nrow = 2, heights = c(3, 3)))
 print(grid.arrange(violin_wilcox, pr, nrow = 2, heights = c(3, 3)))
@@ -909,7 +909,7 @@ violin_median_page_wilcox <- ggplot(df_median, aes(x = PPI_cat, y = pg.median, c
 
 
 # Combine the boxplot and density plot
-pdf(file = "PageRank_GSE87038_v2.pdf", height = 10)
+pdf(file = paste0("PageRank_", db, "_v2.pdf"), height = 10)
 print(grid.arrange(pr, density_median_page_plot + coord_flip(), ncol = 2, widths = c(3, 1)))
 print(grid.arrange(violin_median_page_wilcox, pr, nrow = 2, heights = c(3, 3)))
 print(grid.arrange(violin_wilcox, pr, nrow = 2, heights = c(3, 3)))
@@ -1043,7 +1043,7 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         ggtitle("wilcox test, median ANND")
 
     # Combine the boxplot and density plot
-    pdf(file = "annd_GSE87038_v2.pdf", height = 10)
+    pdf(file = paste0("annd_", db, "_v2.pdf"), height = 10)
     print(grid.arrange(pr, density_median_annd_wilcox + coord_flip(), ncol = 2, widths = c(3, 1)))
     print(grid.arrange(violin_median_annd_plot, pr, nrow = 2, heights = c(3, 3)))
 
@@ -1199,7 +1199,7 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         ggtitle("wilcox, median nr_strength")
 
     # Combine the boxplot and density plot
-    pdf(file = "normalized.node.strength_GSE87038_v2.pdf", height = 10)
+    pdf(file = paste0("normalized.node.strength_", db, "_v2.pdf"), height = 10)
     print(grid.arrange(pr, density_median_normalized.strength_plot + coord_flip(), ncol = 2, widths = c(3, 1)))
     print(grid.arrange(violin_median_normalized.strength_wilcox, pr, nrow = 2, heights = c(3, 3)))
     print(grid.arrange(violin_wilcox, pr, nrow = 2, heights = c(3, 3)))
