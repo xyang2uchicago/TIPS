@@ -35,15 +35,15 @@ graph_list <- readRDS(file)
 # [16] "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"
 # [21] "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_8"
 # [26] "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"      "CTS_16.1"
-# [31] "CTS_13"      "CTS_8"       "HiGCTS_13"
+# [31] "CTS_13"      "CTS_8"      
 edge_counts <- sapply(graph_list, ecount)
 (edge_counts)
 #       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6 
 #        4978        9544        7120        5362        5808       10993 
 #       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18 
-#        6937        8655        5828        7004       11719        8546 
+#        6937        8655        5828        7004       11719        8543 
 #      HiG_19       HiG_7      HiG_11      HiG_15      HiG_16      HiG_13 
-#        7828        7572        9301        8632       10581        8508 
+#        7827        7572        9301        8632       10581        8508 
 #       HiG_8    HiGCTS_7   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1 
 #        5880          17          15          54          10          31 
 #    HiGCTS_8       CTS_7      CTS_11      CTS_15      CTS_16    CTS_16.1 
@@ -165,24 +165,26 @@ df <- merge(df, tmp, by = c("signature", "gene")) %>%
     ungroup()
 
 (head(df))
+# # A tibble: 6 × 8
 #   signature gene        PageRank PPI_cat EigenCentrality p.PageRank rank_by_p.PR
 #   <chr>     <chr>          <dbl> <fct>             <dbl>      <dbl>        <dbl>
-# 1 CTS_11    1810011O10…  0.00430 CTS             0            0.952           14
-# 2 CTS_11    Aard         0.00430 CTS             0            0.956           33
-# 3 CTS_11    Abhd4        0.00430 CTS             0            0.952           14
-# 4 CTS_11    Akr1b8       0.00430 CTS             0            0.952           14
-# 5 CTS_11    Asb4         0.0525  CTS             0.00366      0.947            6
-# 6 CTS_11    Baiap2l1     0.00913 CTS             0.133        0.961           39
+# 1 CTS_11    1810011O10…  0.00430 CTS            1.02e-17      0.97          38.5
+# 2 CTS_11    Aard         0.00430 CTS            1.02e-17      0.973         49.5
+# 3 CTS_11    Abhd4        0.00430 CTS            1.02e-17      0.969         32  
+# 4 CTS_11    Akr1b8       0.00430 CTS            1.02e-17      0.969         32  
+# 5 CTS_11    Asb4         0.0525  CTS            3.66e- 3      0.947          5.5
+# 6 CTS_11    Baiap2l1     0.00913 CTS            1.33e- 1      0.958         13.5
 (dim(df)) # [1] 8213    8
 
 (subset(df, tolower(gene) == "isl1"))
+# # A tibble: 5 × 8
 #   signature gene  PageRank PPI_cat EigenCentrality p.PageRank rank_by_p.PR
 #   <chr>     <chr>    <dbl> <fct>             <dbl>      <dbl>        <dbl>
-# 1 CTS_8     Isl1   0.0578  CTS              0.681       0.74           45 
-# 2 HiGCTS_8  Isl1   0.187   HiGCTS           0.769       0.786           3 
-# 3 HiG_14    Isl1   0.00378 HiG              0.0235      0.297         129 
-# 4 HiG_2     Isl1   0.00349 HiG              0.133       0.3           116.
-# 5 HiG_8     Isl1   0.00703 HiG              0.242       0.237          30 
+# 1 CTS_8     Isl1   0.0578  CTS              0.681       0.746         47.5
+# 2 HiGCTS_8  Isl1   0.187   HiGCTS           0.769       0.795          3  
+# 3 HiG_14    Isl1   0.00378 HiG              0.0235      0.297        129  
+# 4 HiG_2     Isl1   0.00349 HiG              0.133       0.3          116. 
+# 5 HiG_8     Isl1   0.00703 HiG              0.242       0.236         28  
 
 # number of significantly high pagerank per PPI_cats, too much control !
 n.pr.high <- lapply(names(graph_list), function(x) nrow(subset(df, signature == x & p.PageRank < 0.05))) %>% unlist()
@@ -275,7 +277,7 @@ tmp <- lapply(annd_observed, function(x) data.frame(annd = x, gene = names(x)) %
     rbindlist(., idcol = names(.))
 colnames(tmp)[1] <- "signature"
 df <- merge(df, tmp, by = c("signature", "gene"))
-(dim(df)) # [1] 8060    9
+(dim(df)) # [1] 8059    9
 
 annd_P[["CTS_8"]]
 tmp <- lapply(annd_P, function(x) data.frame(p.annd = x, gene = names(x))) %>%
@@ -285,7 +287,7 @@ colnames(tmp)[1] <- "signature"
 
 df <- merge(df, tmp, by = c("signature", "gene"))
 df[which(is.na(df$knn)), "p.annd"] <- NA ## due to nrow(df) 4878 > nrow(tmp)
-(dim(df)) # [1] 8060   10
+(dim(df)) # [1] 8059   10
 
 ## merge back the normalized strength of vertex
 # normalized_strength <- strength(g) / (vcount(g) - 1)
@@ -323,16 +325,16 @@ V_strength <- merge(V_strength, V_strength_norm, by = c("signature", "gene"))
 
 ## add the V_strength & V_strength_norm infor
 df <- merge(df, V_strength, by = c("signature", "gene"))
-(dim(df)) # 8060   14
+(dim(df)) # 8059   14
 (head(df, 3))
 #   signature     gene    PageRank PPI_cat EigenCentrality p.PageRank
 # 1    CTS_11     Asb4 0.052483905     CTS     0.003662169      0.947
-# 2    CTS_11 Baiap2l1 0.009130091     CTS     0.132614464      0.961
-# 3    CTS_11   Ccdc80 0.022049838     CTS     0.102663878      0.962
+# 2    CTS_11 Baiap2l1 0.009130091     CTS     0.132614464      0.958
+# 3    CTS_11   Ccdc80 0.022049838     CTS     0.102663878      0.961
 #   rank_by_p.PR rank_by_PR     annd p.annd   strength rank_by_strength
-# 1            6          4 1.892216      0 0.20650263                5
-# 2           39         30 6.457612      0 0.02879440               25
-# 3           42         21 6.692259      0 0.08354285               15
+# 1          5.5          4 1.892216      0 0.20650263                5
+# 2         13.5         30 6.457612      0 0.02879440               25
+# 3         23.0         21 6.692259      0 0.08354285               15
 #   normalized.strength rank_by_normalized.strength
 # 1         0.004130053                           5
 # 2         0.000575888                          25
@@ -340,7 +342,7 @@ df <- merge(df, V_strength, by = c("signature", "gene"))
 
 (table(df$normalized.strength >= df$annd))
 # FALSE 
-#  8060 
+#  8059 
 
 ## # Add rank_by_ANND column and rerank strength, normalized strength by considering ties !!!
 df <- df %>%
@@ -464,8 +466,8 @@ write.table(df5[, c(
 # 6         HiG_2                 21943  Acta2        1.0     HiG            TRUE
 # 14        HiG_3                  9565  Acta2        2.0     HiG            TRUE
 # 51       HiG_17                 11396  Acta2        2.0     HiG            TRUE
-# 58       HiG_18                  8432  Acta2        5.0     HiG            TRUE
-# 62       HiG_19                 18035  Acta2        2.0     HiG            TRUE
+# 58       HiG_18                  8294  Acta2        5.0     HiG            TRUE
+# 62       HiG_19                 18133  Acta2        2.0     HiG            TRUE
 # 73       HiG_11                 20880  Acta2        1.0     HiG            TRUE
 # 84       HiG_16                 14197  Acta2        3.0     HiG            TRUE
 # 91        HiG_8                  5914 Nkx2-5        3.0     HiG            TRUE
@@ -589,8 +591,8 @@ ks.test(df_median$bc.median[b], df_median$bc.median[c]) # p-value =  1	HiGCTS vs
 wilcox.test(df_median$bc.median[a], df_median$bc.median[b]) # p-value = 0.000295226244881333  HiG vs HiGCTS
 wilcox.test(df_median$bc.median[a], df_median$bc.median[c]) # p-value =  0.000123880353215404	HiG vs CTS
 wilcox.test(df_median$bc.median[b], df_median$bc.median[c]) # p-value = 0.440400698139003	HiGCTS vs CTS
-t.test(df_median$bc.median[a], df_median$bc.median[b]) # p-value = 1.31031354436124e-05  HiG vs HiGCTS
-t.test(df_median$bc.median[a], df_median$bc.median[c]) # p-value =  1.48497712000408e-05	HiG vs CTS
+t.test(df_median$bc.median[a], df_median$bc.median[b]) # p-value = 1.45e-05  HiG vs HiGCTS
+t.test(df_median$bc.median[a], df_median$bc.median[c]) # p-value = 1.643e-05  HiG vs CTS
 t.test(df_median$bc.median[b], df_median$bc.median[c]) # p-value = 0.355917683749582	HiGCTS vs CTS
 
 
@@ -657,7 +659,7 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ########### plot PageRank ############
 df <- readRDS(file = "df_PAGERANK_strength_ANND.rewiring.P.rds") # !!!!!!!!!!!!!!!!!!!!!!!
-(dim(df)) # [1] 8060   16
+(dim(df)) # [1] 8059   16
 
 df <- rbind(
     subset(df, PPI_cat == "CTS"),
@@ -721,18 +723,18 @@ df5_CHD <- subset(df5, PCGC_AllCurated == TRUE)
 (dim(df5_CHD)) # [1] 15 17
 (df5_CHD %>% as.data.frame())
 #    signature   gene    PageRank PPI_cat EigenCentrality p.PageRank rank_by_p.PR
-# 1     CTS_11   Fbn1 0.055065672     CTS       0.4869366      0.973         30.5
-# 2     CTS_11  Fgfr2 0.064327535     CTS       1.0000000      0.960         17.5
-# 3      CTS_8  Fgfr2 0.041574332     CTS       0.3937628      0.458         13.0
-# 4      CTS_8   Isl1 0.057804144     CTS       0.6809899      0.740         42.0
-# 5  HiGCTS_16 Plagl1 0.114285714  HiGCTS       0.0000000      0.929          2.0
-# 6   HiGCTS_8   Isl1 0.187381852  HiGCTS       0.7691712      0.786          3.0
-# 7     HiG_11  Acta2 0.013871703     HiG       0.9973502      0.534        308.0
+# 1     CTS_11   Fbn1 0.055065672     CTS       0.4869366      0.970         31.0
+# 2     CTS_11  Fgfr2 0.064327535     CTS       1.0000000      0.959         16.5
+# 3      CTS_8  Fgfr2 0.041574332     CTS       0.3937628      0.465         14.0
+# 4      CTS_8   Isl1 0.057804144     CTS       0.6809899      0.746         42.0
+# 5  HiGCTS_16 Plagl1 0.114285714  HiGCTS       0.0000000      0.926          2.0
+# 6   HiGCTS_8   Isl1 0.187381852  HiGCTS       0.7691712      0.795          3.0
+# 7     HiG_11  Acta2 0.013871703     HiG       0.9973502      0.529        301.0
 # 8     HiG_16  Acta2 0.011768339     HiG       1.0000000      0.770        517.0
 # 9     HiG_17  Acta2 0.009240550     HiG       0.7519698      0.627        451.5
 # 10    HiG_17  Actc1 0.008124728     HiG       0.8657376      0.723        498.5
-# 11    HiG_18  Acta2 0.010387360     HiG       0.2678098      0.549        366.0
-# 12    HiG_19  Acta2 0.011703470     HiG       1.0000000      0.704        519.0
+# 11    HiG_18  Acta2 0.010383249     HiG       0.2678098      0.546        372.0
+# 12    HiG_19  Acta2 0.011700875     HiG       1.0000000      0.701        517.0
 # 13     HiG_2  Acta2 0.013565393     HiG       0.7456318      0.720        377.0
 # 14     HiG_2  Actc1 0.010526542     HiG       0.8855112      0.810        402.0
 # 15     HiG_3  Acta2 0.011665908     HiG       0.4713817      0.527        282.5
@@ -763,7 +765,7 @@ df5_CHD <- subset(df5, PCGC_AllCurated == TRUE)
 # 8                            1        151.0          260.0            TRUE
 # 9                            3         96.0          261.5            TRUE
 # 10                           5        122.0          261.5            TRUE
-# 11                           5        134.0          226.0            TRUE
+# 11                           5        134.0          225.5            TRUE
 # 12                           1        118.0          262.0            TRUE
 # 13                           2        222.0          218.0            TRUE
 # 14                           4        245.0          218.0            TRUE
@@ -945,13 +947,13 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # # Groups:   signature [7]
     #   signature   gene   PageRank PPI_cat EigenCentrality p.PageRank rank_by_p.PR
     #   <fct>       <chr>     <dbl> <fct>             <dbl>      <dbl>        <dbl>
-    # 1 CTS_16.1    Tbx20  0.00446  CTS              0.0677      0.752         57  
-    # 2 CTS_8       Tbx1   0.0134   CTS              0.222       0.753         43  
-    # 3 HiGCTS_16.1 Bmp2   0.0343   HiGCTS           0.207       0.902          6.5
-    # 4 HiGCTS_8    Isl1   0.187    HiGCTS           0.769       0.786          3  
+    # 1 CTS_16.1    Tbx20  0.00446  CTS              0.0677      0.745         57.5
+    # 2 CTS_8       Tbx1   0.0134   CTS              0.222       0.756         43  
+    # 3 HiGCTS_16.1 Bmp2   0.0343   HiGCTS           0.207       0.895          6  
+    # 4 HiGCTS_8    Isl1   0.187    HiGCTS           0.769       0.795          3  
     # 5 HiG_18      Ece1   0.000802 HiG              0.0118      0.474        217  
     # 6 HiG_5       Cited2 0.00131  HiG              0.0288      0.432        192. 
-    # 7 HiG_7       Cited2 0.000970 HiG              0.0276      0.223         68  
+    # 7 HiG_7       Cited2 0.000970 HiG              0.0276      0.22          67.5
     #   rank_by_PR   annd p.annd strength rank_by_strength normalized.strength
     #        <dbl>  <dbl>  <dbl>    <dbl>            <dbl>               <dbl>
     # 1         60  21.4       0   0.0374               55            0.000479
@@ -1216,7 +1218,7 @@ names(n.annd.high) <- names(graph_list)
 #       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6 
 #         300         435         406         301         316         510 
 #       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18 
-#         355         418         338         358         522         451 
+#         355         418         338         358         522         450 
 #      HiG_19       HiG_7      HiG_11      HiG_15      HiG_16      HiG_13 
 #         523         335         437         406         519         403 
 #       HiG_8    HiGCTS_7   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1 
@@ -1256,9 +1258,9 @@ y <- grepl(".", CTS, fixed = TRUE)
 if (any(y)) CT <- CTS[!y] else CT <- CTS
 
 (CTS)
-# "7"    "11"   "15"   "16"   "16.1" "8"    "13"
+# "7"    "11"   "15"   "16"   "16.1" "8"   
 (CT)
-# "7"  "11" "15" "16" "8"  "13"
+# "7"  "11" "15" "16" "8" 
 
 plot_CTS_bc <- plot_HiG_bc <- list()
 ## compare the CTS&HiG genes to non-hiG genes per CTS-derived PPI
