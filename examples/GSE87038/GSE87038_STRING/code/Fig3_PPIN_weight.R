@@ -46,7 +46,7 @@ graph_list <- readRDS(file)
 (names(graph_list))
 #  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"       "HiG_6"       "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"      "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"      
 # [15] "HiG_11"      "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"    "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_8"    "CTS_7"       "CTS_11"      "CTS_15"     
-# [29] "CTS_16"      "CTS_16.1"    "CTS_13"      "CTS_8"       "HiGCTS_13"
+# [29] "CTS_16"      "CTS_16.1"    "CTS_13"      "CTS_8"      
 
 signature_levels = c(names(graph_list))
 
@@ -124,7 +124,7 @@ top_genes = df %>%
 
 # Subset top CHD genes
 top_genes_CHD = subset(top_genes, PCGC_AllCurated == TRUE)
-(dim(top_genes_CHD))  # Optional: check how many CHD genes were top 5
+(dim(top_genes_CHD))  # [1] 15 17
 
 # Optional: write out table of top 5 genes
 tb = top_genes[, c("signature", "gene", "PPI_cat", "normalized.strength", "PCGC_AllCurated")]
@@ -364,12 +364,12 @@ fold_change <- robustness.dt %>%
 #   PPI_cat fold_change_edge fold_change_vertex
 #   <fct>              <dbl>              <dbl>
 # 1 CTS                1.04                1.66
-# 2 HiGCTS             1.00                1.67
+# 2 HiGCTS             1.00                1.70
 # 3 HiG                0.913               1.09
 
 ### additionally, wilcox-test the between-group changes among observed PPINs
 tmp = subset(robustness.dt,measure=='btwn.cent')
-(dim(tmp)) # 160115     10
+(dim(tmp)) # 160111     10
 wilcox.test(subset(tmp,PPI_cat=='HiG')$comp.pct, subset(tmp,PPI_cat=='CTS')$comp.pct)
 # W = 1961908, p-value < 2.2e-16
 
@@ -401,9 +401,9 @@ sig_results_ppi <- lapply(ppi_comparisons, function(cmp) {
 
 (sig_results_ppi)
 #   group1 group2            p p_stars
-# 1    HiG HiGCTS 3.155646e-11    ****
-# 2    HiG    CTS 4.063640e-28    ****
-# 3    CTS HiGCTS 5.285741e-01      ns
+# 1    HiG HiGCTS 1.217560e-10    ****
+# 2    HiG    CTS 1.220792e-27    ****
+# 3    CTS HiGCTS 4.696298e-01      ns
 
 }
 
@@ -707,8 +707,8 @@ edge_counts <- edge_data %>%
 #   PPI_cat edge_count
 #   <fct>        <int>
 # 1 CTS            905
-# 2 HiGCTS         137
-# 3 HiG         184731
+# 2 HiGCTS         146
+# 3 HiG         150813
 
 pairwise_pvals <- edge_data %>%
   pairwise_wilcox_test(
@@ -719,9 +719,9 @@ pairwise_pvals <- edge_data %>%
 (pairwise_pvals)
 #   .y.         group1 group2    n1     n2 statistic        p   p.adj p.adj.signif
 # * <chr>       <chr>  <chr>  <int>  <int>     <dbl>    <dbl>   <dbl> <chr>       
-# 1 edge_weight CTS    HiGCTS   905    137     45708  7.03e-7 2.11e-6 ****        
-# 2 edge_weight CTS    HiG      905 184731  80746929  7.7 e-2 7.7 e-2 ns          
-# 3 edge_weight HiGCTS HiG      137 184731  14062139  2.4 e-2 3.6 e-2 *   
+# 1 edge_weight CTS    HiGCTS   905    146    63027  0.372 0.548 ns          
+# 2 edge_weight CTS    HiG      905 150813 67454552. 0.548 0.548 ns          
+# 3 edge_weight HiGCTS HiG      146 150813 11421990  0.433 0.548 ns
 }
 
 ### Save Plots to Folder
