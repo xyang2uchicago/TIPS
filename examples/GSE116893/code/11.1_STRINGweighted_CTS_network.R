@@ -289,4 +289,5 @@ graphs_with_duplicates <- sapply(graph_list, function(g) {
 
 # See which graphs have duplicates
 which(graphs_with_duplicates)
-# named integer(0)
+# HiG_17 
+#     15

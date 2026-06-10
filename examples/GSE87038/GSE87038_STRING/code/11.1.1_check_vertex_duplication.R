@@ -5,6 +5,7 @@ library(ggplot2)
 library("gridExtra")
 library(ggrepel)
 library(ggpubr)
+library(igraph)
 
 ########## BEGINNING OF USER INPUT ##########
 

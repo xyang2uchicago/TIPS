@@ -5,6 +5,7 @@ library(ggplot2)
 library("gridExtra")
 library(ggrepel)
 library(ggpubr)
+library(igraph)
 
 ########## BEGINNING OF USER INPUT ##########
 
@@ -37,7 +38,7 @@ graphs_with_duplicates <- sapply(graph_list, function(g) {
 
 # See which graphs have duplicates
 which(graphs_with_duplicates)
-# HiG_17 
+# HiG_17
 #     15
 
 # Show actual edges for duplicated vertices
@@ -76,8 +77,6 @@ graph_list <- lapply(graph_list, simplify, edge.attr.comb ='max') # !!!!!!!!!!!!
 
 N <- sapply(graph_list, vcount)
 
-correct_n_edges <- NULL
-
 unmapped_genes <- c() # initialize vector
 
 # BioMart database used to map STRING protein id to official gene id
@@ -115,25 +114,43 @@ map_protein_to_gene <- function(string_id) {
     }
 }
 
+correct_n_edges <- NULL
+
 # MANUAL INPUT REQUIRED
-for (i in names(which(graphs_with_duplicates))) {
+for (i in sub("^HiG_", "", names(which(graphs_with_duplicates)))) {
     cat("\n")
-    cat("Analyzing", i, "\n")
+    cat("Analyzing HiG_", i, "\n")
 
-    diff_exp <- graph_list[[i]]
+    diff_exp <- DEG[[i]]  # data frame with 'names' column
 
-    diff_exp_df <- data.frame(names = V(diff_exp)$name, stringsAsFactors = FALSE)
+    mapped <- string_db$map(diff_exp, "names", removeUnmappedRows = TRUE)
 
-    mapped <- string_db$map(diff_exp_df, "names", removeUnmappedRows = TRUE)
+    # For cluster 17: current STRING aliases no longer map LINC02210-CRHR1 (a read-through
+    # lncRNA overlapping CRHR1 on chr17). The saved graph was built when STRING returned
+    # both ENSP00000488912 (correct lncRNA entry) and ENSP00000381333 (CRHR1 protein,
+    # locus-overlap artifact). Inject both so the duplicate is detected and the correct
+    # edge count is stored. The removal block below then discards ENSP00000381333.
+    if (i == "17") {
+        existing_linc <- mapped$STRING_id[mapped$names == "LINC02210-CRHR1"]
+        if (!"9606.ENSP00000488912" %in% existing_linc)
+            mapped <- rbind(mapped, data.frame(names = "LINC02210-CRHR1",
+                                               STRING_id = "9606.ENSP00000488912",
+                                               stringsAsFactors = FALSE))
+        if (!"9606.ENSP00000381333" %in% existing_linc)
+            mapped <- rbind(mapped, data.frame(names = "LINC02210-CRHR1",
+                                               STRING_id = "9606.ENSP00000381333",
+                                               stringsAsFactors = FALSE))
+    }
 
     dup_name <- unique(mapped$names[duplicated(mapped$names)])
+    cat("Duplicated gene names:", paste(dup_name, collapse = ", "), "\n")
 
     dup_entries <- mapped[mapped$names %in% dup_name, ]
 
     # Apply biomart function to get gene ID and symbol info
     annotation <- do.call(rbind, lapply(dup_entries$STRING_id, map_protein_to_gene))
 
-    # Combine
+    # Combine for biological validation
     annotated_dup <- cbind(dup_entries, annotation[, c("gene_id", "gene_symbol")])
 
     print(annotated_dup)
@@ -141,46 +158,47 @@ for (i in names(which(graphs_with_duplicates))) {
     # In the manual code below, we want to delete all duplicate gene names that are associated with
     # the wrong Ensemble ID (those that are not in the official database corresponding to our gene).
 
-    # Find official mouse gene symbols: https://www.informatics.jax.org/
+    # Find official human gene symbols: https://www.genenames.org/
     # Find Ensemble ID at NCBI: https://www.ncbi.nlm.nih.gov
     # Map protein id to gene id using BioMart: https://useast.ensembl.org/info/data/biomart/index.html
 
+
     #               names            STRING_id         gene_id     gene_symbol
-    # 921 LINC02210-CRHR1 9606.ENSP00000381333 ENSG00000120088           CRHR1
-    # 922 LINC02210-CRHR1 9606.ENSP00000488912 ENSG00000263715 LINC02210-CRHR1 ✅
-    # 923 LINC02210-CRHR1 9606.ENSP00000381333 ENSG00000120088           CRHR1
-    # 924 LINC02210-CRHR1 9606.ENSP00000488912 ENSG00000263715 LINC02210-CRHR1
+    # 96            H3F3A 9606.ENSP00000355780 ENSG00000163041           H3-3A ✅
+    # 97            H3F3A 9606.ENSP00000254810 ENSG00000132475           H3-3B
+    # 388             HN1 9606.ENSP00000498587 ENSG00000148400          NOTCH1
+    # 389             HN1 9606.ENSP00000439228            <NA>            <NA>
+    # 390             HN1 9606.ENSP00000348316 ENSG00000189159            JPT1 ✅
+    # 513 LINC02210-CRHR1 9606.ENSP00000488912 ENSG00000263715 LINC02210-CRHR1 ✅ (correct lncRNA entry)
+    # 514 LINC02210-CRHR1 9606.ENSP00000381333 ENSG00000120088           CRHR1    (chr17 locus overlap, remove)
 
-    if (i == "HiG_17") mapped <- mapped[-c(921, 923, 924), ]
+    # Official Symbol: H3-3A / Official Ensemble ID: ENSG00000163041
+    # Official Symbol: JPT1 / Official Ensemble ID: ENSG00000189159
+    # Official Symbol: LINC02210-CRHR1 / Official Ensemble ID: ENSG00000263715
 
-    # Continue with generating STRING PPIN
+    if (i == "17") {
+        # Use STRING ID-based removal to avoid positional index shift bugs
+        mapped <- mapped[mapped$STRING_id != "9606.ENSP00000254810", ]  # H3F3A: remove H3-3B, keep H3-3A
+        mapped <- mapped[mapped$STRING_id != "9606.ENSP00000498587", ]  # HN1: remove NOTCH1
+        mapped <- mapped[mapped$STRING_id != "9606.ENSP00000439228", ]  # HN1: remove unresolved entry
+        mapped <- mapped[mapped$STRING_id != "9606.ENSP00000381333", ]  # LINC02210-CRHR1: remove CRHR1 locus overlap
+    }
 
+
+    # Rebuild graph after removal, translate STRING IDs to gene symbols
     hits <- mapped$STRING_id
     graph <- string_db$get_subnetwork(hits)
     all(mapped[match(V(graph)$name, mapped$STRING_id), ]$STRING_id == V(graph)$name) # TRUE
-    V(graph)$symbol <- mapped[match(V(graph)$name, mapped$STRING_id), ]$names
-
+    V(graph)$name <- mapped[match(V(graph)$name, mapped$STRING_id), ]$names
 
     for (j in seq_along(dup_name)) {
-        correct_vertex_names <- mapped$STRING_id[mapped$names == dup_name[j]]
-
-        # pick the first STRING_id that exists in the graph
-        correct_vertex_name <- correct_vertex_names[correct_vertex_names %in% V(graph)$name][1]
-
-        # check if gene is not in STRING
-        if (is.na(correct_vertex_name) || length(correct_vertex_name) == 0) {
-            cat("Warning: No mapped STRING_id for", dup_name[j], "found in graph vertices\n")
-            unmapped_genes <- c(unmapped_genes, dup_name[j])
-            next
-        }
-
-        edges <- incident(graph, correct_vertex_name, mode = "all")
-        n_edge_count <- length(edges)
+        edges <- incident(graph, dup_name[j], mode = "all")
+        n <- get.edgelist(graph)[edges, ]
 
         res <- data.frame(
-            "graph_id" = i,
-            "names" = dup_name[j],
-            "n_edge" = n_edge_count,
+            "graph_id" = paste0("HiG_", i),
+            "names"    = dup_name[j],
+            "n_edge"   = nrow(n),
             "STRING_id" = subset(mapped, names == dup_name[j])$STRING_id
         )
 
@@ -191,18 +209,15 @@ for (i in names(which(graphs_with_duplicates))) {
         }
     }
 }
-# After processing, check all unmapped genes
-unique(unmapped_genes)
 
 (correct_n_edges)
-#   graph_id names n_edge                STRING_id
-# 1    HiG_5  HN1L      4 10090.ENSMUSP00000024981
-# 2   HiG_17 CXX1A      8 10090.ENSMUSP00000086158
-# 3   HiG_18  HN1L      2 10090.ENSMUSP00000024981
-# 4   HiG_19  HN1L      4 10090.ENSMUSP00000024981
+#   graph_id           names n_edge            STRING_id vertex_index_to_remove
+# 1   HiG_17           H3F3A     68 9606.ENSP00000355780                       
+# 2   HiG_17             HN1     12 9606.ENSP00000348316                       
+# 3   HiG_17 LINC02210-CRHR1     20 9606.ENSP00000488912                    921
 
 ################################################################
-## remove duplciated vertex directly from un-simplified graph ##
+## remove duplicated vertex directly from un-simplified graph ##
 ################################################################
 graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_notsimplified.rds"))
 
@@ -218,8 +233,8 @@ graphs_with_duplicates <- sapply(graph_list, function(g) {
 
 # See which graphs have duplicates
 which(graphs_with_duplicates)
-#  HiG_5 HiG_17 HiG_18 HiG_19
-#      5     11     12     13
+# HiG_17
+#     15
 
 # initialization
 correct_n_edges$vertex_index_to_remove <- vector("list", nrow(correct_n_edges))

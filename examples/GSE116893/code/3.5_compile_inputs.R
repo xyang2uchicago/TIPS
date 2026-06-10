@@ -53,8 +53,8 @@ significant["15"] <- TRUE   # included by design: NOTCH-active ADRN-proliferatin
 cat("Significant CTS:\n")
 print(significant)
 # Significant CTS:
-#    15    16     9
-#  TRUE FALSE  TRUE
+#   15   16    9 
+# TRUE TRUE TRUE 
 
 
 # Assemble res object
