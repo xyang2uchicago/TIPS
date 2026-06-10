@@ -1,7 +1,11 @@
-wd <- "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/GSE87038_STRING/"
-setwd(paste0(wd, "results/"))
+########## BEGINNING OF USER INPUT ##########
+wd          <- "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/GSE87038_STRING/"
 shared_path <- paste0(wd, "../../Shared_Data/")
-
+CP_cluster  <- "8"   # focal cluster; drives HiG_X, CTS_X, HiGCTS_X signatures
+top_TF_rank <- 3     # top N TFs to report per signature
+gene_top_n  <- 20    # top N genes to label in plot
+########## END OF USER INPUT ##########
+setwd(paste0(wd, "results/"))
 
 library(clusterProfiler) # clusterProfiler v4.6.0
 library(msigdbr)
@@ -44,8 +48,6 @@ setdiff(toupper(TF_mouse), TF_human)
 #  [97] "ZFP420"        "ZFP422"        "ZFP423"        "ZFP426"        "ZFP429"        "ZFP438"
 # ....
 
-input_path <- "../../data/"
-
 coding_genes <- readRDS(file = paste0(shared_path, "coding_genes.rds")) %>% unique()
 length(coding_genes) # 19930
 names(coding_genes) <- NULL
@@ -87,9 +89,9 @@ table(df_PageRank$signature)
 df_PageRank$gene <- toupper(df_PageRank$gene)
 
 res_pr <- rank_TF_CHD_in_PPIN(df_PageRank, CHD, TF_human,
-    signatures = c("HiG_8", "CTS_8", "HiGCTS_8"),
+    signatures = c(paste0("HiG_", CP_cluster), paste0("CTS_", CP_cluster), paste0("HiGCTS_", CP_cluster)),
     key = "PageRank",
-    top_TF_rank = 3, gene_top_n = 20, saveFigure = TRUE
+    top_TF_rank = top_TF_rank, gene_top_n = gene_top_n, saveFigure = TRUE
 )
 #  => CP_rank_gene_by_pageRank.pdf
 
@@ -116,9 +118,9 @@ table(df_betweenness$signature)
 df_betweenness$gene <- toupper(df_betweenness$gene)
 
 res_bw <- rank_TF_CHD_in_PPIN(df_betweenness, CHD, TF_human,
-    signatures = c("HiG_8", "CTS_8", "HiGCTS_8"),
+    signatures = c(paste0("HiG_", CP_cluster), paste0("CTS_", CP_cluster), paste0("HiGCTS_", CP_cluster)),
     key = "BetweennessCentrality",
-    top_TF_rank = 3, gene_top_n = 20, saveFigure = TRUE
+    top_TF_rank = top_TF_rank, gene_top_n = gene_top_n, saveFigure = TRUE
 )
 #  => CP_rank_gene_by_BetweennessCentrality.pdf
 
@@ -142,8 +144,6 @@ res_bw <- rank_TF_CHD_in_PPIN(df_betweenness, CHD, TF_human,
 ##################################################
 ## identify among the top_TF_rank (=3) TFs BetweennessCentrality > 0
 
-(keyTF_8 <- subset(res_pr[["HiGCTS_8"]])$gene) #   "ISL1" "IRX3" "ALX1"
+(seed_TF <- subset(res_pr[[paste0("HiGCTS_", CP_cluster)]])$gene) #   "ISL1" "IRX3" "ALX1"
 
-(keyTF_8 <- intersect(keyTF_8, subset(res_bw[["HiGCTS_8"]], BetweennessCentrality > 0)$gene)) #  "ISL1"
-
-seed_TF <- keyTF_8
+(seed_TF <- intersect(seed_TF, subset(res_bw[[paste0("HiGCTS_", CP_cluster)]], BetweennessCentrality > 0)$gene)) #  "ISL1"

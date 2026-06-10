@@ -1,7 +1,11 @@
-wd <- "/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/IbarraSoria2018_STRING/"
-setwd(paste0(wd, "results/"))
+########## BEGINNING OF USER INPUT ##########
+wd          <- "/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/IbarraSoria2018_STRING/"
 shared_path <- paste0(wd, "../../Shared_Data/")
-
+CP_cluster  <- "cardiac.a"   # focal cluster; drives HiG_X, CTS_X, HiGCTS_X signatures
+top_TF_rank <- 3              # top N TFs to report per signature
+gene_top_n  <- 20             # top N genes to label in plot
+########## END OF USER INPUT ##########
+setwd(paste0(wd, "results/"))
 
 library(clusterProfiler) # clusterProfiler v4.6.0
 library(msigdbr)
@@ -43,8 +47,6 @@ setdiff(toupper(TF_mouse), TF_human)
 #  [91] "ZFP397"        "ZFP398"        "ZFP407"        "ZFP408"        "ZFP410"        "ZFP414"
 #  [97] "ZFP420"        "ZFP422"        "ZFP423"        "ZFP426"        "ZFP429"        "ZFP438"
 # ....
-
-input_path <- "../../data/"
 
 coding_genes <- readRDS(file = paste0(shared_path, "coding_genes.rds")) %>% unique()
 length(coding_genes) # 19930
@@ -95,9 +97,9 @@ table(df_PageRank$signature)
 df_PageRank$gene <- toupper(df_PageRank$gene)
 
 res_pr <- rank_TF_CHD_in_PPIN(df_PageRank, CHD, TF_human,
-    signatures = c("HiG_cardiac.a", "CTS_cardiac.a", "HiGCTS_cardiac.a"),
+    signatures = c(paste0("HiG_", CP_cluster), paste0("CTS_", CP_cluster), paste0("HiGCTS_", CP_cluster)),
     key = "PageRank",
-    top_TF_rank = 3, gene_top_n = 20, saveFigure = TRUE
+    top_TF_rank = top_TF_rank, gene_top_n = gene_top_n, saveFigure = TRUE
 )
 #  => CP_rank_gene_by_pageRank.pdf
 
@@ -132,9 +134,9 @@ table(df_betweenness$signature)
 df_betweenness$gene <- toupper(df_betweenness$gene)
 
 res_bw <- rank_TF_CHD_in_PPIN(df_betweenness, CHD, TF_human,
-    signatures = c("HiG_cardiac.a", "CTS_cardiac.a", "HiGCTS_cardiac.a"),
+    signatures = c(paste0("HiG_", CP_cluster), paste0("CTS_", CP_cluster), paste0("HiGCTS_", CP_cluster)),
     key = "BetweennessCentrality",
-    top_TF_rank = 3, gene_top_n = 20, saveFigure = TRUE
+    top_TF_rank = top_TF_rank, gene_top_n = gene_top_n, saveFigure = TRUE
 )
 #  => CP_rank_gene_by_BetweennessCentrality.pdf
 
@@ -142,6 +144,6 @@ res_bw <- rank_TF_CHD_in_PPIN(df_betweenness, CHD, TF_human,
 ## identify among the top_TF_rank (=3) TFs BetweennessCentrality > 0
 ## the output will pass to code 24.0xxxx
 
-(keyTF_cardiac.a <- subset(res_pr[["HiGCTS_cardiac.a"]])$gene) #  "MEF2C" "GATA4" "MSX2"
+(seed_TF <- subset(res_pr[[paste0("HiGCTS_", CP_cluster)]])$gene) #  "MEF2C" "GATA4" "MSX2"
 
-(keyTF_cardiac.a <- intersect(keyTF_cardiac.a, subset(res_bw[["HiGCTS_cardiac.a"]], BetweennessCentrality > 0)$gene)) #  "MEF2C" "GATA4" "MSX2"
+(seed_TF <- intersect(seed_TF, subset(res_bw[[paste0("HiGCTS_", CP_cluster)]], BetweennessCentrality > 0)$gene)) #  "MEF2C" "GATA4" "MSX2"
