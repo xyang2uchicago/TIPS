@@ -10,19 +10,21 @@ library(stringr)
 
 ########## BEGINNING OF USER INPUT ##########
 
-wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/"
+wd = "C:/Users/felix/Documents/GitHub/TIPS/examples/GSE116893/"
 setwd(paste0(wd, "results/PPI_weight/"))
 
-db <- "GSE87038"
+db <- "GSE116893"
 
 specificity_methods <- c("combined") # Other methods: "ratio", "zscore", "diff"
 
-isl1_cluster <- "HiGCTS_8" # cluster containing ISL1 gene
+cluster_labels <- "leiden_0.6"
+
+# isl1_cluster <- "HiGCTS_8" # cluster containing ISL1 gene
 
 core_count <- 1 # number of cores used for parallel processing in steps 1 and 2. Use core_count = 1 if on Windows.
 
 step1 <- TRUE # calculate gene correlations and specificity
-step2 <- FALSE # update network edge weights
+step2 <- TRUE # update network edge weights
 step3 <- FALSE # graph comparing specificity methods for all clusters
 step4 <- FALSE # graph comparing specificity methods for isl1_cluster
 
@@ -32,7 +34,7 @@ BioTIP_version <- '06232025'
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/heads/master/R/BioTIP_update_', BioTIP_version, '.R'))
 
-load(paste0(wd, "data/sce_E8.25_uncorrected.RData"))
+sce <- readRDS(paste0(wd, "data/sce.rds"))
 
 ########## END OF USER INPUT ##########
 
@@ -145,7 +147,7 @@ which(graphs_with_duplicates)
 
 if (step1) {
     ## first, add a meta column to match the graph_list names
-    colData(sce)$cluster <- colData(sce)$label
+    colData(sce)$cluster <- colData(sce)[[cluster_labels]]
 
     network_specificity_list <- calculate_network_specificity(sce,
         graph_list,
@@ -154,7 +156,7 @@ if (step1) {
         method = "pearson",
         cores = core_count,
         shrink = TRUE,
-        verbose = FALSE
+        verbose = TRUE
     )
     saveRDS(network_specificity_list, "network_specificity_list.rds")
     names(network_specificity_list)
