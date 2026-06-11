@@ -15,6 +15,8 @@ specificity_methods <- c("combined", "ratio", "zscore", "diff") # Other methods:
 
 isl1_cluster <- "HiGCTS_8" # cluster containing ISL1 gene
 
+cluster_labels <- "cluster"
+
 core_count <- 1 # number of cores used for parallel processing in steps 1 and 2. Use core_count = 1 if on Windows.
 
 step1 <- TRUE # calculate gene correlations and specificity
@@ -141,7 +143,7 @@ which(graphs_with_duplicates)
 
 if (step1) {
     ## first, add a meta column to match the graph_list names
-    colData(sce)$cluster <- colData(sce)$label
+    colData(sce)$cluster <- colData(sce)$cluster_labels
 
     network_specificity_list <- calculate_network_specificity(sce,
         graph_list,

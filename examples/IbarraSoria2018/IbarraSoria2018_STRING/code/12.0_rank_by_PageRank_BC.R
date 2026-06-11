@@ -1,6 +1,7 @@
 ########## BEGINNING OF USER INPUT ##########
 wd          <- "/Users/felixyu/Documents/GitHub/TIPS/examples/IbarraSoria2018/IbarraSoria2018_STRING/"
 shared_path <- paste0(wd, "../../Shared_Data/")
+celltype_specific_weight_version <- '10'
 CP_cluster  <- "cardiac.a"   # focal cluster; drives HiG_X, CTS_X, HiGCTS_X signatures
 top_TF_rank <- 3              # top N TFs to report per signature
 gene_top_n  <- 20             # top N genes to label in plot
@@ -54,7 +55,7 @@ names(coding_genes) <- NULL
 CHD <- readRDS(paste0(shared_path, "CHD_Cilia_Genelist.rds"))
 CHD <- unlist(CHD[c("Griffin2023_PCGC_AllCurated")])
 
-source("/Users/felixyu/Documents/GitHub/TIPS/R/celltype_specific_weight_v10.R")
+source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
 #############################
 db_specifc_output_path <- paste0(wd, "results/PPI_weight/")

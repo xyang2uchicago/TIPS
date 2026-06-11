@@ -62,8 +62,9 @@ graph_list <- readRDS( file= paste0(db, '_STRING_graph_perState_notsimplified.rd
 ## refer to 11.1.0_correct_vertex_duplication.R 
 correct_n_edges = readRDS('correct_n_edges_HiG_STRING2.14.0.rds')
 for(g_name in unique(correct_n_edges$graph_id)){
-	vertices_to_remove = subset(correct_n_edges, graph_id == g_name)$vetex_index_to_remove
-	if(any(is.na(vertices_to_remove))) vertices_to_remove = vertices_to_remove[!is.na(vertices_to_remove)]
+	vertices_to_remove = subset(correct_n_edges, graph_id == g_name)$vertex_index_to_remove
+	vertices_to_remove = vertices_to_remove[!is.na(vertices_to_remove)]
+	vertices_to_remove = as.integer(unlist(strsplit(vertices_to_remove, ",")))
 	graph_list[[g_name]] = delete_vertices(graph_list[[g_name]], vertices_to_remove)
 }
 N = sapply(graph_list, vcount)

@@ -349,4 +349,4 @@ saveRDS(correct_n_edges_copy, file = "correct_n_edges_HiG_STRING2.14.0.rds")
 
 # FIXES:
 
-# What needs to be done: Re-run 11.1.1 with the fix to regenerate correct_n_edges_HiG_STRING2.14.0.rds with correct values, then re-run all scripts that load it (11.1.2, 11.2.0, 11.2.1, 11.6, Fig3). The CTS-level analyses don't need to be touched.
+# What needs to be done: Re-run 11.1.1 with the fix to regenerate correct_n_edges_HiG_STRING2.14.0.rds with correct values, then re-run all scripts that load it (11.1.2, 11.2.0, 11.2.1, 11.3, 11.6, Fig3). The CTS-level analyses don't need to be touched.

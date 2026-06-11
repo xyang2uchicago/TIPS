@@ -224,8 +224,9 @@ graph_list_notsimplified <- readRDS( file= paste0('../', db, '_STRING_graph_perS
 # Remove duplicate vertices
 correct_n_edges = readRDS('../correct_n_edges_HiG_STRING2.14.0.rds')
 for(g_name in unique(correct_n_edges$graph_id)){
-	vertices_to_remove = subset(correct_n_edges, graph_id == g_name)$vetex_index_to_remove
-	if(any(is.na(vertices_to_remove))) vertices_to_remove = vertices_to_remove[!is.na(vertices_to_remove)]
+	vertices_to_remove = subset(correct_n_edges, graph_id == g_name)$vertex_index_to_remove
+	vertices_to_remove = vertices_to_remove[!is.na(vertices_to_remove)]
+	vertices_to_remove = as.integer(unlist(strsplit(vertices_to_remove, ",")))
 	graph_list_notsimplified[[g_name]] = delete_vertices(graph_list_notsimplified[[g_name]], vertices_to_remove)
 }
 N = sapply(graph_list_notsimplified, vcount)

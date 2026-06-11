@@ -674,9 +674,10 @@ graph_list_notsimplified <- readRDS( file= paste0('../', db, '_STRING_graph_perS
 # Remove duplicate vertices
 correct_n_edges = readRDS('../correct_n_edges_HiG_STRING2.14.0.rds')
 for(g_name in unique(correct_n_edges$graph_id)){
-	vertices_to_remove = subset(correct_n_edges, graph_id == g_name)$vetex_index_to_remove
-	if(any(is.na(vertices_to_remove))) vertices_to_remove = vertices_to_remove[!is.na(vertices_to_remove)]
-	graph_list[[g_name]] = delete_vertices(graph_list_notsimplified[[g_name]], vertices_to_remove)
+	vertices_to_remove = subset(correct_n_edges, graph_id == g_name)$vertex_index_to_remove
+	vertices_to_remove = vertices_to_remove[!is.na(vertices_to_remove)]
+	vertices_to_remove = as.integer(unlist(strsplit(vertices_to_remove, ",")))
+	graph_list_notsimplified[[g_name]] = delete_vertices(graph_list_notsimplified[[g_name]], vertices_to_remove)
 }
 N = sapply(graph_list_notsimplified, vcount)
 
@@ -708,7 +709,7 @@ edge_counts <- edge_data %>%
 #   <fct>        <int>
 # 1 CTS            905
 # 2 HiGCTS         146
-# 3 HiG         150813
+# 3 HiG         150792
 
 pairwise_pvals <- edge_data %>%
   pairwise_wilcox_test(
@@ -718,10 +719,10 @@ pairwise_pvals <- edge_data %>%
 
 (pairwise_pvals)
 #   .y.         group1 group2    n1     n2 statistic        p   p.adj p.adj.signif
-# * <chr>       <chr>  <chr>  <int>  <int>     <dbl>    <dbl>   <dbl> <chr>       
-# 1 edge_weight CTS    HiGCTS   905    146    63027  0.372 0.548 ns          
-# 2 edge_weight CTS    HiG      905 150813 67454552. 0.548 0.548 ns          
-# 3 edge_weight HiGCTS HiG      146 150813 11421990  0.433 0.548 ns
+# * <chr>       <chr>  <chr>  <int>  <int>     <dbl>    <dbl>   <dbl> <chr>
+# 1 edge_weight CTS    HiGCTS   905    146    63027  0.372 0.547 ns
+# 2 edge_weight CTS    HiG      905 150792 67442476. 0.547 0.547 ns
+# 3 edge_weight HiGCTS HiG      146 150792 11419978  0.433 0.547 ns
 }
 
 ### Save Plots to Folder

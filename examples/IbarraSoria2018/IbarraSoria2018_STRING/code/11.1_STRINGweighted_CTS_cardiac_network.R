@@ -231,8 +231,6 @@ for (i in names(CTS)) {
     all(mapped[match(V(graph)$name, mapped$STRING_id), ]$STRING_id == V(graph)$name) # TRUE
     V(graph)$name <- mapped[match(V(graph)$name, mapped$STRING_id), ]$symbol
     # The 'scores' column reflects the strength of the differential expression for each gene based on the Wilcoxon rank-sum test. A high score suggests that the gene's expression is significantly different between the groups under comparison.
-    # V(graph)$weight <- diff_exp[match(V(graph)$name, diff_exp$symbol), ]$summary.logFC
-    # V(graph)$FDR <- diff_exp[match(V(graph)$name, diff_exp$symbol), ]$FDR
     E(graph)$weight <- E(graph)$combined_score / 1000
     graph <- delete_edge_attr(graph, "combined_score") # Remove combined_score as there is no use for it.
 
