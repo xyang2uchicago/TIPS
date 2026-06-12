@@ -18,6 +18,14 @@ final_table <- read.table(file = file, header = TRUE, sep = "\t")
 
 # unique(final_table$linkage)  # [1] "CM" "CF"  (both directions present; final_table: 16x13)
 
+# deduplicate: same pair can appear under multiple TF sections with identical delta
+final_table <- final_table %>%
+    mutate(pair_key = paste(pmin(from, to), pmax(from, to), sep = "||")) %>%
+    group_by(linkage, pair_key) %>%
+    dplyr::slice(1) %>%
+    ungroup() %>%
+    select(-pair_key)
+
 for (lk in unique(final_table$linkage)) {
     g_merged <- make_merged_TIPS_graph(
         subset(final_table, linkage == lk),

@@ -53,7 +53,8 @@ significant <- sapply(seq_along(BioTIP_scores), function(i) {
 })
 names(significant) <- names(BioTIP_scores)
 
-significant["15"] <- TRUE   # included by design: NOTCH-active ADRN-proliferating transition cluster
+significant["15"] <- TRUE   # manual override: p_ic=0 (passes) but p_delta=0.32 (fails; delta-Ic not significant by simulation).
+                            # Included by design: NOTCH-active ADRN-proliferating state confirmed in Yu 2025 Fig 3 as one of 2 NOTCH transition clusters.
 
 cat("Significant CTS:\n")
 print(significant)

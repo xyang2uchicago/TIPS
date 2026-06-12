@@ -337,7 +337,7 @@ for (key in motif_TF_highConf) { # !!!!!!!!
 
     p <- tryCatch(
         heatmap_pull_candidate(mat, graph_list, CTS_name, CHD,
-            key = key_in_TFfamily, TF = TF_human,
+            key = key_in_TFfamily, coding_genes = coding_genes, TF = TF_human,
             show_SMC_access = FALSE
         ),
         error = function(e) {

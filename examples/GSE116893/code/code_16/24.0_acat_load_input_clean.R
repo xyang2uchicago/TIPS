@@ -7,10 +7,11 @@ library(SingleCellExperiment)
 wd <- "C:/Users/felix/Documents/GitHub/TIPS/examples/GSE116893/"
 setwd(paste0(wd, "results/results_16/"))
 
-shared_path <- paste0(wd, "../Shared_Data/")
-data_dir    <- paste0(wd, "data/")
-biotip_dir  <- paste0(wd, "BioTIP/")
-ppi_path    <- paste0(wd, "results/PPI_weight/")
+shared_path  <- paste0(wd, "../Shared_Data/")
+data_dir     <- paste0(wd, "data/")
+biotip_dir   <- paste0(wd, "BioTIP/")
+ppi_path     <- paste0(wd, "results/PPI_weight/")
+coding_genes <- readRDS(paste0(shared_path, "coding_genes.rds")) %>% unique()
 
 celltype_specific_weight_version <- '10'
 species      <- "human"

@@ -12,7 +12,7 @@ wd <- "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/GSE87038_STRING/"
 setwd(paste0(wd, "results/GSE181346_heart_scATAC/"))
 
 ## Paths (derived from wd; only change if your directory structure differs)
-input_path             <- "../../data/"   # relative to setwd() location
+input_path             <- "../../../data/"   # relative to setwd() location
 db_specifc_result_path <- paste0(wd, "results/")
 db_specifc_input_path  <- paste0(wd, "../data/")
 db_specifc_CTS_path    <- paste0(wd, "../data/")
@@ -453,7 +453,7 @@ if (rebuild_mat) {
     ########################################################
     ##  input 5 -- shared --- published ISL1-CP binding
     ## Maven2023 ISL1 ChIP-seq: consistent peaks across replicates, annotated to nearest TSS (±1 kb, hg19)
-    ISL1_set <- readRDS(file = paste0(shared_path, “GSE195476_ISL1/ISL1_set.rds”))
+    ISL1_set <- readRDS(file = paste0(shared_path, "GSE195476_ISL1/ISL1_set.rds"))
     lengths(ISL1_set)
     # ISL1_NKO_d6CP    ISL1_WT_d18MNP      ISL1_WT_d6CP    NKX25_NKO_d6CP
     # 1987              2917              1724               266

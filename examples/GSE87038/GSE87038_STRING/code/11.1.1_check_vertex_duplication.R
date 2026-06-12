@@ -9,7 +9,7 @@ library(igraph)
 
 ########## BEGINNING OF USER INPUT ##########
 
-wd = "C:/Users/felix/Documents/GitHub/TIPS/examples/GSE87038/GSE87038_STRING/"
+wd = "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/GSE87038_STRING/"
 setwd(paste0(wd, "results/"))
 score_threshold <- "weight"
 
