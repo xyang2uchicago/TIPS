@@ -321,8 +321,8 @@ library(igraph)
 file <- paste0(db_specifc_result_path, "/PPI_weight/GSE87038_STRING_graph_perState_simplified_combinedweighted.rds")
 graph_list <- readRDS(file)
 
-## 2026 correction: C13 is not significant by the filter of maximal Is* at its cluster
-if ("CTS_13" %in% names(graph_list)) graph_list <- graph_list[-which(names(graph_list) == "CTS_13")]
+# ## 2026 correction: C13 is not significant by the filter of maximal Is* at its cluster
+# if ("CTS_13" %in% names(graph_list)) graph_list <- graph_list[-which(names(graph_list) == "CTS_13")]
 names(graph_list)
 # [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"       "HiG_6"
 # [7] "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"      "HiG_17"      "HiG_18"

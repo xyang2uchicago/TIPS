@@ -63,7 +63,7 @@ colnames(mat)
 ### extract subnetworks and add ISL1-bound links ###
 ####################################################
 
-source("../../../../../R/celltype_specific_weight_v10.R")
+source('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v10.R')
 
 # Step 1.3) heatmap confirming key TF’s self impact by checking its targets among the CTS_CP, candidates to be the highest pagerank TFs !!!!!!!!!!!!!1
 p <- heatmap_pull_candidate(mat, graph_list, CTS_name, CHD,

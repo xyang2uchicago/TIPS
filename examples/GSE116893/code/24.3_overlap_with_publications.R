@@ -47,7 +47,7 @@ library(ggExtra)
 ## refer to F:\projects\scRNA\source\cardiac_CTS_GRN\GSE175634_iPSC_CM_weighted_v9\24.4.0_GS_publications_collection.R
 library(dplyr)
 library(tidyr)
-source('E:/Git_Holly/TIPS/R/celltype_specific_weight_v10.R')
+source('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v10.R')
 
 GP_path = 'D:/projects/DS/data/TF_perturb_CM/doc/'
 

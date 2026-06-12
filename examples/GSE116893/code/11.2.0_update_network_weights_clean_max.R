@@ -19,14 +19,11 @@ specificity_methods <- c("combined") # Other methods: "ratio", "zscore", "diff"
 
 cluster_labels <- "leiden_0.6"
 
-# isl1_cluster <- "HiGCTS_8" # cluster containing ISL1 gene
 
 core_count <- 1 # number of cores used for parallel processing in steps 1 and 2. Use core_count = 1 if on Windows.
 
-step1 <- TRUE # calculate gene correlations and specificity
+step1 <- FALSE # calculate gene correlations and specificity
 step2 <- TRUE # update network edge weights
-step3 <- FALSE # graph comparing specificity methods for all clusters
-step4 <- FALSE # graph comparing specificity methods for isl1_cluster
 
 celltype_specific_weight_version <- '10'
 BioTIP_version <- '06232025'
@@ -40,11 +37,21 @@ sce <- readRDS(paste0(wd, "data/sce.rds"))
 
 sce
 colnames(colData(sce))
-#  [1] "cell"             "barcode"          "sample"           "pool"
-#  [5] "stage"            "sequencing.batch" "theiler"          "doub.density"
-#  [9] "doublet"          "cluster"          "cluster.sub"      "cluster.stage"
-# [13] "cluster.theiler"  "stripped"         "celltype"         "colour"
-# [17] "sizeFactor"       "batch"            "label"
+#  [1] "orig.ident"             "nCount_RNA"             "nFeature_RNA"          
+#  [4] "Stage_Code"             "Tissue"                 "Patient_No"            
+#  [7] "Risk_Category"          "First_Avail_TP"         "MYCN_Status"           
+# [10] "ALK_Status"             "TP53_Status"            "Response"              
+# [13] "Vital_Status"           "Age_at_IDX_in_months"   "Gender"                
+# [16] "Treatment"              "First_Avail_Time_Point" "sample_name"           
+# [19] "biospecimen_id"         "percent.mt"             "seurat_clusters"       
+# [22] "sample_label_wo_prefix" "cell_type"              "S.Score"               
+# [25] "G2M.Score"              "Phase"                  "malignancy"            
+# [28] "cell_state"             "MES_Score"              "ADRN_Score"            
+# [31] "MES_ADRN_diff"          "Event"                  "leiden_0.2"            
+# [34] "leiden_0.4"             "leiden_0.6"             "leiden_0.8"            
+# [37] "leiden_1"               "leiden_1.2"             "leiden_0.3"            
+# [40] "leiden_0.5"             "leiden_0.7"             "RNA_snn_res.0.2"       
+# [43] "ident"
 
 # Calculate log-normalized counts
 # FIXED
@@ -103,35 +110,27 @@ for (g_name in unique(correct_n_edges$graph_id)) {
 
 N <- sapply(graph_list, vcount)
 (N0 - N)[which(N0 - N > 0)]
-#  HiG_5 HiG_17 HiG_18 HiG_19
-#      2      1      2      2
+# HiG_17 
+#      1
 range(E(graph_list[[1]])$weight) # [1] 0.200 0.999
 
 graph_list <- lapply(graph_list, simplify, edge.attr.comb = "max") # by default is 'sum'
 range(E(graph_list[[1]])$weight) # [1]  0.200 0.999
 
 names(graph_list)
-#  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"
-#  [6] "HiG_6"       "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"
-# [11] "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"       "HiG_11"
-# [16] "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"
-# [21] "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_13"
-# [26] "HiGCTS_8"    "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"
-# [31] "CTS_16.1"    "CTS_13"      "CTS_8"
+#  [1] "HiG_1"     "HiG_2"     "HiG_3"     "HiG_4"     "HiG_5"     "HiG_6"    
+#  [7] "HiG_7"     "HiG_8"     "HiG_10"    "HiG_11"    "HiG_12"    "HiG_13"   
+# [13] "HiG_14"    "HiG_16"    "HiG_17"    "HiG_15"    "HiG_9"     "HiGCTS_15"
+# [19] "HiGCTS_16" "HiGCTS_9"  "CTS_15"    "CTS_16"    "CTS_9"
+
 edge_counts <- sapply(graph_list, ecount)
 edge_counts
-#       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6
-#        4978        9544        7120        5362        5808       10993
-#       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18
-#        6937        8655        5828        7004       11719        8543
-#      HiG_19       HiG_7      HiG_11      HiG_15      HiG_16      HiG_13
-#        7827        7572        9301        8632       10581        8508
-#       HiG_8    HiGCTS_7   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1
-#        5880          17          15          54          10          31
-#   HiGCTS_13    HiGCTS_8       CTS_7      CTS_11      CTS_15      CTS_16
-#           9          10          52          54         207          70
-#    CTS_16.1      CTS_13       CTS_8
-#         210         147         165
+#     HiG_1     HiG_2     HiG_3     HiG_4     HiG_5     HiG_6     HiG_7     HiG_8 
+#     13101      4272      3520      4372      4623      9872      4363      3946 
+#    HiG_10    HiG_11    HiG_12    HiG_13    HiG_14    HiG_16    HiG_17    HiG_15 
+#      5037     10588     10459     16636     24134     10239     37844     23162 
+#     HiG_9 HiGCTS_15 HiGCTS_16  HiGCTS_9    CTS_15    CTS_16     CTS_9 
+#      2407       381       413         0       931       493       454
 
 graphs_with_duplicates <- sapply(graph_list, function(g) {
     vertex_names <- V(g)$name
@@ -160,13 +159,10 @@ if (step1) {
     )
     saveRDS(network_specificity_list, "network_specificity_list.rds")
     names(network_specificity_list)
-    #  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"
-    #  [6] "HiG_6"       "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"
-    # [11] "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"       "HiG_11"
-    # [16] "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"
-    # [21] "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_8"
-    # [26] "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"      "CTS_16.1"
-    # [31] "CTS_13"      "CTS_8"
+    #  [1] "HiG_1"     "HiG_2"     "HiG_3"     "HiG_4"     "HiG_5"     "HiG_6"    
+    #  [7] "HiG_7"     "HiG_8"     "HiG_10"    "HiG_11"    "HiG_12"    "HiG_13"   
+    # [13] "HiG_14"    "HiG_16"    "HiG_17"    "HiG_15"    "HiG_9"     "HiGCTS_15"
+    # [19] "HiGCTS_16" "CTS_15"    "CTS_16"    "CTS_9" 
 
     names(network_specificity_list[[1]])
     # [1] "scores"      "genes"       "corexp_sign"
@@ -197,8 +193,8 @@ if (step2) {
     # [1] "scores"      "genes"       "corexp_sign"
 
     table(network_specificity_list[[1]]$corexp_sign)
-    # negative positive
-    # 40106    51703
+    # negative positive 
+    #    66468    71916
 
     for (s in specificity_methods) {
         weighted_graph_list <- update_network_weights(graph_list,
@@ -214,137 +210,4 @@ if (step2) {
     g <- weighted_graph_list[[1]]
     vertex_attr_names(g) # "name"   "weight" "FDR"  
     edge_attr_names(g) # "weight"         "norm_PPI_score" "corexp_sign"    "coexp_focal"
-}
-
-###################################################
-## compare weights methods
-## check new weights for ISL1 in "HiGCTS_8"
-#####################################################
-library(ggplot2)
-library(hexbin)
-
-
-if (step3) {
-    pdf(file = paste0("compare_specificity_method_vs_PPIscores.pdf"))
-
-    for (net_name in names(network_specificity_list))
-    {
-        plot_data <- NULL
-        par(mfrow = c(2, 2))
-
-        for (s in specificity_methods) {
-            graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_simplified_", s, "weighted.rds"))
-            g <- graph_list[[net_name]]
-            # Safeguard to skip graphs with missing original weights
-            if (is.null(E(g)$norm_PPI_score) || length(E(g)$norm_PPI_score) == 0) {
-                cat("⚠️  Skipping", net_name, "- no 'norm_PPI_score' on edges.\n")
-                next
-            }
-
-            # Check for ISL1 vertex and mark edges
-            isl1_vertex <- which(tolower(V(g)$name) == "isl1")
-            is_isl1_edge <- rep(FALSE, length(E(g)))
-            if (length(isl1_vertex) > 0) {
-                isl1_edges <- incident(g, isl1_vertex, mode = "all")
-                is_isl1_edge[isl1_edges] <- TRUE
-            }
-
-            temp_data <- data.frame(
-                net_name = net_name,
-                norm_PPI_score = E(g)$norm_PPI_score,
-                log_weight = log10(E(g)$weight),
-                method = s,
-                is_isl1 = is_isl1_edge
-            )
-
-            plot_data <- rbind(plot_data, temp_data)
-        }
-        if (!is.null(plot_data) && "is_isl1" %in% colnames(plot_data)) {
-            p2 <- ggplot(plot_data, aes(x = norm_PPI_score, y = log_weight)) +
-                stat_binhex(bins = 50, alpha = 0.7) +
-                geom_point(
-                    data = subset(plot_data, is_isl1 == TRUE),
-                    aes(x = norm_PPI_score, y = log_weight),
-                    color = "red", size = 1.5
-                ) +
-                scale_fill_viridis_c() +
-                facet_wrap(~method, scales = "free") +
-                theme_minimal() +
-                labs(
-                    title = paste("Edge Weight Density -", net_name),
-                    x = "E(g)$norm_PPI_score",
-                    y = "log10(E(g)$weight)",
-                    fill = "Count"
-                ) +
-                theme(legend.position = "bottom")
-
-            print(p2)
-        } else {
-            message("⚠️  Skipping plot for ", net_name, " — plot_data is empty or malformed.")
-        }
-    }
-    dev.off()
-}
-
-if (step4) {
-    net_name <- isl1_cluster
-    plot_data <- NULL
-
-    for (s in specificity_methods) {
-        graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_simplified_", s, "weighted.rds"))
-        g <- graph_list[[net_name]]
-
-        graphs_with_duplicates <- sapply(graph_list, function(g) {
-            vertex_names <- V(g)$name
-            if (is.null(vertex_names)) {
-                # If no names, use vertex indices
-                vertex_names <- V(g)
-            }
-            any(duplicated(vertex_names))
-        })
-
-        which(graphs_with_duplicates)
-
-        # Check for ISL1 vertex and mark edges
-        isl1_vertex <- which(tolower(V(g)$name) == "isl1")
-        is_isl1_edge <- rep(FALSE, length(E(g)))
-        if (length(isl1_vertex) > 0) {
-            isl1_edges <- incident(g, isl1_vertex, mode = "all")
-            is_isl1_edge[isl1_edges] <- TRUE
-        }
-        else{
-            print(paste0("No ISL1 found in ", isl1_cluster))
-            break
-        }
-
-        temp_data <- data.frame(
-            net_name = net_name,
-            norm_PPI_score = E(g)$norm_PPI_score,
-            log_weight = log10(E(g)$weight),
-            method = s,
-            is_isl1 = is_isl1_edge
-        )
-
-        plot_data <- rbind(plot_data, temp_data)
-    }
-
-    if (length(isl1_vertex) > 0) {
-        temp <- subset(plot_data, is_isl1 == TRUE)
-        pdf(file = paste0("compare_specificity_method_", isl1_cluster, "_vs_PPIscores.pdf"))
-        print(
-            ggplot(temp, aes(x = norm_PPI_score, y = log_weight, color = as.factor(norm_PPI_score))) +
-                geom_point() +
-                scale_fill_viridis_c() +
-                facet_wrap(~method, scales = "free") +
-                theme_minimal() +
-                labs(
-                    title = paste("Isl1 linkages -", net_name),
-                    x = "E(g)$norm_PPI_score",
-                    y = "log10(E(g)$weight)"
-                ) +
-                theme(legend.position = "bottom")
-        )
-
-        dev.off()
-    }
 }

@@ -6,4 +6,5 @@
 examples/GSE116893/data/malignant_leiden.rds
 examples/GSE116893/data/seurat_rna_malignant_harmony_cellstateannotated.rds
 examples/GSE116893/data/sce.rds
+examples/GSE116893/data/sce_C9split.rds
 **/Rplots.pdf

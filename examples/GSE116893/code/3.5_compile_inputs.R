@@ -8,11 +8,16 @@ setwd(paste0(wd, "results/"))
 biotip_dir <- "../BioTIP/"
 data_dir   <- "../data/"
 
-# Load Seurat object (includes expression matrix + leiden_0.6 in meta.data) and convert to SCE
-seurat_obj <- readRDS(paste0(data_dir, "malignant_leiden.rds"))
-sce <- as.SingleCellExperiment(seurat_obj)
 
-saveRDS(sce, file = paste0(data_dir, "sce.rds"))
+if(!file.exists(paste0(data_dir, "sce.rds"))){
+    # Load Seurat object (includes expression matrix + leiden_0.6 in meta.data) and convert to SCE
+    seurat_obj <- readRDS(paste0(data_dir, "malignant_leiden.rds"))
+    sce <- as.SingleCellExperiment(seurat_obj)
+
+    saveRDS(sce, file = paste0(data_dir, "sce.rds"))
+} else {
+    sce <- readRDS(paste0(data_dir, "sce.rds"))
+}
 
 cell_state_col <- "leiden_0.6"
 samplesL <- split(colnames(sce), f = colData(sce)[[cell_state_col]])

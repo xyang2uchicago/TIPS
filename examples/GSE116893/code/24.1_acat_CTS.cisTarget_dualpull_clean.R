@@ -1,48 +1,38 @@
 # Set True if running 24.0 the first time
 rebuild_mat <- TRUE
-source("/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/GSE87038_STRING/code/24.0_acat_load_input_clean.R")
+source("C:/Users/felix/Documents/GitHub/TIPS/examples/GSE116893/code/24.0_acat_load_input_clean.R")
 
-source("../../../../R/celltype_specific_weight_v10.R")
+source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
 ## check the loaded objects =========================
-seed_TF # 'ISL1'  # by top PageRank in code 12.xxxx
+seed_TF
 names(graph_list)
-# [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"       "HiG_6"
-# [7] "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"      "HiG_17"      "HiG_18"
-# [13] "HiG_19"      "HiG_7"       "HiG_11"      "HiG_15"      "HiG_16"      "HiG_13"
-# [19] "HiG_8"       "HiGCTS_7"    "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1"
-# [25] "HiGCTS_8"    "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"      "CTS_16.1"
-# [31] "CTS_8"
+#  [1] "HiG_1"     "HiG_2"     "HiG_3"     "HiG_4"     "HiG_5"     "HiG_6"    
+#  [7] "HiG_7"     "HiG_8"     "HiG_10"    "HiG_11"    "HiG_12"    "HiG_13"   
+# [13] "HiG_14"    "HiG_16"    "HiG_17"    "HiG_15"    "HiG_9"     "HiGCTS_15"
+# [19] "HiGCTS_16" "CTS_15"    "CTS_16"    "CTS_9" 
 names(DEG)
-#  [1] "1"  "2"  "3"  "4"  "5"  "6"  "9"  "10" "12" "14" "17" "18" "19" "7"  "11" "15" "16" "13" "8"
+#  [1] "1"  "2"  "3"  "4"  "5"  "6"  "7"  "8"  "10" "11" "12" "13" "14" "16" "17"
+# [16] "15" "9" 
 
 celltype_col # [1] "label"
-CP_cluster # '8'
-CM_cluster # '17'
-CF_cluster # '16'
+CP_cluster # '15'
+CM_cluster # '7'
+CF_cluster # '9'
 
-lengths(CTS) # a lsit
-#   7 11 15 16  8  16.1
-#  32 52 67 40  54  79
+lengths(CTS) # a list
+#  15  16   9 
+#  76 139 110
 
 class(sce) # [1] "SingleCellExperiment"
 
-dim(mat) # [1] 54 28
+dim(mat) # [1] 76 4
 colnames(mat)
-# [1] "CP_hi"                            "CM_hi"                            "CF_hi"
-# [4] "PCW6CP_access"                    "PCW8_CM_access"                   "PCW19_CM_access"
-# [7] "PCW8_CF_access"                   "PCW19_CF_access"                  "PCW8_SMC_access"
-# [10] "PCW19_SMC_access"                 "PCW6_CM_access"                   "PCW6_CF_access"
-# [13] "PCW6_SMC_access"                  "iEPC_access"                      "CTS_8"
-# [16] "Maven2023_gene_ISL1_up_E"         "Maven2023_gene_ISL1_up_T"         "Maven2023_gene_ISL1_up_L"
-# [19] "Maven2023_gene_ISL1_dn_E"         "Maven2023_gene_ISL1_dn_T"         "Maven2023_gene_ISL1_dn_L"
-# [22] "Maven2023_gene_ISL1_WT_d6CP"      "Gao2019_gene_Isl1_E825E9.bound"   "Gao2019_gene_Isl1.iCPC_CPC.bound"
-# [25] "ISL1_CP_bound"                    "ISL1_CP_candidate"                "ISL1_CM_candidate"
-# [28] "ISL1_CF_candidate"
+# [1] "CP_hi"  "CM_hi"  "CF_hi"  "CTS_15"
 
-seed_TF # 'ISL1'
-CTS_ID # '8'
-CTS_name # 'CTS_8'
+seed_TF
+CTS_ID # '15'
+CTS_name # 'CTS_15'
 
 ## set subfold =======================
 (updir <- getwd())
@@ -79,14 +69,14 @@ write.table(subset(cisTarget.res, NES >= NES_threshold & geneSet %in% c(CP_clust
 ########################################################
 ##   --- binary flag CTS genes
 
-dim(mat) # [1] 54 28
+(dim(mat)) # [1] 76  4
 ### = load the binary annotation matrix build in code 24.0xxx ============================
 files <- list.files(pattern = "^heatmap_blocked_CTS_") %>% grep("_v3.tsv", ., value = TRUE)
 if (length(files) > 0) {
     fileName <- grep("_v3.tsv", files, value = TRUE)
     mat <- read.table(fileName, sep = "\t", header = T, check.names = FALSE)
 
-    saved_variables <- readRDS(file = "scATAC_cisTarget_variables.rds")
+    saved_variables <- readRDS(file = "NB_cisTarget_variables.rds")
 
     # Recreate variables
     x <- saved_variables$x
@@ -97,11 +87,6 @@ if (length(files) > 0) {
     motifAnnot_sub <- get_regulators_from_motifs(cisTarget.res, CTS_ID, NES_threshold, motifAnnot = motifAnnot)
     keys <- unique(motifAnnot_sub$regulators)
     if (any(is.na(keys))) keys <- keys[!is.na(keys)]
-    keys
-    # [1] "PARP1"            "HOXD3"            "ZSCAN9"           "CEBPB;PDX1;STAT6" "TCF3"
-    # [6] "POU3F3"
-    length(tmp) # 9
-
 
     ## add to the binary annotation matrix the motif-based TF-target annotations
     for (key in keys) {
@@ -118,61 +103,53 @@ if (length(files) > 0) {
     # literature review to identify top TF here as a key to followup predictions
 
 
-    dim(mat) # [1] 54 71  all CTS.8 genes !!
-    colnames(mat)
+    (dim(mat)) # [1] 76 87
+    (colnames(mat))
     # ...
-    # [30] "cisTarget_PARP1.motif_target"
-    # [31] "cisTarget_HOXD3.motif_target"
-    # [32] "cisTarget_ZSCAN9.motif_target"
-    # [33] "cisTarget_CEBPB;PDX1;STAT6.motif_target"
-    # [34] "cisTarget_TCF3.motif_target"
-    # [35] "cisTarget_POU3F3.motif_target"
-    # [36] "cisTarget_AHCTF1.motif_target"
-    # [37] "cisTarget_ISX;LHX2;LHX9;SHOX2.motif_target"
-    # [38] "cisTarget_FOXM1;IKZF1;TBL1XR1.motif_target"
-    # [39] "cisTarget_FOXM1.motif_target"
-    # [40] "cisTarget_HMGA1;HMGA2.motif_target"
-    # [41] "cisTarget_STAT5A.motif_target"
-    # [42] "cisTarget_POU4F3.motif_target"
-    # [43] "cisTarget_RREB1.motif_target"
-    # [44] "cisTarget_PRDM5;ZNF324;ZNF324B;ZNF341;ZNF580.motif_target"
-    # [45] "cisTarget_SF1.motif_target"
-    # [46] "cisTarget_HMG20A.motif_target"
-    # [47] "cisTarget_KLF2.motif_target"
-    # [48] "cisTarget_BCL11A;BCL6;CHURC1;DDX20;DPF2;EGR1;EGR2;EP300;FLI1;GTF2F1;HINFP;IKZF1;IKZF3;IRF4;KLF10;KLF13;KLF15;KLF16;KLF6;KLF9;MAZ;MTF1;MZF1;NFXL1;OVOL2;PATZ1;PAX4;PML;PRDM9;PURA;RARA;RARB;RARG;RBAK;RCOR1;RELA;RXRA;RXRB;RXRG;SIN3A;SP1;SP2;SP3;SP4;SP5;SPI1;SREBF1;SREBF2;STAT5A;TAF1;THRA;THRB;VEZF1;WRNIP1;WT1;ZBED1;ZBTB14;ZBTB17;ZBTB5;ZBTB7B;ZNF148;ZNF202;ZNF212;ZNF214;ZNF263;ZNF341;ZNF398;ZNF432;ZNF444;ZNF467;ZNF496;ZNF529;ZNF543;ZNF596;ZNF615;ZNF701;ZNF737;ZNF740;ZNF875;ZNF880.motif_target"
-    # [49] "cisTarget_ZNF148;ZNF281.motif_target"
-    # [50] "cisTarget_ATF2;IKZF1.motif_target"
-    # [51] "cisTarget_GTF2H3.motif_target"
-    # [52] "cisTarget_ZNF282.motif_target"
-    # [53] "cisTarget_BARX1.motif_target"
-    # [54] "cisTarget_IRF4.motif_target"
-    # [55] "cisTarget_ZKSCAN2.motif_target"
-    # [56] "cisTarget_HMGA1.motif_target"
-    # [57] "cisTarget_STAT6.motif_target"
-    # [58] "cisTarget_LHX9.motif_target"
-    # [59] "cisTarget_PRDM5;ZNF324;ZNF341;ZNF580.motif_target"
-    # [60] "cisTarget_DPF2;GTF2F1;IKZF3;MAZ;NFXL1;PRDM9;RBAK;SIN3A;TAF1;VEZF1;WRNIP1;ZBTB5;ZNF263;ZNF341;ZNF444;ZNF467;ZNF496;ZNF596;ZNF701;ZNF875.motif_target"
-    # [61] "cisTarget_ZNF281.motif_target"
-    # [62] "cisTarget_ATF2.motif_target"
+    # [70] "cisTarget_NFYA;NFYB;NFYC.motif_target"                                                                                                                                                                                                                     
+    # [71] "cisTarget_YY2.motif_target"                                                                                                                                                                                                                                
+    # [72] "cisTarget_E2F1;E2F3;E2F4;E2F6;E2F7;TFDP1;TFDP2;ZNF566;ZNF574.motif_target"                                                                                                                                                                                 
+    # [73] "cisTarget_E2F1;E2F2;E2F3;E2F4;E2F5;E2F6;E2F7;RB1;TFDP1;TFDP2.motif_target"                                                                                                                                                                                 
+    # [74] "cisTarget_E2F4;E2F7;ZFP69B.motif_target"                                                                                                                                                                                                                   
+    # [75] "cisTarget_E2F6.motif_target"                                                                                                                                                                                                                               
+    # [76] "cisTarget_E2F8;TFAP2C.motif_target"                                                                                                                                                                                                                        
+    # [77] "cisTarget_E2F1;E2F4;KLF1;KLF10;KLF11;KLF12;KLF13;KLF14;KLF15;KLF17;KLF2;KLF5;KLF7;KLF8;MAZ;PATZ1;SP1;SP2;SP3;SP4;SP5;SP6;SP7;SP8;SP9;ZNF281.motif_target"                                                                                                  
+    # [78] "cisTarget_WT1.motif_target"                                                                                                                                                                                                                                
+    # [79] "cisTarget_RELA.motif_target"                                                                                                                                                                                                                               
+    # [80] "cisTarget_MYBL2.motif_target"                                                                                                                                                                                                                              
+    # [81] "cisTarget_SP1;SP2;SP3;SP4.motif_target"                                                                                                                                                                                                                    
+    # [82] "cisTarget_SMAD3.motif_target"                                                                                                                                                                                                                              
+    # [83] "cisTarget_ZNF548.motif_target"                                                                                                                                                                                                                             
+    # [84] "cisTarget_ZFX.motif_target"                                                                                                                                                                                                                                
+    # [85] "cisTarget_ACAA1;E2F2;E2F3;FOXN4;ZNF501.motif_target"                                                                                                                                                                                                       
+    # [86] "cisTarget_SP1.motif_target"                                                                                                                                                                                                                                
+    # [87] "cisTarget_CHD1.motif_target"   
 
 
     ## from the enriched motifs find the potential regulators that are either HiG of CTS member of a cluster of interest  ===================
     x <- colnames(mat)[grepl("cisTarget_", colnames(mat))]
     x <- gsub("cisTarget_", "", x) %>% gsub("\\.motif_target", "", .)
     x <- unlist(strsplit(x, ";")) %>% unique()
-    x
-    # 	 [1] "PARP1"   "HOXD3"   "ZSCAN9"  "CEBPB"   "PDX1"    "STAT6"   "TCF3"    "POU3F3"  "AHCTF1"  "ISX"
-    #  [11] "LHX2"    "LHX9"    "SHOX2"   "FOXM1"   "IKZF1"   "TBL1XR1" "HMGA1"   "HMGA2"   "STAT5A"  "POU4F3"
-    #  [21] "RREB1"   "PRDM5"   "ZNF324"  "ZNF324B" "ZNF341"  "ZNF580"  "SF1"     "HMG20A"  "KLF2"    "BCL11A"
-    #  [31] "BCL6"    "CHURC1"  "DDX20"   "DPF2"    "EGR1"    "EGR2"    "EP300"   "FLI1"    "GTF2F1"  "HINFP"
-    #  [41] "IKZF3"   "IRF4"    "KLF10"   "KLF13"   "KLF15"   "KLF16"   "KLF6"    "KLF9"    "MAZ"     "MTF1"
-    #  [51] "MZF1"    "NFXL1"   "OVOL2"   "PATZ1"   "PAX4"    "PML"     "PRDM9"   "PURA"    "RARA"    "RARB"
-    #  [61] "RARG"    "RBAK"    "RCOR1"   "RELA"    "RXRA"    "RXRB"    "RXRG"    "SIN3A"   "SP1"     "SP2"
-    #  [71] "SP3"     "SP4"     "SP5"     "SPI1"    "SREBF1"  "SREBF2"  "TAF1"    "THRA"    "THRB"    "VEZF1"
-    #  [81] "WRNIP1"  "WT1"     "ZBED1"   "ZBTB14"  "ZBTB17"  "ZBTB5"   "ZBTB7B"  "ZNF148"  "ZNF202"  "ZNF212"
-    #  [91] "ZNF214"  "ZNF263"  "ZNF398"  "ZNF432"  "ZNF444"  "ZNF467"  "ZNF496"  "ZNF529"  "ZNF543"  "ZNF596"
-    # [101] "ZNF615"  "ZNF701"  "ZNF737"  "ZNF740"  "ZNF875"  "ZNF880"  "ZNF281"  "ATF2"    "GTF2H3"  "ZNF282"
-    # [111] "BARX1"   "ZKSCAN2"
+    print(x)
+    #   [1] "CEBPZ"   "DRAP1"   "FOS"     "FOXI1"   "HMGXB3"  "IRF3"    "MBD2"   
+    #   [8] "NFYA"    "NFYB"    "NFYC"    "PBX1"    "PBX3"    "SP2"     "YBX1"   
+    #  [15] "E2F8"    "E2F1"    "E2F4"    "E2F6"    "TFDP1"   "E2F3"    "E2F7"   
+    #  [22] "TFDP2"   "TAF1"    "YY1"     "YY2"     "SP4"     "ZNF566"  "ZNF574" 
+    #  [29] "E2F2"    "E2F5"    "RB1"     "ZFP69B"  "ZNF142"  "ZNF141"  "KLF1"   
+    #  [36] "ZBTB33"  "ZNF846"  "ZNF692"  "TFAP2B"  "TFAP2C"  "TFAP2E"  "EGR2"   
+    #  [43] "EGR4"    "KLF10"   "KLF11"   "KLF12"   "KLF13"   "KLF14"   "KLF15"  
+    #  [50] "KLF16"   "KLF17"   "KLF18"   "KLF2"    "KLF3"    "KLF4"    "KLF5"   
+    #  [57] "KLF6"    "KLF7"    "KLF8"    "KLF9"    "MAZ"     "PATZ1"   "SP1"    
+    #  [64] "SP3"     "SP5"     "SP6"     "SP7"     "SP8"     "SP9"     "VEZF1"  
+    #  [71] "ZBTB14"  "ZBTB17"  "ZNF148"  "ZNF281"  "ZNF398"  "CHURC1"  "CTCF"   
+    #  [78] "ETS1"    "MAFA"    "MZF1"    "NR3C1"   "OVOL2"   "SPZ1"    "SREBF2" 
+    #  [85] "TFAP4"   "WT1"     "ZBTB7A"  "RELA"    "TRIM28"  "ZNF555"  "ZNF91"  
+    #  [92] "ZNF730"  "MYBL1"   "MYBL2"   "EGR1"    "SMAD3"   "PML"     "ZNF548" 
+    #  [99] "ZFY"     "ZNF571"  "MTF2"    "ZBTB7B"  "MYB"     "TFAP2A"  "SMAD9"  
+    # [106] "ZNF449"  "ZNF530"  "ZNF534"  "ZNF662"  "ZNF383"  "ZNF682"  "NRL"    
+    # [113] "TIGD1"   "ZNF445"  "ZNF425"  "ZFX"     "ACAA1"   "FOXN1"   "FOXN2"  
+    # [120] "FOXN4"   "HES7"    "ONECUT2" "ZNF501"  "ZNF350"  "ZNF674"  "MAX"    
+    # [127] "MYC"     "CHD1"    "ZGPAT"   "ZNF202" 
 
     ##  extend seed_TF candidates to those 1) being CTS itself, or 2) CTS_enriched motifs having target genes highly expressed in CP, CM, or CF ===============
     key_TFs <- seed_TF
@@ -186,13 +163,30 @@ if (length(files) > 0) {
     }
 
     key_TFs
-    # TCF3 is in DEG of 8
-    # HMGA2 is in DEG of 17
-    # HMGA2 is in DEG of 16
-    # HMGA2 is in DEG of 8
-    # KLF6 is in DEG of 17
-    # KLF6 is in DEG of 16
-    # RARB is in CTS of 8
+    # FOS is in DEG of 9
+    # PBX1 is in DEG of 9
+    # PBX3 is in DEG of 7
+    # PBX3 is in DEG of 15
+    # E2F3 is in DEG of 15
+    # E2F7 is in DEG of 15
+    # TFDP2 is in DEG of 15
+    # E2F2 is in DEG of 15
+    # RB1 is in DEG of 15
+    # KLF12 is in DEG of 7
+    # KLF12 is in DEG of 9
+    # KLF12 is in DEG of 15
+    # KLF13 is in DEG of 15
+    # KLF7 is in DEG of 9
+    # SP3 is in DEG of 15
+    # ZNF148 is in DEG of 15
+    # CTCF is in DEG of 15
+    # ETS1 is in DEG of 15
+    # NR3C1 is in DEG of 15
+    # SREBF2 is in DEG of 15
+    # ZNF730 is in DEG of 15
+    # MTF2 is in DEG of 15
+    # MYB is in DEG of 15
+    # CHD1 is in DEG of 15
 
 
     for (i in x) {
@@ -201,10 +195,12 @@ if (length(files) > 0) {
             key_TFs <- c(key_TFs, i)
         }
     }
-    # RARB is in CTS of 8
 
     key_TFs <- unique(key_TFs)
-    key_TFs # "ISL1"  "TCF3"  "HMGA2" "KLF6"  "RARB"
+    (key_TFs)
+    # [1] "FOS"    "PBX1"   "PBX3"   "E2F3"   "E2F7"   "TFDP2"  "E2F2"   "RB1"   
+    # [9] "KLF12"  "KLF13"  "KLF7"   "SP3"    "ZNF148" "CTCF"   "ETS1"   "NR3C1" 
+    # [17] "SREBF2" "ZNF730" "MTF2"   "MYB"    "CHD1"  
 
 
     mat <- as.data.frame(mat)
@@ -213,18 +209,64 @@ if (length(files) > 0) {
     ## ====== note that this step is manual, such as selecting the TFs of the same motif that are most close to the seed TF ======
     # (x = which(grepl(seed_TF[3], colnames(mat)) | grepl(seed_TF[2], colnames(mat)) | grepl(seed_TF[3], colnames(mat)) ) )  # TF candidateds for CTS.CP
     (x <- intersect(which(grepl("cisTarget_", colnames(mat))), which(Reduce("|", lapply(key_TFs, function(p) grepl(p, colnames(mat), fixed = F))))))
-    x
-    # [1] 34 40 48
-    colnames(mat)[x]
-    # [1] "cisTarget_TCF3.motif_target"
-    # [2] "cisTarget_HMGA1;HMGA2.motif_target"
-    # [3] "cisTarget_BCL11A;BCL6;CHURC1;DDX20;DPF2;EGR1;EGR2;EP300;FLI1;GTF2F1;HINFP;IKZF1;IKZF3;IRF4;KLF10;KLF13;KLF15;KLF16;KLF6;KLF9;MAZ;MTF1;MZF1;NFXL1;OVOL2;PATZ1;PAX4;PML;PRDM9;PURA;RARA;RARB;RARG;RBAK;RCOR1;RELA;RXRA;RXRB;RXRG;SIN3A;SP1;SP2;SP3;SP4;SP5;SPI1;SREBF1;SREBF2;STAT5A;TAF1;THRA;THRB;VEZF1;WRNIP1;WT1;ZBED1;ZBTB14;ZBTB17;ZBTB5;ZBTB7B;ZNF148;ZNF202;ZNF212;ZNF214;ZNF263;ZNF341;ZNF398;ZNF432;ZNF444;ZNF467;ZNF496;ZNF529;ZNF543;ZNF596;ZNF615;ZNF701;ZNF737;ZNF740;ZNF875;ZNF880.motif_target"
+    (x)
+    #  [1]  5  8  9 10 13 14 15 24 27 28 30 34 35 36 37 42 44 60 61 62 65 66 68 69 72
+    # [26] 73 74 77 80 81 85 87
+    (colnames(mat)[x])
+    #  [1] "cisTarget_CEBPZ;DRAP1;FOS;FOXI1;HMGXB3;IRF3;MBD2;NFYA;NFYB;NFYC;PBX1;PBX3;SP2;YBX1.motif_target"                                                                                                                                                           
+    #  [2] "cisTarget_E2F1;E2F3;E2F4;E2F6;E2F7;E2F8;TFDP1;TFDP2.motif_target"                                                                                                                                                                                          
+    #  [3] "cisTarget_CEBPZ;DRAP1;FOXI1;HMGXB3;IRF3;MBD2;NFYA;NFYB;NFYC;PBX1;PBX3;SP2.motif_target"                                                                                                                                                                    
+    #  [4] "cisTarget_CEBPZ;DRAP1;FOXI1;HMGXB3;IRF3;MBD2;NFYA;NFYB;NFYC;PBX3;SP2.motif_target"                                                                                                                                                                         
+    #  [5] "cisTarget_E2F1;E2F3;E2F4;E2F6;E2F7;E2F8;SP4;TFDP1;TFDP2;ZNF566;ZNF574.motif_target"                                                                                                                                                                        
+    #  [6] "cisTarget_E2F1;E2F2;E2F3;E2F4;E2F5;E2F6;E2F7;E2F8;RB1;TFDP1;TFDP2.motif_target"                                                                                                                                                                            
+    #  [7] "cisTarget_E2F1;E2F3;E2F4;E2F6;E2F7;TFDP1;TFDP2;ZFP69B.motif_target"                                                                                                                                                                                        
+    #  [8] "cisTarget_E2F1;E2F2;E2F3;E2F4;E2F5;E2F6;E2F7.motif_target"                                                                                                                                                                                                 
+    #  [9] "cisTarget_E2F1;E2F4;E2F6;E2F7;EGR2;EGR4;KLF1;KLF10;KLF11;KLF12;KLF13;KLF14;KLF15;KLF16;KLF17;KLF18;KLF2;KLF3;KLF4;KLF5;KLF6;KLF7;KLF8;KLF9;MAZ;PATZ1;SP1;SP2;SP3;SP4;SP5;SP6;SP7;SP8;SP9;TFDP1;TFDP2;VEZF1;ZBTB14;ZBTB17;ZNF148;ZNF281;ZNF398.motif_target"
+    # [10] "cisTarget_CHURC1;CTCF;ETS1;MAFA;MZF1;NR3C1;OVOL2;SPZ1;SREBF2;TFAP4;WT1;YY1;ZBTB7A.motif_target"                                                                                                                                                            
+    # [11] "cisTarget_E2F3.motif_target"                                                                                                                                                                                                                               
+    # [12] "cisTarget_E2F1;E2F3;E2F4;TFDP1.motif_target"                                                                                                                                                                                                               
+    # [13] "cisTarget_ZNF730.motif_target"                                                                                                                                                                                                                             
+    # [14] "cisTarget_MYBL1;MYBL2.motif_target"                                                                                                                                                                                                                        
+    # [15] "cisTarget_EGR1;KLF1;KLF10;KLF12;KLF13;KLF14;KLF15;KLF18;KLF2;KLF3;KLF5;KLF6;KLF7;KLF9;MAZ;SP1;SP2;SP3;SP4;SP5;SP9;WT1.motif_target"                                                                                                                        
+    # [16] "cisTarget_MTF2.motif_target"                                                                                                                                                                                                                               
+    # [17] "cisTarget_MYB.motif_target"                                                                                                                                                                                                                                
+    # [18] "cisTarget_ACAA1;E2F2;E2F3;FOXN1;FOXN2;FOXN4;HES7;ONECUT2;ZBTB14;ZNF501.motif_target"                                                                                                                                                                       
+    # [19] "cisTarget_SP1;SP3.motif_target"                                                                                                                                                                                                                            
+    # [20] "cisTarget_EGR2;KLF12;KLF7;KLF8;SP4;ZNF682.motif_target"                                                                                                                                                                                                    
+    # [21] "cisTarget_CHD1;ZGPAT;ZNF202.motif_target"                                                                                                                                                                                                                  
+    # [22] "cisTarget_CEBPZ;DRAP1;FOS;FOXI1;HMGXB3;IRF3;NFYA;NFYB;NFYC;PBX1;PBX3;SP2.motif_target"                                                                                                                                                                     
+    # [23] "cisTarget_E2F1;E2F3;E2F6;E2F8;TFDP1.motif_target"                                                                                                                                                                                                          
+    # [24] "cisTarget_MBD2;NFYA;NFYB;NFYC;PBX3.motif_target"                                                                                                                                                                                                           
+    # [25] "cisTarget_E2F1;E2F3;E2F4;E2F6;E2F7;TFDP1;TFDP2;ZNF566;ZNF574.motif_target"                                                                                                                                                                                 
+    # [26] "cisTarget_E2F1;E2F2;E2F3;E2F4;E2F5;E2F6;E2F7;RB1;TFDP1;TFDP2.motif_target"                                                                                                                                                                                 
+    # [27] "cisTarget_E2F4;E2F7;ZFP69B.motif_target"                                                                                                                                                                                                                   
+    # [28] "cisTarget_E2F1;E2F4;KLF1;KLF10;KLF11;KLF12;KLF13;KLF14;KLF15;KLF17;KLF2;KLF5;KLF7;KLF8;MAZ;PATZ1;SP1;SP2;SP3;SP4;SP5;SP6;SP7;SP8;SP9;ZNF281.motif_target"                                                                                                  
+    # [29] "cisTarget_MYBL2.motif_target"                                                                                                                                                                                                                              
+    # [30] "cisTarget_SP1;SP2;SP3;SP4.motif_target"                                                                                                                                                                                                                    
+    # [31] "cisTarget_ACAA1;E2F2;E2F3;FOXN4;ZNF501.motif_target"                                                                                                                                                                                                       
+    # [32] "cisTarget_CHD1.motif_target"     
 
     # Manually choose TFs that are present in cisTarget. If two TFs are part of the same cisTarget, choose one.
-    # Optionally use automated code from IbarraSoria2018 code.
-
-    key_TFs <- c("TCF3", "HMGA2", "RARB")
+    # Per-TF loop (IbarraSoria2018 pattern): prefers dedicated single-TF motif; falls back to first partial match.
+    x <- NULL
+    for (j in key_TFs) {
+        y_exact <- which(colnames(mat) == paste0("cisTarget_", j, ".motif_target"))
+        if (length(y_exact) > 0) {
+            y <- y_exact
+        } else {
+            y <- intersect(which(grepl("cisTarget_", colnames(mat))),
+                           which(grepl(j, colnames(mat), fixed = FALSE)))
+        }
+        cat(j, "\t", y, "\t", colnames(mat)[y], "\n")
+        if (length(y) == 0) y <- 0
+        x <- c(x, y[1])
+    }
     names(x) <- key_TFs
+    x <- x[which(x > 0)]
+    key_TFs <- names(x)
+
+    key_TFs <- c("E2F3", "MYB", "ZNF730", "MTF2")
+    x <- x[key_TFs]
     if (length(x) > 0) {
         for (j in seq_along(x)) {
             # if(grepl(";",colnames(mat)[x[j]])){
@@ -243,16 +285,16 @@ if (length(files) > 0) {
         } # end of for(j in seq_along(x))
     } # end of if(length(x)>0)
 
-    dim(mat) # 54 71
+    dim(mat) # 76 99
 
     cat(paste0("key_TFs: ", paste(key_TFs, collapse = "_"), "\n")) # key_TFs: TCF3_HMGA2_RARB
 
     ## record the whole mat for all CTS genes, which we can load later  ===================
     if (length(key_TFs) > 0) {
-        fileName <- paste0("heatmap_blocked_", CTS_name, "_scATAC_cisTarget_", paste(key_TFs, collapse = "_"), "_v3.tsv")
+        fileName <- paste0("heatmap_blocked_", CTS_name, "_NB_cisTarget_", paste(key_TFs, collapse = "_"), "_v3.tsv")
         write.table(mat, file = fileName, sep = "\t", quote = FALSE, row.names = TRUE, col.names = TRUE) # !!!!!!!!!!!!
 
-        saveRDS(list(x = x, key_TFs = key_TFs, motifAnnot_sub = motifAnnot_sub), "scATAC_cisTarget_variables.rds")
+        saveRDS(list(x = x, key_TFs = key_TFs, motifAnnot_sub = motifAnnot_sub), "NB_cisTarget_variables.rds")
     } else {
         stop("No key TFs found for ", CTS_name, "\n")
     }
@@ -260,29 +302,96 @@ if (length(files) > 0) {
 
 ###  heatmap confirming key TF’s self impact by checking its targets among the CTS_CP ================
 # key_TFs =  c('TCF3','HMGA2','RARB')
-# fileName=paste0('heatmap_blocked_',CTS_name,'_scATAC_cisTarget_',paste(key_TFs, collapse='_'),'_v3.tsv')
+# fileName=paste0('heatmap_blocked_',CTS_name,'_NB_cisTarget_',paste(key_TFs, collapse='_'),'_v3.tsv')
 # mat = read.table(fileName, sep='\t',header=T, check.names=F)
 # x = c(  34 ,40, 48)
 # names(x) = key_TFs
 
 
-dim(mat) # [1] 54 71
-colnames(mat)
-# [....
-# [63] "TCF3_CP_candidate"
-# [64] "TCF3_CM_candidate"
-# [65] "TCF3_CF_candidate"
-# [66] "HMGA2_CP_candidate"
-# [67] "HMGA2_CM_candidate"
-# [68] "HMGA2_CF_candidate"
-# [69] "RARB_CP_candidate"
-# [70] "RARB_CM_candidate"
-# [71] "RARB_CF_candidate"
-
-# cisTarget_ATF2.motif_target
+print(dim(mat)) # [1] 76 105
+print(colnames(mat))
+#   [1] "CP_hi"                                                                                                                                                                                                                                                     
+#   [2] "CM_hi"                                                                                                                                                                                                                                                     
+#   [3] "CF_hi"                                                                                                                                                                                                                                                     
+#   [4] "CTS_15"                                                                                                                                                                                                                                                    
+#   [5] "cisTarget_CEBPZ;DRAP1;FOS;FOXI1;HMGXB3;IRF3;MBD2;NFYA;NFYB;NFYC;PBX1;PBX3;SP2;YBX1.motif_target"                                                                                                                                                           
+#   [6] "cisTarget_E2F8.motif_target"                                                                                                                                                                                                                               
+#   [7] "cisTarget_E2F1;E2F4;E2F6;TFDP1.motif_target"                                                                                                                                                                                                               
+#   [8] "cisTarget_E2F1;E2F3;E2F4;E2F6;E2F7;E2F8;TFDP1;TFDP2.motif_target"                                                                                                                                                                                          
+#   [9] "cisTarget_CEBPZ;DRAP1;FOXI1;HMGXB3;IRF3;MBD2;NFYA;NFYB;NFYC;PBX1;PBX3;SP2.motif_target"                                                                                                                                                                    
+#  [10] "cisTarget_CEBPZ;DRAP1;FOXI1;HMGXB3;IRF3;MBD2;NFYA;NFYB;NFYC;PBX3;SP2.motif_target"                                                                                                                                                                         
+#  [11] "cisTarget_TAF1;YY1;YY2.motif_target"                                                                                                                                                                                                                       
+#  [12] "cisTarget_E2F4.motif_target"                                                                                                                                                                                                                               
+#  [13] "cisTarget_E2F1;E2F3;E2F4;E2F6;E2F7;E2F8;SP4;TFDP1;TFDP2;ZNF566;ZNF574.motif_target"                                                                                                                                                                        
+#  [14] "cisTarget_E2F1;E2F2;E2F3;E2F4;E2F5;E2F6;E2F7;E2F8;RB1;TFDP1;TFDP2.motif_target"                                                                                                                                                                            
+#  [15] "cisTarget_E2F1;E2F3;E2F4;E2F6;E2F7;TFDP1;TFDP2;ZFP69B.motif_target"                                                                                                                                                                                        
+#  [16] "cisTarget_SP2.motif_target"                                                                                                                                                                                                                                
+#  [17] "cisTarget_ZNF142.motif_target"                                                                                                                                                                                                                             
+#  [18] "cisTarget_ZNF141.motif_target"                                                                                                                                                                                                                             
+#  [19] "cisTarget_E2F4;E2F6.motif_target"                                                                                                                                                                                                                          
+#  [20] "cisTarget_KLF1.motif_target"                                                                                                                                                                                                                               
+#  [21] "cisTarget_ZBTB33.motif_target"                                                                                                                                                                                                                             
+#  [22] "cisTarget_E2F1.motif_target"                                                                                                                                                                                                                               
+#  [23] "cisTarget_ZNF846.motif_target"                                                                                                                                                                                                                             
+#  [24] "cisTarget_E2F1;E2F2;E2F3;E2F4;E2F5;E2F6;E2F7.motif_target"                                                                                                                                                                                                 
+#  [25] "cisTarget_ZFP69B;ZNF692.motif_target"                                                                                                                                                                                                                      
+#  [26] "cisTarget_E2F8;TFAP2B;TFAP2C;TFAP2E.motif_target"
+#  ...
+#  [87] "cisTarget_CHD1.motif_target"                                                                                                                                                                                                                               
+#  [88] "E2F3_CP_candidate"                                                                                                                                                                                                                                         
+#  [89] "E2F3_CM_candidate"                                                                                                                                                                                                                                         
+#  [90] "E2F3_CF_candidate"                                                                                                                                                                                                                                         
+#  [91] "MYB_CP_candidate"                                                                                                                                                                                                                                          
+#  [92] "MYB_CM_candidate"                                                                                                                                                                                                                                          
+#  [93] "MYB_CF_candidate"                                                                                                                                                                                                                                          
+#  [94] "PBX3_CP_candidate"                                                                                                                                                                                                                                         
+#  [95] "PBX3_CM_candidate"                                                                                                                                                                                                                                         
+#  [96] "PBX3_CF_candidate"                                                                                                                                                                                                                                         
+#  [97] "ZNF730_CP_candidate"                                                                                                                                                                                                                                       
+#  [98] "ZNF730_CM_candidate"                                                                                                                                                                                                                                       
+#  [99] "ZNF730_CF_candidate"                                                                                                                                                                                                                                       
+# [100] "MTF2_CP_candidate"                                                                                                                                                                                                                                         
+# [101] "MTF2_CM_candidate"                                                                                                                                                                                                                                         
+# [102] "MTF2_CF_candidate"                                                                                                                                                                                                                                         
+# [103] "NA_CP_candidate"                                                                                                                                                                                                                                           
+# [104] "NA_CM_candidate"                                                                                                                                                                                                                                           
+# [105] "NA_CF_candidate"   
 
 motif_TF_highConf <- gsub("cisTarget_", "", colnames(mat)[x]) %>% gsub("\\.motif_target", "", .)
 print(motif_TF_highConf)
+#  [1] "CEBPZ;DRAP1;FOS;FOXI1;HMGXB3;IRF3;MBD2;NFYA;NFYB;NFYC;PBX1;PBX3;SP2;YBX1"                                                                                                                                                           
+#  [2] "E2F1;E2F3;E2F4;E2F6;E2F7;E2F8;TFDP1;TFDP2"                                                                                                                                                                                          
+#  [3] "CEBPZ;DRAP1;FOXI1;HMGXB3;IRF3;MBD2;NFYA;NFYB;NFYC;PBX1;PBX3;SP2"                                                                                                                                                                    
+#  [4] "CEBPZ;DRAP1;FOXI1;HMGXB3;IRF3;MBD2;NFYA;NFYB;NFYC;PBX3;SP2"                                                                                                                                                                         
+#  [5] "E2F1;E2F3;E2F4;E2F6;E2F7;E2F8;SP4;TFDP1;TFDP2;ZNF566;ZNF574"                                                                                                                                                                        
+#  [6] "E2F1;E2F2;E2F3;E2F4;E2F5;E2F6;E2F7;E2F8;RB1;TFDP1;TFDP2"                                                                                                                                                                            
+#  [7] "E2F1;E2F3;E2F4;E2F6;E2F7;TFDP1;TFDP2;ZFP69B"                                                                                                                                                                                        
+#  [8] "E2F1;E2F2;E2F3;E2F4;E2F5;E2F6;E2F7"                                                                                                                                                                                                 
+#  [9] "E2F1;E2F4;E2F6;E2F7;EGR2;EGR4;KLF1;KLF10;KLF11;KLF12;KLF13;KLF14;KLF15;KLF16;KLF17;KLF18;KLF2;KLF3;KLF4;KLF5;KLF6;KLF7;KLF8;KLF9;MAZ;PATZ1;SP1;SP2;SP3;SP4;SP5;SP6;SP7;SP8;SP9;TFDP1;TFDP2;VEZF1;ZBTB14;ZBTB17;ZNF148;ZNF281;ZNF398"
+# [10] "CHURC1;CTCF;ETS1;MAFA;MZF1;NR3C1;OVOL2;SPZ1;SREBF2;TFAP4;WT1;YY1;ZBTB7A"                                                                                                                                                            
+# [11] "E2F3"                                                                                                                                                                                                                               
+# [12] "E2F1;E2F3;E2F4;TFDP1"                                                                                                                                                                                                               
+# [13] "ZNF730"                                                                                                                                                                                                                             
+# [14] "MYBL1;MYBL2"                                                                                                                                                                                                                        
+# [15] "EGR1;KLF1;KLF10;KLF12;KLF13;KLF14;KLF15;KLF18;KLF2;KLF3;KLF5;KLF6;KLF7;KLF9;MAZ;SP1;SP2;SP3;SP4;SP5;SP9;WT1"                                                                                                                        
+# [16] "MTF2"                                                                                                                                                                                                                               
+# [17] "MYB"                                                                                                                                                                                                                                
+# [18] "ACAA1;E2F2;E2F3;FOXN1;FOXN2;FOXN4;HES7;ONECUT2;ZBTB14;ZNF501"                                                                                                                                                                       
+# [19] "SP1;SP3"                                                                                                                                                                                                                            
+# [20] "EGR2;KLF12;KLF7;KLF8;SP4;ZNF682"                                                                                                                                                                                                    
+# [21] "CHD1;ZGPAT;ZNF202"                                                                                                                                                                                                                  
+# [22] "CEBPZ;DRAP1;FOS;FOXI1;HMGXB3;IRF3;NFYA;NFYB;NFYC;PBX1;PBX3;SP2"                                                                                                                                                                     
+# [23] "E2F1;E2F3;E2F6;E2F8;TFDP1"                                                                                                                                                                                                          
+# [24] "MBD2;NFYA;NFYB;NFYC;PBX3"                                                                                                                                                                                                           
+# [25] "E2F1;E2F3;E2F4;E2F6;E2F7;TFDP1;TFDP2;ZNF566;ZNF574"                                                                                                                                                                                 
+# [26] "E2F1;E2F2;E2F3;E2F4;E2F5;E2F6;E2F7;RB1;TFDP1;TFDP2"                                                                                                                                                                                 
+# [27] "E2F4;E2F7;ZFP69B"                                                                                                                                                                                                                   
+# [28] "E2F1;E2F4;KLF1;KLF10;KLF11;KLF12;KLF13;KLF14;KLF15;KLF17;KLF2;KLF5;KLF7;KLF8;MAZ;PATZ1;SP1;SP2;SP3;SP4;SP5;SP6;SP7;SP8;SP9;ZNF281"                                                                                                  
+# [29] "MYBL2"                                                                                                                                                                                                                              
+# [30] "SP1;SP2;SP3;SP4"                                                                                                                                                                                                                    
+# [31] "ACAA1;E2F2;E2F3;FOXN4;ZNF501"                                                                                                                                                                                                       
+# [32] "CHD1"    
+
 for (key in motif_TF_highConf) { # !!!!!!!!
     if (grepl(";", key)) {
         key_in_TFfamily <- strsplit(key, ";", fixed = T) %>%
@@ -293,23 +402,25 @@ for (key in motif_TF_highConf) { # !!!!!!!!
         key_in_TFfamily <- key
     }
 
-    p <- heatmap_pull_candidate(mat, graph_list, CTS_name, CHD,
-        key = key_in_TFfamily, coding_genes = coding_genes, TF = TF_human,
-        show_SMC_access = TRUE
+    p <- tryCatch(
+        heatmap_pull_candidate(mat, graph_list, CTS_name, CHD,
+            key = key_in_TFfamily, TF = TF_human,
+            show_SMC_access = FALSE
+        ),
+        error = function(e) {
+            message("heatmap skipped for '", key_in_TFfamily, "' (0 candidate genes): ", e$message)
+            NULL
+        }
     )
-    ## for Fig 5, only the PRRX1 CP bound genes are shown
-    pdf(file = paste0("heatmap_blocked_", CTS_name, "_scATAC_cisTarget_", key_in_TFfamily, "_v3_coding_target.pdf"), height = 4)
-    print(p)
-    dev.off()
+    if (!is.null(p)) {
+        pdf(file = paste0("heatmap_blocked_", CTS_name, "_NB_cisTarget_", key_in_TFfamily, "_v3_coding_target.pdf"), height = 4)
+        print(p)
+        dev.off()
+    }
 }
 
-# candidate genes:  1
-# direct motif:  cisTarget_TCF3.motif_target  used from multiple potentoal matches
-# candidate genes:  5
-# simplified motif name:  cisTarget_HMGA1;HMGA2.motif_target
-# candidate genes:  1
-# simplified motif name:  cisTarget_BCL11A;BCL6;CHURC1;DDX20;DPF2;EGR1;EGR2;EP300;FLI1;GTF2F1;HINFP;IKZF1;IKZF3;IRF4;KLF10;KLF13;KLF15;KLF16;KLF6;KLF9;MAZ;MTF1;MZF1;NFXL1;OVOL2;PATZ1;PAX4;PML;PRDM9;PURA;RARA;RARB;RARG;RBAK;RCOR1;RELA;RXRA;RXRB;RXRG;SIN3A;SP1;SP2;SP3;SP4;SP5;SPI1;SREBF1;SREBF2;STAT5A;TAF1;THRA;THRB;VEZF1;WRNIP1;WT1;ZBED1;ZBTB14;ZBTB17;ZBTB5;ZBTB7B;ZNF148;ZNF202;ZNF212;ZNF214;ZNF263;ZNF341;ZNF398;ZNF432;ZNF444;ZNF467;ZNF496;ZNF529;ZNF543;ZNF596;ZNF615;ZNF701;ZNF737;ZNF740;ZNF875;ZNF880.motif_target
-
+# candidate genes:  0 
+# simplified motif name:  cisTarget_CEBPZ;DRAP1;FOS;FOXI1;HMGXB3;IRF3;MBD2;NFYA;NFYB;NFYC;PBX1;PBX3;SP2;YBX1.motif_target cisTarget_CEBPZ;DRAP1;FOXI1;HMGXB3;IRF3;MBD2;NFYA;NFYB;NFYC;PBX1;PBX3;SP2.motif_target cisTarget_CEBPZ;DRAP1;FOXI1;HMGXB3;IRF3;MBD2;NFYA;NFYB;NFYC;PBX3;SP2.motif_target cisTarget_CEBPZ;DRAP1;FOS;FOXI1;HMGXB3;IRF3;NFYA;NFYB;NFYC;PBX1;PBX3;SP2.motif_target cisTarget_MBD2;NFYA;NFYB;NFYC;PBX3.motif_target 
 
 ##########################################################
 ## --  identify_TF_targeted_pull_candidat -- subset of CTS[['CP']] that are
@@ -321,8 +432,16 @@ library(igraph)
 library(tibble)
 
 
-mat <- read.table(paste0("heatmap_blocked_", CTS_name, "_scATAC_cisTarget_", paste(key_TFs, collapse = "_"), "_v3.tsv"), sep = "\t", header = T, check.names = FALSE)
-dim(mat) # [1] 54  71
+mat <- read.table(paste0("heatmap_blocked_", CTS_name, "_NB_cisTarget_", paste(key_TFs, collapse = "_"), "_v3.tsv"), sep = "\t", header = T, check.names = FALSE)
+print(dim(mat)) # [1] 54  71
+
+# No ATAC data for NB: add dummy access columns (all 1) so identify_TF_targeted_pull_candidate
+# accessibility filter becomes a no-op
+for (col in c("PCW6CP_access", "PCW8_CM_access", "PCW19_CM_access",
+              "PCW8_CF_access", "PCW19_CF_access",
+              "PCW8_SMC_access", "PCW19_SMC_access", "iEPC_access")) {
+    mat[[col]] <- 1L
+}
 
 for (key in key_TFs) {
     key_column <- which(grepl(key, colnames(mat)) & grepl("cisTarget_", colnames(mat)))
@@ -340,7 +459,7 @@ for (key in key_TFs) {
     saveRDS(graph_TF_list, file = paste0("PPI_graph_", key_in_TFfamily, "_GRN_prediction_", CTS_name, "_v3.rds"))
 }
 
-names(graph_TF_list)
+print(names(graph_TF_list))
 # [1] "CTSHiG.CP_TF.target"        "CTS.CP_TF.target_HiGCM"    "CTS.CP_TF.target_HiGCF"
 # [4] "CTSHiG.CP_TF.target_CPopen"
 
@@ -407,7 +526,7 @@ for (key in key_TFs) {
 
 
 ### =reporting the results	and visualization #==========
-(files <- list.files(pattern = "PPI_graph_.*_GRN_prediction_.*_final.rds"))
+print((files <- list.files(pattern = "PPI_graph_.*_GRN_prediction_.*_final.rds")))
 # [1] "PPI_graph_HMGA2_GRN_prediction_CTS_8_CF_final.rds"
 # [2] "PPI_graph_HMGA2_GRN_prediction_CTS_8_CM_final.rds"
 # [3] "PPI_graph_RARB_GRN_prediction_CTS_8_CM_final.rds"
@@ -451,7 +570,7 @@ for (f in files) {
     final_table <- rbind(final_table, change_df)
 }
 
-dim(final_table) # 4  13
+print(dim(final_table)) # 4  13
 ####### generateing final table of the predicted subnetwork #################
 
 write.table(final_table,
@@ -459,25 +578,3 @@ write.table(final_table,
     quote = FALSE, row.names = FALSE, col.names = TRUE, sep = "\t"
 )
 
-## verify the unchanged edges in CF is due to 'shrinkage' correlation effect which is more robust
-key_in_TFfamily <- "HMGA2"
-graph_TF_list <- readRDS(file = paste0("PPI_graph_", key_in_TFfamily, "_GRN_prediction_", CTS_name, "_v3.rds"))
-res <- fill_TF_targeting_predicted_edges(graph_TF_list,
-    linkage_name = "CF", graph_list,
-    sce, celltype_col = celltype_col, CT_cluster_id = CP_cluster,
-    descendant_cluster_id = CF_cluster, TF_symbol = key_in_TFfamily,
-    HVG = rownames(sce),
-    shrink = FALSE
-)
-E(res[[2]])$weight # [1] 0.02714859
-E(res[[1]])$weight # [1] 0
-
-res <- fill_TF_targeting_predicted_edges(graph_TF_list,
-    linkage_name = "CF", graph_list,
-    sce, celltype_col = celltype_col, CT_cluster_id = CP_cluster,
-    descendant_cluster_id = CF_cluster, TF_symbol = key_in_TFfamily,
-    HVG = rownames(sce),
-    shrink = TRUE
-)
-E(res[[2]])$weight # [1] 0
-E(res[[1]])$weight # [1] 0

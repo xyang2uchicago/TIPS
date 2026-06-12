@@ -41,7 +41,7 @@ source(paste0("https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/head
 #'   in other cell types/clusters. Each matrix should have the same dimensions
 #'   and gene ordering as \code{coexp_focal}.
 #'
-#' @return A list containing four different specificity score matrices:
+#' @return A list containing four Fdifferent specificity score matrices:
 #'   \describe{
 #'     \item{ratio}{Ratio of focal co-expression to mean co-expression in other cell types}
 #'     \item{zscore}{Z-score measure comparing focal to other cell types}

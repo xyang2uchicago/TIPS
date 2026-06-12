@@ -15,8 +15,7 @@ inputdir <- paste0(wd, "data/")
 shared_path <- paste0(wd, "../Shared_Data/")
 
 celltype_specific_weight_version <- '10'
-# source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
-source(paste0('../../code/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
+source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
 db <- "GSE87038"
 
