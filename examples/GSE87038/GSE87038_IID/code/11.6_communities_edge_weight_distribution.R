@@ -12,7 +12,7 @@ library(igraph)
 
 wd <- "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/GSE87038_IID/"
 setwd(paste0(wd, "results/"))
-inputdir <- file.path(wd, "data/")
+inputdir <- file.path(wd, "results/")
 
 db <- "GSE87038"
 

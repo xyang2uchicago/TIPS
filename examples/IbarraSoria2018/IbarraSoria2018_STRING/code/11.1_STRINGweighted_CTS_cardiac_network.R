@@ -27,7 +27,7 @@ if(download_files){
     # BioTIP.res.Rdata
     download.file(
         "https://github.com/xyang2uchicago/BioTIP/raw/refs/heads/master/examples/result/gastrulationE8.25_Ibarra-Soria2018/subcelltype/BioTIP.res.RData",
-        "../data/BioTIP.res.RData"
+        "../../data/BioTIP.res.RData"
     )
 
     # STRING db
@@ -48,8 +48,8 @@ if(download_files){
 }
 
 # Load BioTIP results and sce object
-load(file = "../data/BioTIP.res.RData")
-load("../data/sce_16subtype.RData") 
+load(file = "../../data/BioTIP.res.RData")
+load("../../data/sce_16subtype.RData") 
 
 ########## END OF USER INPUT ##########
 
@@ -94,12 +94,12 @@ for (i in c(setdiff(names(markers.up), names(CTS)), unique_CTS_ID)) {
     DEG[[i]] <- rownames(interesting.up[interesting.up$summary.logFC > logFC.cut & interesting.up$FDR < 0.01, ])
 }
 
-saveRDS(DEG, file = paste0("../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.05.rds"))
-saveRDS(markers.up, file = "../data/markers.up_ttest_min.prop0.25.rds")
+saveRDS(DEG, file = paste0("../../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.05.rds"))
+saveRDS(markers.up, file = "../../data/markers.up_ttest_min.prop0.25.rds")
 
 dim(markers.up[[1]]) # just to check dimensions
 
-DEG <- readRDS(file = paste0("../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.05.rds"))
+DEG <- readRDS(file = paste0("../../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.05.rds"))
 lengths(DEG)
 
 ######################################################
@@ -231,8 +231,6 @@ for (i in names(CTS)) {
     all(mapped[match(V(graph)$name, mapped$STRING_id), ]$STRING_id == V(graph)$name) # TRUE
     V(graph)$name <- mapped[match(V(graph)$name, mapped$STRING_id), ]$symbol
     # The 'scores' column reflects the strength of the differential expression for each gene based on the Wilcoxon rank-sum test. A high score suggests that the gene's expression is significantly different between the groups under comparison.
-    # V(graph)$weight <- diff_exp[match(V(graph)$name, diff_exp$symbol), ]$summary.logFC
-    # V(graph)$FDR <- diff_exp[match(V(graph)$name, diff_exp$symbol), ]$FDR
     E(graph)$weight <- E(graph)$combined_score / 1000
     graph <- delete_edge_attr(graph, "combined_score") # Remove combined_score as there is no use for it.
 

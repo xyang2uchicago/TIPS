@@ -20,8 +20,8 @@ db <- "IbarraSoria2018"
 
 db_species <- 10090 # 10090 for mouse, 9606 for human
 
-load(file = "../data/BioTIP.res.RData")
-load("../data/sce_16subtype.RData")
+load(file = "../../data/BioTIP.res.RData")
+load("../../data/sce_16subtype.RData")
 
 CTS <- res$CTS.candidate[which(res$significant)]
 names(CTS)
@@ -219,9 +219,9 @@ df_graph_info <- data.frame(
 # CTS_cardiac.a                           CTS_cardiac.a     37     17
 
 
-saveRDS(graph_list, file = paste0(db, "_IID_graph_perState_notsimplified.rds")) # !!!!!!!!!!!!!!!!!!!
+saveRDS(graph_list, file = file.path(wd, "results", paste0(db, "_IID_graph_perState_notsimplified.rds"))) # !!!!!!!!!!!!!!!!!!!
 
-graph_list <- readRDS(file = paste0(db, "_IID_graph_perState_notsimplified.rds"))
+graph_list <- readRDS(file = file.path(wd, "results", paste0(db, "_IID_graph_perState_notsimplified.rds")))
 graph_list <- lapply(graph_list, simplify) # !!!!!!!!!!!!!!!!!!! # FIXED
 
 # Check which graphs have duplicate vertex names

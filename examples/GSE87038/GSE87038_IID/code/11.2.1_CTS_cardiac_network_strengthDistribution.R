@@ -11,7 +11,7 @@ library(igraph)
 
 wd <- "/Users/felixyu/Documents/GitHub/TIPS/examples/GSE87038/GSE87038_IID/"
 setwd(paste0(wd, "results/"))
-inputdir <- file.path(wd, "data/")
+inputdir <- file.path(wd, "results/")
 
 PPI_color_palette <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
 PPI_size_palette <- c("CTS" = 1, "HiGCTS" = 0.75, "HiG" = 0.25)

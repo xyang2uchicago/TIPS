@@ -36,7 +36,7 @@ source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/
 cardiac_clusters <- c("2", "3", "4", "8", "11", "12", "14", "16", "17", "18", "19")
 CT_id <- c("7", "8", "11", "13", "15", "16", "16.1") # critical transition clusters
 
-redo = FALSE # compute edge-betweenness communities. Only needed once!
+redo = TRUE # compute edge-betweenness communities. Only needed once!
 
 PPI_color_palette = c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
 
@@ -62,8 +62,9 @@ graph_list <- readRDS( file= paste0(db, '_STRING_graph_perState_notsimplified.rd
 ## refer to 11.1.0_correct_vertex_duplication.R 
 correct_n_edges = readRDS('correct_n_edges_HiG_STRING2.14.0.rds')
 for(g_name in unique(correct_n_edges$graph_id)){
-	vertices_to_remove = subset(correct_n_edges, graph_id == g_name)$vetex_index_to_remove
-	if(any(is.na(vertices_to_remove))) vertices_to_remove = vertices_to_remove[!is.na(vertices_to_remove)]
+	vertices_to_remove = subset(correct_n_edges, graph_id == g_name)$vertex_index_to_remove
+	vertices_to_remove = vertices_to_remove[!is.na(vertices_to_remove)]
+	vertices_to_remove = as.integer(unlist(strsplit(vertices_to_remove, ",")))
 	graph_list[[g_name]] = delete_vertices(graph_list[[g_name]], vertices_to_remove)
 }
 N = sapply(graph_list, vcount)
@@ -82,7 +83,7 @@ N2 = sapply(graph_list, vcount)
 # [16] "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"   
 # [21] "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_13"  
 # [26] "HiGCTS_8"    "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"     
-# [31] "CTS_16.1"    "CTS_13"      "CTS_8"    
+# [31] "CTS_16.1"    "CTS_13"      "CTS_8"  
 edge_counts <- sapply(graph_list, ecount)
 (edge_counts)
 #       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6 
@@ -267,7 +268,7 @@ dev.copy2pdf(file='community_number.pdf', width=10)
 # MAIN ANALYSIS EXECUTION
 # ==============================================================================
 # Extract edge weight data by PPI category
-edge_data <- extract_edge_weights_by_category(graph_list_notsimplified, PPI_color_palette, as.character(CT_id))
+edge_data <- extract_edge_weights_by_category(graph_list, PPI_color_palette, as.character(CT_id))
 (head(edge_data, 3))
 #   sample PPI_cat edge_weight num_edges cluster_ID cluster_cat
 # 1  HiG_1     HiG       0.211      4978          1      stable

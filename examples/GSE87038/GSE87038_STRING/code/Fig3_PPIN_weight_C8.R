@@ -66,7 +66,7 @@ top_genes = df %>%
 
 # Subset top CHD genes
 top_genes_CHD = subset(top_genes, PCGC_AllCurated == TRUE)
-(dim(top_genes_CHD))  # Optional: check how many CHD genes were top 5
+(dim(top_genes_CHD))  # [1] 3 17
 
 # Optional: write out table of top 5 genes
 tb = top_genes[, c("signature", "gene", "PPI_cat", "normalized.strength", "PCGC_AllCurated")]
@@ -123,7 +123,7 @@ failure.dt = failure.dt[grepl("_8$", failure.dt$signature), ]
 attack.vertex.btwn = attack.vertex.btwn[grepl("_8$", attack.vertex.btwn$signature), ]
 
 robustness.dt <- rbind(failure.dt, attack.vertex.btwn[,1:6])  #, attack.edge.btwn[,1:6])  
-(dim(robustness.dt)) #  798   9
+(dim(robustness.dt)) #  798   6
 robustness.dt$PPI_cat = lapply(robustness.dt$signature, function(x) unlist(strsplit(x , '_'))[1]) %>% unlist %>%
 		factor(.,levels=c('CTS', 'HiGCTS', 'HiG')) 
 head(robustness.dt, 3)
@@ -224,8 +224,9 @@ graph_list_notsimplified <- readRDS( file= paste0('../', db, '_STRING_graph_perS
 # Remove duplicate vertices
 correct_n_edges = readRDS('../correct_n_edges_HiG_STRING2.14.0.rds')
 for(g_name in unique(correct_n_edges$graph_id)){
-	vertices_to_remove = subset(correct_n_edges, graph_id == g_name)$vetex_index_to_remove
-	if(any(is.na(vertices_to_remove))) vertices_to_remove = vertices_to_remove[!is.na(vertices_to_remove)]
+	vertices_to_remove = subset(correct_n_edges, graph_id == g_name)$vertex_index_to_remove
+	vertices_to_remove = vertices_to_remove[!is.na(vertices_to_remove)]
+	vertices_to_remove = as.integer(unlist(strsplit(vertices_to_remove, ",")))
 	graph_list_notsimplified[[g_name]] = delete_vertices(graph_list_notsimplified[[g_name]], vertices_to_remove)
 }
 N = sapply(graph_list_notsimplified, vcount)

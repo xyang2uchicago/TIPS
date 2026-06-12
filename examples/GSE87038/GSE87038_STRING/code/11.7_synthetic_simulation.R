@@ -145,24 +145,24 @@ p2 <- ggplot(df_plot, aes(x = network, y = normalized_AUC, fill = network)) +
 df_subset <- df_plot %>% filter(category == "HiG", network %in% c("real_PPIN", "deg_preserving")) %>% arrange(ID)
 vals1 <- df_subset$normalized_AUC[df_subset$network == "real_PPIN"]
 vals2 <- df_subset$normalized_AUC[df_subset$network == "deg_preserving"]
-t.test(vals1, vals2, paired = TRUE, alternative = "greater") # p-value = 4.203e-06
+t.test(vals1, vals2, paired = TRUE, alternative = "greater") # p-value = 1.984e-05
 
 # CTS category
 df_subset <- df_plot %>% filter(category == "CTS", network %in% c("real_PPIN", "deg_preserving")) %>% arrange(ID)
 vals1 <- df_subset$normalized_AUC[df_subset$network == "real_PPIN"]
 vals2 <- df_subset$normalized_AUC[df_subset$network == "deg_preserving"]
-t.test(vals1, vals2, paired = TRUE, alternative = "greater") # p-value = 0.03232
+t.test(vals1, vals2, paired = TRUE, alternative = "greater") # p-value = 0.03726
 
 # HiGCTS category
 df_subset <- df_plot %>% filter(category == "HiGCTS", network %in% c("real_PPIN", "deg_preserving")) %>% arrange(ID)
 vals1 <- df_subset$normalized_AUC[df_subset$network == "real_PPIN"]
 vals2 <- df_subset$normalized_AUC[df_subset$network == "deg_preserving"]
-t.test(vals1, vals2, paired = TRUE, alternative = "greater") # p-value = 0.2913
+t.test(vals1, vals2, paired = TRUE, alternative = "greater") # p-value = 0.4073
 
 # All categories together
 df_subset <- df_plot %>% filter(network %in% c("real_PPIN", "deg_preserving")) %>% arrange(ID)
 vals1 <- df_subset$normalized_AUC[df_subset$network == "real_PPIN"]
 vals2 <- df_subset$normalized_AUC[df_subset$network == "deg_preserving"]
-t.test(vals1, vals2, paired = TRUE, alternative = "greater") # p-value = 0.001185
-t.test(vals1, vals2, paired = TRUE) # p-value = 0.00237
-wilcox.test(vals1, vals2, paired = TRUE) # p-value = 0.005156
+t.test(vals1, vals2, paired = TRUE, alternative = "greater") # p-value = 0.001992
+t.test(vals1, vals2, paired = TRUE) # p-value = 0.003983
+wilcox.test(vals1, vals2, paired = TRUE) # p-value = 0.005329

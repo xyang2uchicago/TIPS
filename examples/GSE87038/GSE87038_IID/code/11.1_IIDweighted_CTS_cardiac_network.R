@@ -20,8 +20,8 @@ db <- "GSE87038"
 
 db_species <- 10090 # 10090 for mouse, 9606 for human
 
-load(file = "../data/BioTIP.res.RData")
-load("../data/sce_E8.25_uncorrected.RData")
+load(file = "../../data/BioTIP.res.RData")
+load("../../data/sce_E8.25_uncorrected.RData")
 
 CTS <- res$CTS.candidate[which(res$significant)]
 
@@ -33,11 +33,11 @@ CTS <- c(CTS[1:4], CTS[7], CTS[5:6])
 names(CTS)
 # [1] "7"    "11"   "15"   "16"   "16.1" "13"   "8"
 
-markers.up <- readRDS("../data/markers.up_ttest_min.prop0.25.rds")
+markers.up <- readRDS("../../data/markers.up_ttest_min.prop0.25.rds")
 
 ########## END OF USER INPUT ##########
 # downloaded from GitHub
-DEG <- readRDS(file = paste0("../data/DEG_perState_min.prop0.25_lfc", logFC.cut <- 0.6, "_FDFR0.05.rds"))
+DEG <- readRDS(file = paste0("../../data/DEG_perState_min.prop0.25_lfc", logFC.cut <- 0.6, "_FDFR0.05.rds"))
 lengths(DEG)
 
 ######################################################
@@ -152,7 +152,7 @@ for (i in names(CTS)) {
 
 ## lastly, build for CTS
 # refer to 6.3_DE.statistics_CTS.R
-markers.up_all <- readRDS("../data/markers.up_all_ttest.rds")
+markers.up_all <- readRDS("../../data/markers.up_all_ttest.rds")
 
 # CTS
 for (i in names(CTS)) {
@@ -226,9 +226,9 @@ df_graph_info <- data.frame(
 # CTS_8             CTS_8     51     65
 
 
-saveRDS(graph_list, file = paste0(db, "_IID_graph_perState_notsimplified.rds")) # !!!!!!!!!!!!!!!!!!!
+saveRDS(graph_list, file = file.path(wd, "results", paste0(db, "_IID_graph_perState_notsimplified.rds"))) # !!!!!!!!!!!!!!!!!!!
 
-graph_list <- readRDS(file = paste0(db, "_IID_graph_perState_notsimplified.rds"))
+graph_list <- readRDS(file = file.path(wd, "results", paste0(db, "_IID_graph_perState_notsimplified.rds")))
 graph_list <- lapply(graph_list, simplify, edge.attr.comb = "max") # !!!!!!!!!!!!!!!!!!! # FIXED
 
 # Check which graphs have duplicate vertex names

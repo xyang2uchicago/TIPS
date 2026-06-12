@@ -34,22 +34,22 @@ s <- "combined"  # specificity method
 file <- paste0(db, "_STRING_graph_perState_simplified_", s, "weighted.rds")
 graph_list <- readRDS(file)
 (names(graph_list))
-#  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"
-#  [6] "HiG_6"       "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"
-# [11] "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"       "HiG_11"
-# [16] "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"
-# [21] "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_8"
-# [26] "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"      "CTS_16.1"
-# [31] "CTS_13"      "CTS_8"       "HiGCTS_13"
+#  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"      
+#  [6] "HiG_6"       "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"     
+# [11] "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"       "HiG_11"     
+# [16] "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"   
+# [21] "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_8"   
+# [26] "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"      "CTS_16.1"   
+# [31] "CTS_13"      "CTS_8" 
     
 edge_counts <- sapply(graph_list, ecount)
 (edge_counts)
 #       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6 
 #        4978        9544        7120        5362        5808       10993 
 #       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18 
-#        6937        8655        5828        7004       11719        8546 
+#        6937        8655        5828        7004       11719        8543 
 #      HiG_19       HiG_7      HiG_11      HiG_15      HiG_16      HiG_13 
-#        7828        7572        9301        8632       10581        8508 
+#        7827        7572        9301        8632       10581        8508 
 #       HiG_8    HiGCTS_7   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1 
 #        5880          17          15          54          10          31 
 #    HiGCTS_8       CTS_7      CTS_11      CTS_15      CTS_16    CTS_16.1 
@@ -199,13 +199,13 @@ file <- paste0(db, "_STRING_graph_perState_simplified_combinedweighted.rds")
 graph_list <- readRDS(file)
 
 (names(graph_list))
-#  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"
-#  [6] "HiG_6"       "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"
-# [11] "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"       "HiG_11"
-# [16] "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"
-# [21] "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_8"
-# [26] "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"      "CTS_16.1"
-# [31] "CTS_13"      "CTS_8"       "HiGCTS_13"
+#  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"      
+#  [6] "HiG_6"       "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"     
+# [11] "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"       "HiG_11"     
+# [16] "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"   
+# [21] "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_8"   
+# [26] "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"      "CTS_16.1"   
+# [31] "CTS_13"      "CTS_8"
 
 
 attack.vertex.btwn <- rbindlist(lapply(graph_list, robustness_MonteCarlo, "vertex", "btwn.cent"), idcol = names(graph_list))
@@ -226,7 +226,7 @@ for (j in seq_along(graph_list)) E(graph_list[[j]])$btwn <- edge_betweenness(gra
 ## then do the edge-attack analysis
 attack.edge.btwn <- rbindlist(lapply(graph_list, robustness_MonteCarlo, "edge", "btwn.cent"), idcol = names(graph_list)) # !!!!!!!!!!!!!
 colnames(attack.edge.btwn)[1] <- "signature"
-(dim(attack.edge.btwn)) #  151870      6
+(dim(attack.edge.btwn)) #  151866      6
 (head(attack.edge.btwn, 3))
 #    signature                 type   measure comp.size comp.pct  removed.pct
 #       <char>               <char>    <char>     <num>    <num>        <num>
@@ -240,7 +240,7 @@ colnames(attack.edge.btwn)[1] <- "signature"
 #       CTS_8       HiG_1      HiG_10      HiG_11      HiG_12      HiG_13 
 #         166        4979        8656        9302        5829        8509 
 #      HiG_14      HiG_15      HiG_16      HiG_17      HiG_18      HiG_19 
-#        7005        8633       10582       11720        8547        7829 
+#        7005        8633       10582       11720        8544        7828 
 #       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6       HiG_7 
 #        9545        7121        5363        5809       10994        7573 
 #       HiG_8       HiG_9   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1 
@@ -324,15 +324,14 @@ failure.vertex <- readRDS(paste0("failure.vertex_100_simplified_", s, "weighted.
 # 10:  HiGCTS_8 Targeted vertex attack btwn.cent         1 0.1428571         0.9
 # 11:  HiGCTS_8 Targeted vertex attack btwn.cent         0 0.0000000         1.0
 
-
 failure.edge <- readRDS(paste0("failure.edge_100_simplified_", s, "weighted.rds"))
 failure.dt <- rbind(failure.edge, failure.vertex)
 (head(failure.dt, 3))
-#     signature                type measure comp.size comp.pct  removed.pct
-#    <char>              <char>  <char>     <num>    <num>        <num>
-# 1:  HiG_1 Random edge removal  random       300        1 0.0000000000
-# 2:  HiG_1 Random edge removal  random       300        1 0.0002008839
-# 3:  HiG_1 Random edge removal  random       300        1 0.0004017678
+#    signature                type measure comp.size comp.pct  removed.pct
+#       <char>              <char>  <char>     <num>    <num>        <num>
+# 1:     HiG_1 Random edge removal  random       300        1 0.0000000000
+# 2:     HiG_1 Random edge removal  random       300        1 0.0002008839
+# 3:     HiG_1 Random edge removal  random       300        1 0.0004017678
 
 colnames(failure.dt)[1] <- "signature"
 (table(failure.dt$signature, failure.dt$type))
@@ -353,8 +352,8 @@ colnames(failure.dt)[1] <- "signature"
 #   HiG_15                     8633                   407
 #   HiG_16                    10582                   525
 #   HiG_17                    11720                   524
-#   HiG_18                     8547                   456
-#   HiG_19                     7829                   528
+#   HiG_18                     8544                   456
+#   HiG_19                     7828                   528
 #   HiG_2                      9545                   436
 #   HiG_3                      7121                   412
 #   HiG_4                      5363                   305
@@ -372,26 +371,26 @@ colnames(failure.dt)[1] <- "signature"
 
 
 colnames(attack.vertex.btwn)[1] <- "signature"
-(dim(failure.dt)) #  160115      6
+(dim(failure.dt)) #  160111      6
 
 robustness.dt <- rbind(failure.dt, attack.vertex.btwn, attack.edge.btwn)
-(dim(robustness.dt)) #  320230      6
+(dim(robustness.dt)) #  3202      6
 robustness.dt$PPI_cat <- lapply(robustness.dt$signature, function(x) unlist(strsplit(x, "_"))[1]) %>%
     unlist() %>%
     factor(., levels = c("CTS", "HiGCTS", "HiG"))
 (head(robustness.dt, 3))
-#    signature                type measure comp.size comp.pct  removed.pct PPI_cat
-#       <char>              <char>  <char>     <num>    <num>        <num>  <fctr>
-# 1:     HiG_1 Random edge removal  random       300        1 0.0000000000     HiG
-# 2:     HiG_1 Random edge removal  random       300        1 0.0002008839     HiG
-# 3:     HiG_1 Random edge removal  random       300        1 0.0004017678     HiG
+#    signature                type measure comp.size comp.pct  removed.pct   PPI_cat
+#       <char>              <char>  <char>     <num>    <num>        <num>    <fctr>
+# 1:     HiG_1 Random edge removal  random       300        1 0.0000000000       HiG
+# 2:     HiG_1 Random edge removal  random       300        1 0.0002008839       HiG
+# 3:     HiG_1 Random edge removal  random       300        1 0.0004017678       HiG
 
 robustness.dt$experiment <- ifelse(grepl("edge", robustness.dt$type), "edge", "vertex")
 robustness.dt$measure <- factor(robustness.dt$measure, levels = c("random", "btwn.cent"))
 
 (table(robustness.dt$type, robustness.dt$measure))
 #                          random btwn.cent
-#   Random edge removal    151870         0
+#   Random edge removal    151866         0
 #   Random vertex removal    8245         0
 #   Targeted edge attack        0    151870
 #   Targeted vertex attack      0      8245
@@ -500,9 +499,9 @@ normality_tests <- robustness.dt %>%
 # 4        edge  HiGCTS btwn.cent c(W = 0..... 9.895911e-07
 # 5        edge     HiG    random           NA           NA
 # 6        edge     HiG btwn.cent           NA           NA
-# 7      vertex     CTS    random c(W = 0..... 6.105198e-13
+# 7      vertex     CTS    random c(W = 0..... 8.777701e-13
 # 8      vertex     CTS btwn.cent c(W = 0..... 2.510821e-22
-# 9      vertex  HiGCTS    random c(W = 0..... 7.115017e-06
+# 9      vertex  HiGCTS    random c(W = 0..... 6.015414e-06
 # 10     vertex  HiGCTS btwn.cent c(W = 0..... 5.624286e-13
 # 11     vertex     HiG    random           NA           NA
 # 12     vertex     HiG btwn.cent           NA           NA
@@ -540,7 +539,7 @@ fold_change <- robustness.dt %>%
 #   PPI_cat fold_change_edge fold_change_vertex
 #   <fct>              <dbl>              <dbl>
 # 1 CTS                1.04                1.66
-# 2 HiGCTS             1.00                1.67
+# 2 HiGCTS             1.00                1.70
 # 3 HiG                0.913               1.09
 
 # Add annotation label and y-position to fold_change table
@@ -611,7 +610,7 @@ g2 <- ggplot(targeted_vertex_data, aes(x = PPI_cat, y = comp.pct, fill = PPI_cat
 print(g2)
 
 pdf(file = paste0("box_wilcox-test_attack_", db, ".pdf"), width = 12)
-print(g)
+(g)
 print(g2)
 dev.off()
 
@@ -627,13 +626,13 @@ wilcox.test(
     targeted_vertex_data$comp.pct[which(targeted_vertex_data$PPI_cat == "HiG")]
 )
 
-# W = 1031924, p-value < 2.2e-16
+# W = 1031987, p-value < 2.2e-16
 wilcox.test(
     targeted_vertex_data$comp.pct[which(targeted_vertex_data$PPI_cat == "HiGCTS")],
     targeted_vertex_data$comp.pct[which(targeted_vertex_data$PPI_cat == "HiG")]
 )
 
-# W = 320038, p-value = 1.008e-09
+# W = 320116, p-value = 1.008e-09
 
 ## finally, manually add the threshold of fold changes  ###############
 robustness.dt <- robustness.dt %>%
@@ -675,33 +674,33 @@ df$node_p.adj <- p.adjust(df$node_p, method = "bonferroni")
 
 (df[which(df$edge_p.adj < 0.05), ])
 #               edge_p    edge_p.adj      node_p node_p.adj
-# HiG_1   3.637413e-51  1.163972e-49 0.093157167  1.0000000
-# HiG_2   6.798073e-87  2.175383e-85 0.090784240  1.0000000
-# HiG_3   1.487083e-65  4.758664e-64 0.003414644  0.1092686
-# HiG_4   7.306022e-38  2.337927e-36 0.091777811  1.0000000
-# HiG_5   5.755739e-56  1.841836e-54 0.205247981  1.0000000
-# HiG_6  3.266294e-112 1.045214e-110 0.010034983  0.3211194
-# HiG_9   3.612884e-77  1.156123e-75 0.089369539  1.0000000
-# HiG_10 2.323184e-119 7.434188e-118 0.208304910  1.0000000
-# HiG_12  1.453618e-62  4.651576e-61 0.068712755  1.0000000
-# HiG_14  1.328686e-49  4.251795e-48 0.007798327  0.2495465
-# HiG_17 5.077442e-136 1.624782e-134 0.033718396  1.0000000
-# HiG_18 1.659211e-114 5.309475e-113 0.013531655  0.4330130
-# HiG_19 1.377912e-141 4.409319e-140 0.008995979  0.2878713
-# HiG_7   1.205950e-82  3.859038e-81 0.061944558  1.0000000
-# HiG_11 2.869255e-100  9.181615e-99 0.045315655  1.0000000
-# HiG_15 3.511180e-118 1.123578e-116 0.007977735  0.2552875
-# HiG_16 1.026564e-138 3.285003e-137 0.015038486  0.4812316
-# HiG_13  9.053573e-88  2.897143e-86 0.030536517  0.9771685
-# HiG_8   2.234313e-53  7.149801e-52 0.223815881  1.0000000
+# HiG_1   3.637413e-51  1.163972e-49 0.086770970  1.0000000
+# HiG_2   6.798073e-87  2.175383e-85 0.082104706  1.0000000
+# HiG_3   1.487083e-65  4.758664e-64 0.003313172  0.1060215
+# HiG_4   7.306022e-38  2.337927e-36 0.079926798  1.0000000
+# HiG_5   5.755739e-56  1.841836e-54 0.213588157  1.0000000
+# HiG_6  3.266294e-112 1.045214e-110 0.010379389  0.3321404
+# HiG_9   3.612884e-77  1.156123e-75 0.092708532  1.0000000
+# HiG_10 2.323184e-119 7.434188e-118 0.197330944  1.0000000
+# HiG_12  1.453618e-62  4.651576e-61 0.070739607  1.0000000
+# HiG_14  1.328686e-49  4.251795e-48 0.007995634  0.2558603
+# HiG_17 5.077442e-136 1.624782e-134 0.036284542  1.0000000
+# HiG_18 7.502366e-115 2.400757e-113 0.013342592  0.4269629
+# HiG_19 1.378468e-142 4.411097e-141 0.009183658  0.2938771
+# HiG_7   1.205950e-82  3.859038e-81 0.064359792  1.0000000
+# HiG_11 2.869255e-100  9.181615e-99 0.044110309  1.0000000
+# HiG_15 3.511180e-118 1.123578e-116 0.007507893  0.2402526
+# HiG_16 1.026564e-138 3.285003e-137 0.014580055  0.4665618
+# HiG_13  9.053573e-88  2.897143e-86 0.032697559  1.0000000
+# HiG_8   2.234313e-53  7.149801e-52 0.212229205  1.0000000
 
 
 (df[which(df$node_p.adj < 0.05), ])
 #                  edge_p edge_p.adj       node_p   node_p.adj
-# HiGCTS_16.1 0.892811555  1.0000000 6.384315e-04 0.0204298079
-# CTS_11      0.222390265  1.0000000 1.314911e-04 0.0042077140
-# CTS_16.1    0.013243249  0.4237840 5.263737e-06 0.0001684396
-# CTS_13      0.007453426  0.2385096 6.376707e-06 0.0002040546
+# HiGCTS_16.1 0.892811555  1.0000000 4.902498e-04 0.0156879935
+# CTS_11      0.222390265  1.0000000 1.136213e-04 0.0036358824
+# CTS_16.1    0.013243249  0.4237840 3.607969e-06 0.0001154550
+# CTS_13      0.007453426  0.2385096 6.299788e-06 0.0002015932
 
 
 df$clust <- lapply(rownames(df), function(x) unlist(strsplit(x, split = "_"))[2]) %>% unlist()
@@ -734,7 +733,7 @@ g <- ggplot(tmp, aes(x = as.factor(clust), y = -log10(p.adj), color = PPI_cat)) 
     theme_minimal() +
     theme(legend.position = "top") +
     ggtitle("Adjusted p-values of Wilcox test comparing targeted attack vs random removal")
-print(g)
+(g)
 ## discuss the irrelevent of the p-values and node strength levels
 tmp$count <- c(
     sapply(graph_list, ecount),
@@ -757,7 +756,7 @@ g2 <- ggplot(tmp, aes(x = log10(count), y = -log10(p.adj), color = PPI_cat)) +
     ggtitle("Adjusted p-values of Wilcox test comparing targeted attack vs random removal")
 print(g2)
 pdf(file = paste0("line.adjp_wilcox_attack_", db, ".pdf"))
-print(g)
+(g)
 print(g2)
 dev.off()
 
@@ -773,13 +772,13 @@ dev.off()
 
 
 (names(graph_list))
-#  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"
-#  [6] "HiG_6"       "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"
-# [11] "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"       "HiG_11"
-# [16] "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"
-# [21] "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_8"
-# [26] "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"      "CTS_16.1"
-# [31] "CTS_13"      "CTS_8"       "HiGCTS_13"
+#  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"      
+#  [6] "HiG_6"       "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"     
+# [11] "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"       "HiG_11"     
+# [16] "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"   
+# [21] "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_8"   
+# [26] "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"      "CTS_16.1"   
+# [31] "CTS_13"      "CTS_8"
 
 observed_auc_list <- list()
 for (j in names(graph_list)) {
@@ -792,15 +791,15 @@ for (j in names(graph_list)) {
 #       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6 
 #   0.4488999   0.4559308   0.4282119   0.4488711   0.4633703   0.4450483 
 #       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18 
-#   0.4548706   0.4681002   0.4488626   0.4328458   0.4536677   0.4446846 
+#   0.4548706   0.4681002   0.4488626   0.4328458   0.4536677   0.4437167 
 #      HiG_19       HiG_7      HiG_11      HiG_15      HiG_16      HiG_13 
-#   0.4432373   0.4499778   0.4533461   0.4376471   0.4493834   0.4465732 
+#   0.4436618   0.4499778   0.4533461   0.4376471   0.4493834   0.4465732 
 #       HiG_8    HiGCTS_7   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1 
 #   0.4632466   0.2817460   0.1973684   0.2388889   0.3076923   0.1833333 
 #    HiGCTS_8       CTS_7      CTS_11      CTS_15      CTS_16    CTS_16.1 
 #   0.3071429   0.2377279   0.1840959   0.3123737   0.2508013   0.2466465 
 #      CTS_13       CTS_8 
-#   0.2101852   0.2943673 
+#   0.2101852   0.2943673
 
 df_AUC <- data.frame(
     auc = observed_auc_list %>% unlist(),
@@ -1001,9 +1000,9 @@ for (j in names(graph_list)) {
 #       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6 
 #   0.7059991   0.7104721   0.7235955   0.7093491   0.7138381   0.7281261 
 #       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18 
-#   0.7170029   0.7375547   0.7165139   0.7142507   0.7294497   0.7416438 
+#   0.7170029   0.7375547   0.7165139   0.7142507   0.7294497   0.7416741 
 #      HiG_19       HiG_7      HiG_11      HiG_15      HiG_16      HiG_13 
-#   0.7513450   0.7326760   0.7323650   0.7349069   0.7455150   0.7239132 
+#   0.7510472   0.7326760   0.7323650   0.7349069   0.7455150   0.7239132 
 #       HiG_8    HiGCTS_7   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1 
 #   0.7064360   0.6176471   0.4444444   0.6442901   0.6333333   0.5967742 
 #    HiGCTS_8       CTS_7      CTS_11      CTS_15      CTS_16    CTS_16.1 
@@ -1041,9 +1040,9 @@ options(scipen = 999)
 #       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6 
 #   1.9879669   5.3753351   3.3102531   2.5006391   2.1490349   2.1797991 
 #       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18 
-#   1.9661476   4.5060989   2.6051531   2.4243945   2.1932094   1.0463892 
+#   1.9661476   4.5060989   2.6051531   2.4243945   2.1932094   1.0466757 
 #      HiG_19       HiG_7      HiG_11      HiG_15      HiG_16      HiG_13 
-#   1.0355188   1.8499141   2.1243071   2.2028725   2.2447135   2.4200731 
+#   1.0355347   1.8499141   2.1243071   2.2028725   2.2447135   2.4200731 
 #       HiG_8    HiGCTS_7   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1 
 #   2.5406947   1.8618209   0.2297711   1.0335435   0.2959712   0.3919628 
 #    HiGCTS_8       CTS_7      CTS_11      CTS_15      CTS_16    CTS_16.1 

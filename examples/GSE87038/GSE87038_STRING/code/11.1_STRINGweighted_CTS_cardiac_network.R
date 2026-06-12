@@ -26,7 +26,7 @@ if(download_files){
     # BioTIP.res.Rdata
     download.file(
         "https://github.com/xyang2uchicago/BioTIP/raw/refs/heads/master/examples/result/gastrulationE8.25_Pijuan-Sala2019/C_SNNGraph_allcells/BioTIP.res.RData",
-        "../data/BioTIP.res.RData"
+        "../../data/BioTIP.res.RData"
     )
 
     # STRING db
@@ -46,8 +46,8 @@ if(download_files){
     }
 }
 
-load(file = "../data/BioTIP.res.RData")
-load("../data/sce_E8.25_uncorrected.RData")
+load(file = "../../data/BioTIP.res.RData")
+load("../../data/sce_E8.25_uncorrected.RData")
 
 CTS <- res$CTS.candidate[which(res$significant)]
 
@@ -143,11 +143,11 @@ for (i in c(setdiff(names(markers.up), names(CTS)), unique_CTS_ID)) {
     DEG[[i]] <- subset(interesting.up, summary.logFC > logFC.cut & FDR < 0.01) %>% rownames()
 }
 
-saveRDS(DEG, file = paste0("../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.05.rds"))
-saveRDS(markers.up, file = "../data/markers.up_ttest_min.prop0.25.rds")
+saveRDS(DEG, file = paste0("../../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.05.rds"))
+saveRDS(markers.up, file = "../../data/markers.up_ttest_min.prop0.25.rds")
 dim(markers.up[[1]])
 
-DEG <- readRDS(file = paste0("../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.05.rds"))
+DEG <- readRDS(file = paste0("../../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.05.rds"))
 lengths(DEG)
 
 ######################################################

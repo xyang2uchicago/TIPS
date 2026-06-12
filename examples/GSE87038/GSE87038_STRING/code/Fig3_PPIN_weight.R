@@ -46,7 +46,7 @@ graph_list <- readRDS(file)
 (names(graph_list))
 #  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"       "HiG_6"       "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"      "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"      
 # [15] "HiG_11"      "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"    "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_8"    "CTS_7"       "CTS_11"      "CTS_15"     
-# [29] "CTS_16"      "CTS_16.1"    "CTS_13"      "CTS_8"       "HiGCTS_13"
+# [29] "CTS_16"      "CTS_16.1"    "CTS_13"      "CTS_8"      
 
 signature_levels = c(names(graph_list))
 
@@ -124,7 +124,7 @@ top_genes = df %>%
 
 # Subset top CHD genes
 top_genes_CHD = subset(top_genes, PCGC_AllCurated == TRUE)
-(dim(top_genes_CHD))  # Optional: check how many CHD genes were top 5
+(dim(top_genes_CHD))  # [1] 15 17
 
 # Optional: write out table of top 5 genes
 tb = top_genes[, c("signature", "gene", "PPI_cat", "normalized.strength", "PCGC_AllCurated")]
@@ -364,12 +364,12 @@ fold_change <- robustness.dt %>%
 #   PPI_cat fold_change_edge fold_change_vertex
 #   <fct>              <dbl>              <dbl>
 # 1 CTS                1.04                1.66
-# 2 HiGCTS             1.00                1.67
+# 2 HiGCTS             1.00                1.70
 # 3 HiG                0.913               1.09
 
 ### additionally, wilcox-test the between-group changes among observed PPINs
 tmp = subset(robustness.dt,measure=='btwn.cent')
-(dim(tmp)) # 160115     10
+(dim(tmp)) # 160111     10
 wilcox.test(subset(tmp,PPI_cat=='HiG')$comp.pct, subset(tmp,PPI_cat=='CTS')$comp.pct)
 # W = 1961908, p-value < 2.2e-16
 
@@ -401,9 +401,9 @@ sig_results_ppi <- lapply(ppi_comparisons, function(cmp) {
 
 (sig_results_ppi)
 #   group1 group2            p p_stars
-# 1    HiG HiGCTS 3.155646e-11    ****
-# 2    HiG    CTS 4.063640e-28    ****
-# 3    CTS HiGCTS 5.285741e-01      ns
+# 1    HiG HiGCTS 1.217560e-10    ****
+# 2    HiG    CTS 1.220792e-27    ****
+# 3    CTS HiGCTS 4.696298e-01      ns
 
 }
 
@@ -674,9 +674,10 @@ graph_list_notsimplified <- readRDS( file= paste0('../', db, '_STRING_graph_perS
 # Remove duplicate vertices
 correct_n_edges = readRDS('../correct_n_edges_HiG_STRING2.14.0.rds')
 for(g_name in unique(correct_n_edges$graph_id)){
-	vertices_to_remove = subset(correct_n_edges, graph_id == g_name)$vetex_index_to_remove
-	if(any(is.na(vertices_to_remove))) vertices_to_remove = vertices_to_remove[!is.na(vertices_to_remove)]
-	graph_list[[g_name]] = delete_vertices(graph_list_notsimplified[[g_name]], vertices_to_remove)
+	vertices_to_remove = subset(correct_n_edges, graph_id == g_name)$vertex_index_to_remove
+	vertices_to_remove = vertices_to_remove[!is.na(vertices_to_remove)]
+	vertices_to_remove = as.integer(unlist(strsplit(vertices_to_remove, ",")))
+	graph_list_notsimplified[[g_name]] = delete_vertices(graph_list_notsimplified[[g_name]], vertices_to_remove)
 }
 N = sapply(graph_list_notsimplified, vcount)
 
@@ -707,8 +708,8 @@ edge_counts <- edge_data %>%
 #   PPI_cat edge_count
 #   <fct>        <int>
 # 1 CTS            905
-# 2 HiGCTS         137
-# 3 HiG         184731
+# 2 HiGCTS         146
+# 3 HiG         150792
 
 pairwise_pvals <- edge_data %>%
   pairwise_wilcox_test(
@@ -718,10 +719,10 @@ pairwise_pvals <- edge_data %>%
 
 (pairwise_pvals)
 #   .y.         group1 group2    n1     n2 statistic        p   p.adj p.adj.signif
-# * <chr>       <chr>  <chr>  <int>  <int>     <dbl>    <dbl>   <dbl> <chr>       
-# 1 edge_weight CTS    HiGCTS   905    137     45708  7.03e-7 2.11e-6 ****        
-# 2 edge_weight CTS    HiG      905 184731  80746929  7.7 e-2 7.7 e-2 ns          
-# 3 edge_weight HiGCTS HiG      137 184731  14062139  2.4 e-2 3.6 e-2 *   
+# * <chr>       <chr>  <chr>  <int>  <int>     <dbl>    <dbl>   <dbl> <chr>
+# 1 edge_weight CTS    HiGCTS   905    146    63027  0.372 0.547 ns
+# 2 edge_weight CTS    HiG      905 150792 67442476. 0.547 0.547 ns
+# 3 edge_weight HiGCTS HiG      146 150792 11419978  0.433 0.547 ns
 }
 
 ### Save Plots to Folder

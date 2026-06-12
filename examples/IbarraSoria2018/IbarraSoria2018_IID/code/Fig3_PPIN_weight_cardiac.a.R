@@ -224,7 +224,7 @@ s <- "combined" # specificity method
 # original pdf: edge_weight.pdf
 ###################################################
 {
-  graph_list_notsimplified <- readRDS(file.path(inputdir, paste0(db, "_IID_graph_perState_notsimplified.rds")))
+  graph_list_notsimplified <- readRDS(file.path(wd, "results", paste0(db, "_IID_graph_perState_notsimplified.rds")))
   graph_list <- lapply(graph_list_notsimplified, simplify, edge.attr.comb = "max")
 
   graph_list_cardiac <- graph_list[endsWith(names(graph_list), "_cardiac.a")]

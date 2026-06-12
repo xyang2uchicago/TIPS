@@ -27,17 +27,17 @@ CT_id_formatted <- paste0("(_", CT_id, ")") %>% paste(collapse="|")
 
 graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_notsimplified.rds"))
 (N0 <- sapply(graph_list, vcount))
-#       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6
-#         303         435         411         304         322         512
-#       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18
-#         358         422         341         364         524         457
-#      HiG_19       HiG_7      HiG_11      HiG_15      HiG_16      HiG_13
-#         529         336         441         406         524         403
-#       HiG_8    HiGCTS_7   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1
-#         332          14          19          30          13          30
-#   HiGCTS_13    HiGCTS_8       CTS_7      CTS_11      CTS_15      CTS_16
-#          13          10          31          51          66          39
-#    CTS_16.1      CTS_13       CTS_8
+#       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6 
+#         303         435         411         304         322         512 
+#       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18 
+#         358         422         341         364         524         457 
+#      HiG_19       HiG_7      HiG_11      HiG_15      HiG_16      HiG_13 
+#         529         336         441         406         524         403 
+#       HiG_8    HiGCTS_7   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1 
+#         332          14          19          30          13          30 
+#   HiGCTS_13    HiGCTS_8       CTS_7      CTS_11      CTS_15      CTS_16 
+#          13          10          31          51          66          39 
+#    CTS_16.1      CTS_13       CTS_8 
 #          79          60          54
 
 ########## remove name-duplicated Vertex due to inconsistence in STRING.db ###########
@@ -72,27 +72,27 @@ N2 <- sapply(graph_list, vcount)
 
 
 (names(graph_list))
-#  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"
-#  [6] "HiG_6"       "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"
-# [11] "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"       "HiG_11"
-# [16] "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"
-# [21] "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_13"
-# [26] "HiGCTS_8"    "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"
+#  [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"      
+#  [6] "HiG_6"       "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"     
+# [11] "HiG_17"      "HiG_18"      "HiG_19"      "HiG_7"       "HiG_11"     
+# [16] "HiG_15"      "HiG_16"      "HiG_13"      "HiG_8"       "HiGCTS_7"   
+# [21] "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1" "HiGCTS_13"  
+# [26] "HiGCTS_8"    "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"     
 # [31] "CTS_16.1"    "CTS_13"      "CTS_8"
 edge_counts <- sapply(graph_list, ecount)
 (edge_counts)
-#       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6
-#        4978        9544        7120        5362        5811       10993
-#       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18
-#        6937        8655        5828        7004       11724        8549
-#      HiG_19       HiG_7      HiG_11      HiG_15      HiG_16      HiG_13
-#        7834        7572        9301        8632       10581        8508
-#       HiG_8    HiGCTS_7   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1
-#        5880          17          15          54          10          31
-#   HiGCTS_13    HiGCTS_8       CTS_7      CTS_11      CTS_15      CTS_16
-#           9          10          52          54         207          70
-#    CTS_16.1      CTS_13       CTS_8
-#         210         147         165
+#       HiG_1       HiG_2       HiG_3       HiG_4       HiG_5       HiG_6 
+#        4978        9544        7120        5362        5808       10993 
+#       HiG_9      HiG_10      HiG_12      HiG_14      HiG_17      HiG_18 
+#        6937        8655        5828        7004       11719        8543 
+#      HiG_19       HiG_7      HiG_11      HiG_15      HiG_16      HiG_13 
+#        7827        7572        9301        8632       10581        8508 
+#       HiG_8    HiGCTS_7   HiGCTS_11   HiGCTS_15   HiGCTS_16 HiGCTS_16.1 
+#        5880          17          15          54          10          31 
+#   HiGCTS_13    HiGCTS_8       CTS_7      CTS_11      CTS_15      CTS_16 
+#           9          10          52          54         207          70 
+#    CTS_16.1      CTS_13       CTS_8 
+#         210         147         165 
 
 graphs_with_duplicates <- sapply(graph_list, function(g) {
     vertex_names <- V(g)$name
@@ -201,7 +201,7 @@ ggsave("strength_distribution_w_vsize.pdf", g_strength_dis, width = 11, height =
 #   HiGCTS_13    HiGCTS_8       CTS_7      CTS_11      CTS_15      CTS_16 
 #          13          10          31          51          66          39 
 #    CTS_16.1      CTS_13       CTS_8 
-#          79          60          54 
+#          79          60          54
 
 V_deg_nor_dis <- lapply(graph_list, function(g) {
     deg <- strength(g, weights = E(g)$weight)
@@ -222,7 +222,7 @@ V_deg_nor_dis$PPI_cat <- lapply(V_deg_nor_dis$signature, function(x) unlist(strs
 
 (table(V_deg_nor_dis$PPI_cat))
 #    CTS HiGCTS    HiG
-#    312     96   7618
+#    312     96   7617
 V_deg_nor_dis$cluster <- lapply(V_deg_nor_dis$signature, function(x) unlist(strsplit(x, "_"))[2]) %>% unlist()
 
 all(V_deg_nor_dis$signature %in% names(graph_list))
@@ -309,8 +309,8 @@ print(g_strength_dis)
 dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ######## Compare node-strength distribution across three categories ################
-print(dim(V_deg_dis)) # [1] 2052    6
-print(head(V_deg_dis, 3))
+(dim(V_deg_dis)) # [1] 2052    7
+(head(V_deg_dis, 3))
 #    signature strength_distribution     k PPI_cat cluster n_nodes
 #       <char>                 <num> <int>  <fctr>  <char>   <num>
 # 1:     HiG_1             1.0000000     1     HiG       1     303
@@ -363,11 +363,11 @@ dev.off()
 
 tmp <- subset(V_deg_dis, grepl(CT_id_formatted, signature))
 
-print(table(V_deg_dis$PPI_cat))
+(table(V_deg_dis$PPI_cat))
 #    CTS HiGCTS    HiG 
 #     69     30   1953
 
-print(table(tmp$PPI_cat))
+(table(tmp$PPI_cat))
 #    CTS HiGCTS    HiG 
 #     69     30    594
 saveRDS(V_deg_dis, file = "V_deg_dis.rds") ## note that 'PPI_cast' was originally named as 'width'

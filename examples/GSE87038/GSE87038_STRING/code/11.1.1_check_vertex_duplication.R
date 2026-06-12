@@ -5,6 +5,7 @@ library(ggplot2)
 library("gridExtra")
 library(ggrepel)
 library(ggpubr)
+library(igraph)
 
 ########## BEGINNING OF USER INPUT ##########
 
@@ -89,7 +90,7 @@ string_db <- STRINGdb$new(
 )
 string_db
 
-DEG <- readRDS(paste0("../data/DEG_perState_min.prop0.25_lfc0.6_FDFR0.05.rds"))
+DEG <- readRDS(paste0("../../data/DEG_perState_min.prop0.25_lfc0.6_FDFR0.05.rds"))
 
 DEG <- lapply(DEG, function(x) data.frame(names = x, stringsAsFactors = FALSE))
 
@@ -102,15 +103,12 @@ any(duplicated(DEG[["5"]])) # [1] FALSE
 
 ## build PPIN again and track back the correct number of edges for the duplicated gene ##
 
-markers.up <- readRDS(paste0("../data/DEG_perState_min.prop0.25_lfc0.6_FDFR0.05.rds"))
+markers.up <- readRDS(paste0("../../data/DEG_perState_min.prop0.25_lfc0.6_FDFR0.05.rds"))
 
 graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_notsimplified.rds"))
 graph_list <- lapply(graph_list, simplify, edge.attr.comb ='max') # !!!!!!!!!!!!!!!!!!! # FIXED
 
 N <- sapply(graph_list, vcount)
-
-correct_n_edges <- NULL
-
 
 unmapped_genes <- c() # initialize vector
 
@@ -149,27 +147,29 @@ map_protein_to_gene <- function(string_id) {
     }
 }
 
+correct_n_edges <- NULL
+
 # MANUAL INPUT REQUIRED
-for (i in names(which(graphs_with_duplicates))) {
+for (i in sub("^HiG_", "", names(which(graphs_with_duplicates)))) {
     cat("\n")
-    cat("Analyzing", i, "\n")
+    cat("Analyzing HiG_", i, "\n")
 
-    diff_exp <- graph_list[[i]]
+    diff_exp <- DEG[[i]]  # data frame with 'names' column
 
-    diff_exp_df <- data.frame(names = V(diff_exp)$name, stringsAsFactors = FALSE)
-
-    mapped <- string_db$map(diff_exp_df, "names", removeUnmappedRows = TRUE)
+    mapped <- string_db$map(diff_exp, "names", removeUnmappedRows = TRUE)
 
     dup_name <- unique(mapped$names[duplicated(mapped$names)])
+    cat("Duplicated gene names:", paste(dup_name, collapse = ", "), "\n")
 
     dup_entries <- mapped[mapped$names %in% dup_name, ]
 
     # Apply biomart function to get gene ID and symbol info
     annotation <- do.call(rbind, lapply(dup_entries$STRING_id, map_protein_to_gene))
 
-    # Combine
+    # Combine for biological validation
     annotated_dup <- cbind(dup_entries, annotation[, c("gene_id", "gene_symbol")])
 
+    print(annotated_dup)
 
     # In the manual code below, we want to delete all duplicate gene names that are associated with
     # the wrong Ensemble ID (those that are not in the official database corresponding to our gene).
@@ -177,7 +177,6 @@ for (i in names(which(graphs_with_duplicates))) {
     # Find official mouse gene symbols: https://www.informatics.jax.org/
     # Find Ensemble ID at NCBI: https://www.ncbi.nlm.nih.gov
     # Map protein id to gene id using BioMart: https://useast.ensembl.org/info/data/biomart/index.html
-
 
     #     names                STRING_id            gene_id gene_symbol
     # 237  HN1L 10090.ENSMUSP00000078129 ENSMUSG00000050961    AY358078
@@ -210,34 +209,20 @@ for (i in names(which(graphs_with_duplicates))) {
     # Official Ensemble ID: ENSMUSG00000024165
     if (i == "19") mapped <- mapped[-c(459, 461), ]
 
-    # Continue with generating STRING PPIN
-
+    # Rebuild graph after removal, translate STRING IDs to gene symbols
     hits <- mapped$STRING_id
     graph <- string_db$get_subnetwork(hits)
     all(mapped[match(V(graph)$name, mapped$STRING_id), ]$STRING_id == V(graph)$name) # TRUE
-    V(graph)$symbol <- mapped[match(V(graph)$name, mapped$STRING_id), ]$names
-
+    V(graph)$name <- mapped[match(V(graph)$name, mapped$STRING_id), ]$names
 
     for (j in seq_along(dup_name)) {
-        correct_vertex_names <- mapped$STRING_id[mapped$names == dup_name[j]]
-
-        # pick the first STRING_id that exists in the graph
-        correct_vertex_name <- correct_vertex_names[correct_vertex_names %in% V(graph)$name][1]
-
-        # check if gene is not in STRING
-        if (is.na(correct_vertex_name) || length(correct_vertex_name) == 0) {
-            cat("Warning: No mapped STRING_id for", dup_name[j], "found in graph vertices\n")
-            unmapped_genes <- c(unmapped_genes, dup_name[j])
-            next
-        }
-
-        edges <- incident(graph, correct_vertex_name, mode = "all")
-        n_edge_count <- length(edges)
+        edges <- incident(graph, dup_name[j], mode = "all")
+        n <- get.edgelist(graph)[edges, ]
 
         res <- data.frame(
-            "graph_id" = i,
-            "names" = dup_name[j],
-            "n_edge" = n_edge_count,
+            "graph_id" = paste0("HiG_", i),
+            "names"    = dup_name[j],
+            "n_edge"   = nrow(n),
             "STRING_id" = subset(mapped, names == dup_name[j])$STRING_id
         )
 
@@ -248,8 +233,6 @@ for (i in names(which(graphs_with_duplicates))) {
         }
     }
 }
-# After processing, check all unmapped genes
-unique(unmapped_genes)
 
 (correct_n_edges)
 #   graph_id names n_edge                STRING_id
@@ -259,7 +242,7 @@ unique(unmapped_genes)
 # 4   HiG_19  HN1L      4 10090.ENSMUSP00000024981
 
 ################################################################
-## remove duplciated vertex directly from un-simplified graph ##
+## remove duplicated vertex directly from un-simplified graph ##
 ################################################################
 graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_notsimplified.rds"))
 
@@ -362,3 +345,8 @@ correct_n_edges_copy$vertex_index_to_remove <- sapply(
 write.table(correct_n_edges_copy, file = "correct_n_edges_HiG_STRING2.14.0.txt", sep = "\t", row.names = FALSE)
 
 saveRDS(correct_n_edges_copy, file = "correct_n_edges_HiG_STRING2.14.0.rds")
+
+
+# FIXES:
+
+# What needs to be done: Re-run 11.1.1 with the fix to regenerate correct_n_edges_HiG_STRING2.14.0.rds with correct values, then re-run all scripts that load it (11.1.2, 11.2.0, 11.2.1, 11.3, 11.6, Fig3). The CTS-level analyses don't need to be touched.
