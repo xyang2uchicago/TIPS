@@ -1,4 +1,0 @@
-"graph_id"	"names"	"n_edge"	"STRING_id"	"vertex_index_to_remove"
-"HiG_17"	"H3F3A"	68	"9606.ENSP00000355780"	NA
-"HiG_17"	"HN1"	12	"9606.ENSP00000348316"	NA
-"HiG_17"	"LINC02210-CRHR1"	20	"9606.ENSP00000488912"	"921"
