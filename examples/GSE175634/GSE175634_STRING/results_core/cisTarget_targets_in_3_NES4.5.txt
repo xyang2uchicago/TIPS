@@ -1,0 +1,1 @@
+geneSet	motif	NES	AUC	TF_highConf	TF_lowConf	nEnrGenes	rankAtMax	enrichedGenes

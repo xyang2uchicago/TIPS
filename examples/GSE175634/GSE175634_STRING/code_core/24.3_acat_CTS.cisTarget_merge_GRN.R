@@ -38,8 +38,8 @@ for (lk in unique(final_table$linkage)) {
         g_string = graph_list[[paste0("CTS_", CTS_ID)]]
     )
     cat(lk, "merged graph: vcount =", vcount(g_merged), "ecount =", ecount(g_merged), "\n")
-    # CF merged graph: vcount = 32 ecount = 90
-    # CM merged graph: vcount = 13 ecount = 17
+    # CF merged graph: vcount = 18 ecount = 20
+    # CM merged graph: vcount = 6 ecount = 4
 
     pdf(file = paste0("PPI_graph_merged_GRN_prediction_", CTS_name, "_", lk, "_final.pdf"))
     set.seed(2)

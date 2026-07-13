@@ -16,7 +16,7 @@ dir.create(file.path(updir, paste0("cisTarget_predicted_", CTS_ID)),
 )
 setwd(paste0(updir, "/cisTarget_predicted_", CTS_ID))
 
-NES_threshold <- 3
+NES_threshold <- 4.5
 
 ########################################################
 ##  input 6 -- RcisTarget predicted TF enriched among CTS genes
@@ -83,16 +83,10 @@ if (length(files) > 0) {
     }
     key_TFs <- unique(key_TFs)
     key_TFs
-    # PDLIM5 is in DEG of 5
-    # KLF6 is in DEG of 5
-    # GATA3 is in DEG of 1
-    # GATA6 is in CTS CP.1  ← cardiac-specific, excluded by manual selection below
+    # At NES>=4.5 for CTS_CP.1: EBF1 and BCL6B are enriched motif TFs but neither is in DEG of any cluster
+    # → key_TFs = character(0) (matches original 24.1.2 behavior: no GRN predictions at NES=4.5)
 
     mat <- as.data.frame(mat)
-
-    ## MANUAL SELECTION: remove GATA6 (cardiac-specific TF) and PDLIM5 (not a canonical TF)
-    ## KLF6 and GATA3 are the same TFs as in CTS_CP, providing a direct comparison
-    key_TFs <- c("KLF6", "GATA3")
 
     ## one column index per TF (take first match)
     x <- sapply(key_TFs, function(tf) {
@@ -100,8 +94,10 @@ if (length(files) > 0) {
         if (length(idx) > 0) idx[1] else NA_integer_
     })
     x <- x[!is.na(x)]
-    x
-    colnames(mat)[x]
+    if (length(x) > 0) {
+        print(x)
+        print(colnames(mat)[x])
+    }
 
     names(x) <- names(x)
     if (length(x) > 0) {
@@ -115,14 +111,15 @@ if (length(files) > 0) {
 
     dim(mat)
     cat(paste0("key_TFs: ", paste(key_TFs, collapse = "_"), "\n"))
-    # key_TFs: KLF6_GATA3
+    # key_TFs: (empty at NES=4.5 — EBF1/BCL6B not in DEG of any cluster)
 
     if (length(key_TFs) > 0) {
         fileName <- paste0("heatmap_blocked_", CTS_name, "_cisTarget_", paste(key_TFs, collapse = "_"), "_v3.tsv")
         write.table(mat, file = fileName, sep = "\t", quote = FALSE, row.names = TRUE, col.names = TRUE)
         saveRDS(list(x = x, key_TFs = key_TFs, motifAnnot_sub = motifAnnot_sub), "cisTarget_variables.rds")
     } else {
-        stop("No key TFs found for ", CTS_name, "\n")
+        stop("No key TFs found for ", CTS_name, " at NES=", NES_threshold,
+             " — EBF1/BCL6B enriched at NES>=4.5 for CTS_CP.1 but not in DEG of any cluster (matches original 24.1.2)")
     }
 }
 

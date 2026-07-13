@@ -32,7 +32,7 @@ dir.create(file.path(updir, paste0("cisTarget_predicted_", CTS_ID)),
     showWarnings = FALSE, recursive = TRUE)
 setwd(paste0(updir, "/cisTarget_predicted_", CTS_ID))
 
-NES_threshold <- 3
+NES_threshold <- 4.5
 
 ########################################################
 ##  input 6 -- RcisTarget
@@ -89,10 +89,10 @@ if (length(files) > 0) {
             }
         }
     }
-    # GATA3 is in DEG of 1
-    # KLF6 is in DEG of 5
-    # MEIS1 is in DEG of 3
-    # ISL1 is in DEG of 3  <- cardiac-specific, excluded by manual selection below
+    # TEAD1 is in DEG of 1
+    # ELF2 is in DEG of 1
+    # ETS2 is in DEG of 1
+    # ETV1 is in DEG of 5
 
     for (i in x_all) {
         if (i %in% CTS[[CTS_ID]]) {
@@ -103,14 +103,13 @@ if (length(files) > 0) {
 
     key_TFs <- unique(key_TFs)
     key_TFs
-    # [1] "PRRX1" "HOXB2" "GATA3" "KLF6"  "MEIS1" "ISL1"
+    # [1] "PRRX1" "HOXB2" "TEAD1" "ELF2"  "ETS2"  "ETV1"
 
     mat <- as.data.frame(mat)
 
-    ## MANUAL SELECTION: remove ISL1 (cardiac-specific TF, not appropriate for generic analysis)
-    ## PRRX1 and HOXB2 are seed_TFs but have no cisTarget motif column — exclude from cisTarget GRN
-    ## See GSE87038 code_core for reference pattern
-    key_TFs <- c("GATA3", "KLF6", "MEIS1")
+    ## MANUAL SELECTION: matching original 24.1.1 at NES>=4.5
+    ## ELF2 and ETV1 excluded: they share the same motif as ETS2/ELF/HOXA2/HOXA32
+    key_TFs <- c("TEAD1", "ETS2")
 
     ## one column index per TF (take first match; avoids length mismatch when a TF has multiple motifs)
     x <- sapply(key_TFs, function(tf) {
@@ -132,7 +131,7 @@ if (length(files) > 0) {
     }
 
     cat(paste0("key_TFs: ", paste(key_TFs, collapse = "_"), "\n"))
-    # key_TFs: GATA3_KLF6_MEIS1
+    # key_TFs: TEAD1_ETS2
 
     if (length(key_TFs) > 0) {
         fileName <- paste0("heatmap_blocked_", CTS_name, "_cisTarget_", paste(key_TFs, collapse = "_"), "_v3.tsv")
@@ -145,9 +144,8 @@ if (length(files) > 0) {
 
 motif_TF_highConf <- gsub("cisTarget_", "", colnames(mat)[x]) %>% gsub(".motif_target", "", ., fixed = TRUE)
 print(motif_TF_highConf)
-# [1] "CDX2;CEBPA;...;GATA3;...;ZBTB14"   (GATA3 motif family)
-# [2] "BCL11A;...;KLF6;...;ZNF880"          (KLF6 motif family)
-# [3] "HOXA13;HOXA9;HOXB13;MEIS1"           (MEIS1/HOX motif)
+# [1] "CEBPA;CEBPB;CEBPD;CEBPE;CEBPG;PDX1;SOX9;SRY;TEAD1"   (TEAD1 family)
+# [2] "DLX2;DLX3;...;ELF2;...;ETS2;...;ZNF580"                (ETS2/ELF family)
 
 ###  heatmaps
 for (key in motif_TF_highConf) {
@@ -178,7 +176,7 @@ library(tibble)
 mat <- read.table(paste0("heatmap_blocked_", CTS_name, "_cisTarget_", paste(key_TFs, collapse = "_"), "_v3.tsv"),
     sep = "\t", header = TRUE, check.names = FALSE)
 print(dim(mat))
-# [1] 76 83
+# [1] 76 19
 
 # No ATAC data: add dummy access columns so downstream functions run without errors
 for (col in c("PCW6CP_access", "PCW8_CM_access", "PCW19_CM_access",
@@ -326,7 +324,7 @@ for (key in key_TFs) {
         descendant_cluster_id = CM_cluster, TF_symbol = key_in_TFfamily,
         HVG = rownames(sce))
     cat(paste0(key, ' CM vcount(res[["g_CT_sub"]]): ', vcount(res[["g_CT_sub"]]), "\n"))
-    # GATA3 CM: 3 | KLF6 CM: 8 | MEIS1 CM: 3
+    # TEAD1 CM: 4 | ETS2 CM: 0 (not saved)
     if (vcount(res[["g_CT_sub"]]) > 0)
         saveRDS(res, file = paste0("PPI_graph_", key_in_TFfamily, "_GRN_prediction_", CTS_name, "_CM_final.rds"))
 
@@ -336,25 +334,23 @@ for (key in key_TFs) {
         descendant_cluster_id = CF_cluster, TF_symbol = key_in_TFfamily,
         HVG = rownames(sce))
     cat(paste0(key, ' CF vcount(res_cf[["g_CT_sub"]]): ', vcount(res_cf[["g_CT_sub"]]), "\n"))
-    # GATA3 CF: 10 | KLF6 CF: 26 | MEIS1 CF: 7
+    # TEAD1 CF: 8 | ETS2 CF: 8
     if (vcount(res_cf[["g_CT_sub"]]) > 0)
         saveRDS(res_cf, file = paste0("PPI_graph_", key_in_TFfamily, "_GRN_prediction_", CTS_name, "_CF_final.rds"))
 }
 
 ### reporting ==========
 print((files <- list.files(pattern = "PPI_graph_.*_GRN_prediction_.*_final.rds")))
-# [1] "PPI_graph_GATA3_GRN_prediction_CTS_CP_CF_final.rds"
-# [2] "PPI_graph_GATA3_GRN_prediction_CTS_CP_CM_final.rds"
-# [3] "PPI_graph_KLF6_GRN_prediction_CTS_CP_CF_final.rds"
-# [4] "PPI_graph_KLF6_GRN_prediction_CTS_CP_CM_final.rds"
-# [5] "PPI_graph_MEIS1_GRN_prediction_CTS_CP_CF_final.rds"
-# [6] "PPI_graph_MEIS1_GRN_prediction_CTS_CP_CM_final.rds"
+# [1] "PPI_graph_ETS2_GRN_prediction_CTS_CP_CF_final.rds"
+# [2] "PPI_graph_TEAD1_GRN_prediction_CTS_CP_CF_final.rds"
+# [3] "PPI_graph_TEAD1_GRN_prediction_CTS_CP_CM_final.rds"
 
 final_table <- NULL
 for (f in files) {
     pull <- ifelse(grepl("CF", f), "CF", "CM")
     pattern <- paste(key_TFs, collapse = "|")
     key <- key_in_TFfamily <- regmatches(f, regexpr(pattern, f))
+    if (length(key) == 0) next  # skip files from earlier TF runs
 
     res <- readRDS(file = f)
     g1  <- res[["g_CT_sub"]]

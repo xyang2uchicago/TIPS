@@ -11,6 +11,7 @@ setwd(paste0(updir, "/cisTarget_predicted_", CTS_ID))
 
 (file <- list.files(pattern = "final_table.tsv"))
 # [1] "PPI_graph_GRN_prediction_CTS_CP.1_dualpull_final_table.tsv"
+if (length(file) == 0) stop("No final_table.tsv in cisTarget_predicted_CP.1 — 24.1 CP.1 produced no predictions at NES=4.5 (matches original 24.1.2 behavior)")
 
 final_table <- read.table(file = file, header = TRUE, sep = "\t")
 
@@ -19,7 +20,7 @@ key_TFs <- lapply(
     function(x) strsplit(x, "_")[[1]][3] %>% unlist()
 ) %>% unlist() %>% unique()
 key_TFs
-# [1] "GATA3" "KLF6"
+# character(0) — NES=4.5 produces no predictions; script stops above
 
 # deduplicate: same pair can appear under multiple TF sections with identical delta
 final_table <- final_table %>%
@@ -38,8 +39,7 @@ for (lk in unique(final_table$linkage)) {
         g_string = graph_list[[paste0("CTS_", CTS_ID)]]
     )
     cat(lk, "merged graph: vcount =", vcount(g_merged), "ecount =", ecount(g_merged), "\n")
-    # CF merged graph: vcount = 37 ecount = 94
-    # CM merged graph: vcount = 30 ecount = 79
+    # not reached at NES=4.5 — script stops above (no predictions)
 
     pdf(file = paste0("PPI_graph_merged_GRN_prediction_", CTS_name, "_", lk, "_final.pdf"))
     set.seed(2)
