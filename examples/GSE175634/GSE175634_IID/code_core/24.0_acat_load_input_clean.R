@@ -17,10 +17,11 @@ names(coding_genes) <- NULL
 
 celltype_specific_weight_version <- '10'
 species      <- "human"
-celltype_col <- "leiden_0.5_type"
-CP_cluster   <- "CP"       # cardiogenic progenitor (transitional state)
-CM_cluster   <- "muscle"   # cardiomyocyte (terminal CM fate)
-CF_cluster   <- "endoderm" # endoderm (alternative fate)
+# leiden_0.5 raw cluster numbers match the original code (3=CP, 5=CM, 1=CF)
+celltype_col <- "leiden_0.5"
+CP_cluster   <- "3"   # cardiogenic progenitor (transitional state)
+CM_cluster   <- "5"   # cardiomyocyte (terminal CM fate)
+CF_cluster   <- "1"   # alternative fate; original code cluster assignment
 
 CTS_ID  <- "CP"
 seed_TF <- c("PRRX1", "HOXB2")  # from 12.0: top PageRank in HiGCTS_CP with BetweennessCentrality > 0

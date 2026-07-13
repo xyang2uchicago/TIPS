@@ -9,10 +9,10 @@ seed_TF
 names(graph_list)
 names(DEG)
 
-celltype_col # "leiden_0.5_type"
-CP_cluster # "CP"
-CM_cluster # "muscle"
-CF_cluster # "endoderm"
+celltype_col # "leiden_0.5"
+CP_cluster # "3"
+CM_cluster # "5"
+CF_cluster # "1"
 
 lengths(CTS)
 
@@ -112,10 +112,10 @@ if (length(files) > 0) {
 
     key_TFs <- unique(key_TFs)
     key_TFs
-    # GATA3 is in DEG of endoderm
-    # KLF6 is in DEG of muscle
-    # MEIS1 is in DEG of CP
-    # ISL1 is in DEG of CP  ← cardiac-specific, excluded by manual selection below
+    # GATA3 is in DEG of 1
+    # KLF6 is in DEG of 5
+    # MEIS1 is in DEG of 3
+    # ISL1 is in DEG of 3  ← cardiac-specific, excluded by manual selection below
 
     mat <- as.data.frame(mat)
 
@@ -257,7 +257,7 @@ for (key in key_TFs) {
         HVG = rownames(sce)
     )
     cat(paste0(key, ' CM vcount(res[["g_CT_sub"]]): ', vcount(res[["g_CT_sub"]]), "\n"))
-    # GATA3 CM: 0 | KLF6 CM: 2 | MEIS1 CM: 0
+    # GATA3 CM: 3 | KLF6 CM: 10 | MEIS1 CM: 4
     if (vcount(res[["g_CT_sub"]]) > 0) saveRDS(res, file = paste0("PPI_graph_", key_in_TFfamily, "_GRN_prediction_", CTS_name, "_CM_final.rds"))
 
     res_cf <- fill_TF_targeting_predicted_edges(graph_TF_list,
@@ -267,15 +267,18 @@ for (key in key_TFs) {
         HVG = rownames(sce)
     )
     cat(paste0(key, ' CF vcount(res_cf[["g_CT_sub"]]): ', vcount(res_cf[["g_CT_sub"]]), "\n"))
-    # GATA3 CF: 0 | KLF6 CF: 2 | MEIS1 CF: 2
+    # GATA3 CF: 10 | KLF6 CF: 28 | MEIS1 CF: 8
     if (vcount(res_cf[["g_CT_sub"]]) > 0) saveRDS(res_cf, file = paste0("PPI_graph_", key_in_TFfamily, "_GRN_prediction_", CTS_name, "_CF_final.rds"))
 }
 
 ### reporting ==========
 print((files <- list.files(pattern = "PPI_graph_.*_GRN_prediction_.*_final.rds")))
-# [1] "PPI_graph_KLF6_GRN_prediction_CTS_CP_CF_final.rds"
-# [2] "PPI_graph_KLF6_GRN_prediction_CTS_CP_CM_final.rds"
-# [3] "PPI_graph_MEIS1_GRN_prediction_CTS_CP_CF_final.rds"
+# [1] "PPI_graph_GATA3_GRN_prediction_CTS_CP_CF_final.rds"
+# [2] "PPI_graph_GATA3_GRN_prediction_CTS_CP_CM_final.rds"
+# [3] "PPI_graph_KLF6_GRN_prediction_CTS_CP_CF_final.rds"
+# [4] "PPI_graph_KLF6_GRN_prediction_CTS_CP_CM_final.rds"
+# [5] "PPI_graph_MEIS1_GRN_prediction_CTS_CP_CF_final.rds"
+# [6] "PPI_graph_MEIS1_GRN_prediction_CTS_CP_CM_final.rds"
 
 final_table <- NULL
 for (f in files) {
