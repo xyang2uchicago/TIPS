@@ -28,7 +28,7 @@ names(CTS)
 
 ########## END OF USER INPUT ##########
 # downloaded from GitHub
-DEG <- readRDS(file = paste0(db, "_DEG_perState_min.prop0.25_lfc", logFC.cut <- 0.6, "_FDFR0.05.rds"))
+DEG <- readRDS(file = paste0(db, "_DEG_perState_min.prop0.25_lfc", logFC.cut <- 0.6, "_FDFR0.01.rds"))
 lengths(DEG)
 #                  blood              cardiac.b              cardiac.c
 #                    422                    414                    448

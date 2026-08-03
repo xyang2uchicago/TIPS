@@ -304,7 +304,7 @@ lengths(CTS)
 ########################################################
 ##  input 3 -- data-driven --- DEGs
 ## wilcox test (human iPSC) / t-test (mouse); refer to 3.5_Filter_Plot_Marker_diffBar.R
-DEG <- readRDS(paste0(db_specifc_input_path, "DEG_perState_min.prop0.25_lfc0.6_FDFR0.05.rds"))
+DEG <- readRDS(paste0(db_specifc_input_path, "DEG_perState_min.prop0.25_lfc0.6_FDFR0.01.rds"))
 lengths(DEG)
 # 1   2   3   4   5   6   9  10  12  14  17  18  19   7  11  15  16  13   8
 # 307 438 414 309 325 515 360 425 343 365 529 457 531 340 443 409 526 404 335

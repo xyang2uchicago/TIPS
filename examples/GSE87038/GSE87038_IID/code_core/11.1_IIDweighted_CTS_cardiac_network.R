@@ -37,7 +37,7 @@ markers.up <- readRDS("../../data/markers.up_ttest_min.prop0.25.rds")
 
 ########## END OF USER INPUT ##########
 # downloaded from GitHub
-DEG <- readRDS(file = paste0("../../data/DEG_perState_min.prop0.25_lfc", logFC.cut <- 0.6, "_FDFR0.05.rds"))
+DEG <- readRDS(file = paste0("../../data/DEG_perState_min.prop0.25_lfc", logFC.cut <- 0.6, "_FDFR0.01.rds"))
 lengths(DEG)
 
 ######################################################

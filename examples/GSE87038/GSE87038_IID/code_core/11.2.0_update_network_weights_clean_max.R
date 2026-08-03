@@ -51,7 +51,13 @@ colnames(colData(sce))
 # Calculate log-normalized counts
 # FIXED
 if (!"logcounts" %in% assayNames(sce)) {
-  sce <- scater::logNormCounts(sce)
+    assayName <- assayNames(sce)[1]
+    x <- assay(sce, assayName)
+    if (max(x) > 20) {
+        sce <- scater::logNormCounts(sce, assay.type = assayName)
+    } else {
+        assayNames(sce)[1] <- 'logcounts'
+    }
 }
 assayName <- "logcounts"
 

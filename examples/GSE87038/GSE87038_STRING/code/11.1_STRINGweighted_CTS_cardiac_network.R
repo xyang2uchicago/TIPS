@@ -143,11 +143,11 @@ for (i in c(setdiff(names(markers.up), names(CTS)), unique_CTS_ID)) {
     DEG[[i]] <- subset(interesting.up, summary.logFC > logFC.cut & FDR < 0.01) %>% rownames()
 }
 
-saveRDS(DEG, file = paste0("../../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.05.rds"))
+saveRDS(DEG, file = paste0("../../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.01.rds"))
 saveRDS(markers.up, file = "../../data/markers.up_ttest_min.prop0.25.rds")
 dim(markers.up[[1]])
 
-DEG <- readRDS(file = paste0("../../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.05.rds"))
+DEG <- readRDS(file = paste0("../../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.01.rds"))
 lengths(DEG)
 
 ######################################################

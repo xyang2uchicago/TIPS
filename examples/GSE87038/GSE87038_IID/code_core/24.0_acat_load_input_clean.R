@@ -25,7 +25,6 @@ CTS_ID       <- "8"
 
 seed_TF <- c("NR2F1", "IRX5", "ALX1")   # from CTS_8 (no HiGCTS_8 in IID)
 
-rebuild_mat                <- TRUE
 heatmap_coding_target_only <- TRUE
 ########## END OF USER INPUT ##########
 
@@ -98,7 +97,7 @@ rm(x)
 
 ########################################################
 ##  input 3 -- data-driven --- DEGs
-DEG <- readRDS(paste0(data_dir, "DEG_perState_min.prop0.25_lfc0.6_FDFR0.05.rds"))
+DEG <- readRDS(paste0(data_dir, "DEG_perState_min.prop0.25_lfc0.6_FDFR0.01.rds"))
 names(DEG)
 # [1] "1"  "2"  "3"  "4"  "5"  "6"  "9"  "10" "12" "14" "17" "18" "19" "7"  "11" "15" "16" "13" "8"
 head(DEG[["8"]], 4)
@@ -169,7 +168,7 @@ dim(motifAnnot) # [1] 253096      8
 
 if (!file.exists("cisTarget_targets_in_all_CTS.rds")) {
     dbFile       <- "hg38_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather"
-    feather_path <- paste0(data_dir, "cistarget/")
+    feather_path <- paste0(shared_path, "cistarget/")
 
     if (!file.exists(paste0(feather_path, dbFile))) {
         url <- paste0(
