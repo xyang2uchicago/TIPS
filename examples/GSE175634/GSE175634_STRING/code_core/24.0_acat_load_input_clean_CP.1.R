@@ -26,7 +26,6 @@ CF_cluster   <- "1"   # alternative fate; original code cluster assignment
 CTS_ID  <- "CP.1"
 seed_TF <- character(0)  # HiGCTS_CP.1 contains no non-cardiac TF with BC > 0
 
-rebuild_mat                <- TRUE
 heatmap_coding_target_only <- TRUE
 ########## END OF USER INPUT ##########
 
@@ -119,7 +118,7 @@ dim(motifAnnot)
 
 if (!file.exists("cisTarget_targets_in_all_CTS.rds")) {
     dbFile       <- "hg38_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather"
-    feather_path <- paste0(data_dir, "cistarget/")
+    feather_path <- paste0(shared_path, "cistarget/")
 
     if (!file.exists(paste0(feather_path, dbFile))) {
         url <- paste0(
