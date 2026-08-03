@@ -1,0 +1,136 @@
+      name vcount ecount
+     HiG_0    568   3721
+     HiG_1    613   4518
+    HiG_10    431   2167
+    HiG_11    391   1774
+    HiG_13    610   4096
+     HiG_2    583   4413
+     HiG_3    442   2371
+     HiG_5    471   3468
+     HiG_7    340   1209
+     HiG_8    558   3452
+     HiG_9    446   2368
+    HiG_12    133    347
+     HiG_6    494   2585
+     HiG_4    477   2235
+ HiGCTS_12     24      7
+  HiGCTS_6     13      1
+  HiGCTS_4     24      9
+    CTS_12     40     16
+     CTS_6     33      4
+     CTS_4     55     35
+Available clusters in SCE: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 
+
+Processing network: HiG_0 
+Completed calculating specificity for network: HiG_0 
+
+Processing network: HiG_1 
+Completed calculating specificity for network: HiG_1 
+
+Processing network: HiG_10 
+Completed calculating specificity for network: HiG_10 
+
+Processing network: HiG_11 
+Completed calculating specificity for network: HiG_11 
+
+Processing network: HiG_13 
+Completed calculating specificity for network: HiG_13 
+
+Processing network: HiG_2 
+Completed calculating specificity for network: HiG_2 
+
+Processing network: HiG_3 
+Completed calculating specificity for network: HiG_3 
+
+Processing network: HiG_5 
+Completed calculating specificity for network: HiG_5 
+
+Processing network: HiG_7 
+Completed calculating specificity for network: HiG_7 
+
+Processing network: HiG_8 
+Completed calculating specificity for network: HiG_8 
+
+Processing network: HiG_9 
+Completed calculating specificity for network: HiG_9 
+
+Processing network: HiG_12 
+Completed calculating specificity for network: HiG_12 
+
+Processing network: HiG_6 
+Completed calculating specificity for network: HiG_6 
+
+Processing network: HiG_4 
+Completed calculating specificity for network: HiG_4 
+
+Processing network: HiGCTS_12 
+Skipping small network: HiGCTS_12 with only 7 edges
+
+Processing network: HiGCTS_6 
+Skipping small network: HiGCTS_6 with only 1 edges
+
+Processing network: HiGCTS_4 
+Skipping small network: HiGCTS_4 with only 9 edges
+
+Processing network: CTS_12 
+Completed calculating specificity for network: CTS_12 
+
+Processing network: CTS_6 
+Skipping small network: CTS_6 with only 4 edges
+
+Processing network: CTS_4 
+Completed calculating specificity for network: CTS_4 
+  BHLHE41     GATA1     GATA2 
+"BHLHE41"   "GATA1"   "GATA2" 
+candidate genes:  15 
+simplified motif name:  cisTarget_ASCL1;BHLHE40;BHLHE41;CCNT2;ELK1;GATA1;GATA2;GATA3;GATA4;GATA5;GATA6;HAND1;HAND2;ING4;MAX;MITF;MXD1;MXD3;MXD4;MXI1;MYB;MYC;MYCS;MYF5;MYF6;MYOD1;MYOG;NCOA1;NHLH1;NR3C1;PAX4;SMAD4;TAL1;TAL2;TCF12;TCF3;TCF4;TFE3;TFEB;TRP53;TRP63;TRP73;TRPS1;USF1;USF2;WT1;YY1;ZGLP1.motif_target 
+candidate genes:  21 
+direct motif:  cisTarget_GATA1.merged_motif_target  used from multiple potentoal matches
+candidate genes:  22 
+direct motif:  cisTarget_GATA2.motif_target cisTarget_GATA2.merged_motif_target  used from multiple potentoal matches
+---- DEBUG: Edge presence ----
+In g1: FALSE 
+In g_descendant_sub: FALSE 
+---- DEBUG: Edge presence ----
+In g1: FALSE 
+In g_descendant_sub: FALSE 
+---- DEBUG: After edge insertion ----
+[1] from           to             weight         norm_PPI_score
+[5] corexp_sign    coexp_focal    lty           
+<0 rows> (or 0-length row.names)
+---- DEBUG: After coexpression fill ----
+[1] from           to             weight         norm_PPI_score
+[5] corexp_sign    coexp_focal    lty            coexp_target  
+<0 rows> (or 0-length row.names)
+---- DEBUG: Edge presence ----
+In g1: FALSE 
+In g_descendant_sub: FALSE 
+---- DEBUG: Edge presence ----
+In g1: FALSE 
+In g_descendant_sub: FALSE 
+---- DEBUG: After edge insertion ----
+[1] from           to             weight         norm_PPI_score
+[5] corexp_sign    coexp_focal    lty           
+<0 rows> (or 0-length row.names)
+---- DEBUG: After coexpression fill ----
+[1] from           to             weight         norm_PPI_score
+[5] corexp_sign    coexp_focal    lty            coexp_target  
+<0 rows> (or 0-length row.names)
+---- DEBUG: Edge presence ----
+In g1: FALSE 
+In g_descendant_sub: FALSE 
+---- DEBUG: Edge presence ----
+In g1: FALSE 
+In g_descendant_sub: FALSE 
+---- DEBUG: After edge insertion ----
+[1] from           to             weight         norm_PPI_score
+[5] corexp_sign    coexp_focal    lty           
+<0 rows> (or 0-length row.names)
+---- DEBUG: After coexpression fill ----
+[1] from           to             weight         norm_PPI_score
+[5] corexp_sign    coexp_focal    lty            coexp_target  
+<0 rows> (or 0-length row.names)
+[1] "PPI_graph_BHLHE41_GRN_prediction_CTS_4_CF_final.rds"
+[2] "PPI_graph_GATA1_GRN_prediction_CTS_4_CF_final.rds"  
+[3] "PPI_graph_GATA2_GRN_prediction_CTS_4_CF_final.rds"  
+[4] "PPI_graph_IKZF2_GRN_prediction_CTS_4_CF_final.rds"  

@@ -21,7 +21,6 @@ CF_cluster <- "18"
 CMES_cluster <- "4"
 CTS_ID <- "8"
 seed_TF <- c("NR2F1", "IRX5", "ALX1")
-rebuild_mat <- TRUE
 heatmap_coding_target_only <- TRUE
 ########## END OF USER INPUT ##########
 CTS_name <- paste0("CTS_", CTS_ID)
@@ -342,7 +341,7 @@ lengths(CTS)
 ## load DEGs refer to 3.5_Filter_Plot_Marker_diffBar.R
 # Create a new environment
 # load(paste0(inputDir, "2024_3kHVG/DEG.wc_padj0.01_score40.RData"), envir = new_object)  # Load .RData into this environment
-DEG <- readRDS(paste0(db_specifc_input_path, "DEG_perState_min.prop0.25_lfc0.6_FDFR0.05.rds"))
+DEG <- readRDS(paste0(db_specifc_input_path, "DEG_perState_min.prop0.25_lfc0.6_FDFR0.01.rds"))
 lengths(DEG)
 # 1   2   3   4   5   6   9  10  12  14  17  18  19   7  11  15  16  13   8
 # 307 438 414 309 325 515 360 425 343 365 529 457 531 340 443 409 526 404 335

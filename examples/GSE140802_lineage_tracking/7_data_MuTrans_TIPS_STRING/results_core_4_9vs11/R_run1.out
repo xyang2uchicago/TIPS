@@ -1,0 +1,15 @@
+df = matrix(1:100, 5, 6)
+df
+length(unique(df[,1])
+)
+unique*(df[,1])
+unique(df[,1])
+df = rbind(df, matrix(1:100, 5, 6))
+df
+unique(df[,1])
+table(df[,1], df[4])
+table(df[,1], df[,4])
+heatmap(table(df[,1], df[,4]))
+q()
+source("F:/projects/TIPS/source/GSE140802_lineage_tracking/7_data_MuTrans_TIPS_STRING/code_core_1_5vs7/run_TIPS_core.R")
+source("F:/projects/TIPS/source/GSE140802_lineage_tracking/7_data_MuTrans_TIPS_STRING/code_core_4_9vs11/run_TIPS_core.R")

@@ -13,7 +13,6 @@ CF_cluster <- "extraembryonicMesoderm"
 CMES_cluster <- "mixedMesoderm.a"
 CTS_ID <- "cardiac.a"
 seed_TF <- c("GATA4", "TBX5", "MSX2")
-rebuild_mat <- TRUE
 heatmap_coding_target_only <- TRUE
 ########## END OF USER INPUT ##########
 CTS_name <- paste0("CTS_", CTS_ID)
@@ -307,7 +306,7 @@ lengths(CTS)
 ## load DEGs refer to 3.5_Filter_Plot_Marker_diffBar.R
 # Create a new environment
 # load(paste0(inputDir, "2024_3kHVG/DEG.wc_padj0.01_score40.RData"), envir = new_object)  # Load .RData into this environment
-DEG <- readRDS(paste0(db_specifc_input_path, "DEG_perState_min.prop0.25_lfc0.6_FDFR0.05.rds"))
+DEG <- readRDS(paste0(db_specifc_input_path, "DEG_perState_min.prop0.25_lfc0.6_FDFR0.01.rds"))
 names(DEG)
 #  [1] "blood"                  "cardiac.b"              "cardiac.c"
 #  [4] "endothelial.a"          "endothelial.c"          "endothelial.d"

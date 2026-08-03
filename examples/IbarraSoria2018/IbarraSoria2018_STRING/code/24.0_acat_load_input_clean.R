@@ -271,7 +271,7 @@ lengths(CTS)
 ########################################################
 ##  input 3 -- data-driven --- DEGs
 ## wilcox test (human iPSC) / t-test (mouse); refer to 3.5_Filter_Plot_Marker_diffBar.R
-DEG = readRDS(paste0(db_specifc_input_path, "DEG_perState_min.prop0.25_lfc0.6_FDFR0.05.rds"))
+DEG = readRDS(paste0(db_specifc_input_path, "DEG_perState_min.prop0.25_lfc0.6_FDFR0.01.rds"))
 names(DEG)
 #  [1] "blood"                  "cardiac.b"              "cardiac.c"              "endothelial.a"         
 #  [5] "endothelial.c"          "endothelial.d"          "extraembryonicMesoderm" "mesodermProgenitors"   
