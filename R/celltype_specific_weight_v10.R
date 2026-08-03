@@ -339,6 +339,15 @@ calculate_network_specificity <- function(sce,
                                           min_n_Vg = 5,
                                           min_n_Eg = 10,
                                           verbose = FALSE) {
+    # Rename 'strand' in mcols(rowRanges(sce)) to avoid collision with GRanges reserved slot
+    if (!is.null(rowRanges(sce)) && ncol(mcols(rowRanges(sce))) > 0) {
+        mc <- mcols(rowRanges(sce))
+        if ('strand' %in% colnames(mc)) {
+            colnames(mc)[colnames(mc) == 'strand'] <- 'gene_strand'
+            mcols(rowRanges(sce)) <- mc
+        }
+    }
+
     # Get all cluster IDs present in the SCE
     all_clusters <- unique(sce[[celltype_col]])
     cat("Available clusters in SCE:", paste(all_clusters, collapse = ", "), "\n")

@@ -1,0 +1,47 @@
+geneSet	motif	NES	AUC	TF_highConf	TF_lowConf	nEnrGenes	rankAtMax	enrichedGenes
+endothelial.b	taipale__IRF7_DBD_RAANCGAAAWTCGNTTY_repr	5.84	0.18	IRF7 (directAnnotation). 		8	947	CDH5;COL13A1;FEV;FXYD5;IFITM3;RHOJ;TAL1;TEK
+endothelial.b	metacluster_82.7	5.69	0.176	BARHL1; ZSCAN29 (directAnnotation). 	BARHL2 (inferredBy_MotifSimilarity). 	8	930	DUSP4;FAM89A;GATA2;GNGT2;IGF1;NPR1;SOX17;TAL1
+endothelial.b	metacluster_155.3	5.37	0.168	PLAG1 (directAnnotation). PLAG1 (inferredBy_Orthology). 		7	804	DUSP4;FAM89A;GCC2;GNGT2;ICAM2;LHFP;SOX17
+endothelial.b	metacluster_155.29	4.66	0.15	ZNF2 (directAnnotation). ZNF2 (inferredBy_Orthology). 		4	166	EBF1;ETV2;GAB1;GIMAP1
+endothelial.b	transfac_pro__M06924	4.64	0.149	ZNF236 (directAnnotation). 		11	2159	CDH5;DUSP4;ETV2;FAM89A;FEV;GAB1;GATA2;ICAM2;LHFP;NPR1;NRP2
+endothelial.b	transfac_pro__M05709	4.64	0.149	ZNF136 (directAnnotation). 		8	1228	C1QL2;CD34;FXYD5;GAB1;GATA2;HHEX;NPR1;NRP2
+endothelial.b	transfac_pro__M06747	4.63	0.149	ZNF225 (directAnnotation). 		7	1129	CDH5;COL13A1;DUSP4;EBF1;FEV;RHOJ;SOX17
+endothelial.b	hdpi__TCF3	4.41	0.143	TCF3 (directAnnotation). 		4	267	DUSP4;EBF1;FAM89A;NRP2
+endothelial.b	transfac_pro__M05609	4.2	0.138	SALL3 (directAnnotation). 		11	2863	CD34;EBF1;FAM89A;FEV;GAB1;ICAM2;IGF1;LHFP;NRP2;RHOJ;TEK
+endothelial.b	tfdimers__MD00400	3.92	0.131	CDX2; GFI1; GFI1B (directAnnotation). 	CEBPB; CRX; CUX1; DBP; E2F1; EP300; FOS; FOXA1; FOXA2; FOXA3; GATA1; GATA2; GATA3; GATA4; GATA5; GATA6; HOXB13; IKZF1; ISL1; NKX2-1; NKX3-2; NKX6-2; OTX1; OTX2; PAX4; PAX7; PDX1; PITX3; POU5F1; RAX; SMAD1; STAT6; TAF6; TAL1; TBP; TCF7L2; YY1 (inferredBy_MotifSimilarity). 	5	568	DUSP4;FAM89A;FXYD5;GATA2;IFITM3
+endothelial.b	transfac_pro__M06078	3.91	0.13	ZNF878 (directAnnotation). 		9	2031	CDH5;COL13A1;DUSP4;GATA2;GCC2;NRP2;RHOJ;SOX17;TAL1
+endothelial.b	taipale_tf_pairs__TEAD4_ONECUT2_RCATTCCNNATCGAYN_CAP_repr	3.84	0.129	ONECUT2; TEAD4 (directAnnotation). 		10	2240	C1QL2;CD40;FAM89A;GIMAP1;ICAM2;IGF1;LHFP;MAGEH1;NRP2;SOX17
+endothelial.b	transfac_pro__M06721	3.66	0.124	ZKSCAN7 (directAnnotation). 		11	2240	ABI3;C1QL2;CD40;COL13A1;DUSP4;EBF1;GCC2;GNGT2;HHEX;SOX17;TBC1D22B
+endothelial.b	metacluster_85.7	3.66	0.124	ZSCAN29; ZSCAN29 (directAnnotation). 		9	1439	CD34;DUSP4;FAM89A;GATA2;GNGT2;IGF1;NPR1;SOX17;TAL1
+endothelial.b	metacluster_65.3	3.63	0.123	ZNF45 (directAnnotation). 		6	1129	CDH5;COL13A1;HHEX;NRP2;RHOJ;TEK
+endothelial.b	transfac_pro__M05430	3.55	0.121	RREB1 (directAnnotation). 		4	428	CD34;DUSP4;FAM89A;TEK
+endothelial.b	taipale_tf_pairs__MEIS1_SOX2_TGACAKNNNAACAATGN_CAP_repr	3.51	0.12	MEIS1; SOX2 (directAnnotation). 		8	1561	CDH5;FAM89A;GATA2;HHEX;ICAM2;IFITM3;NRP2;RHOJ
+endothelial.b	taipale_tf_pairs__ETV5_EVX1_RSCGGWAATNNNNNATTAN_CAP_repr	3.5	0.12	ETV5; EVX1 (directAnnotation). 	DLX2; DLX3; ERF; ETV2; ETV7; FLI1; GSC2; HOXA2; HOXB2; PITX1; SOX15 (inferredBy_MotifSimilarity). PDX1; VAX1 (inferredBy_MotifSimilarity_n_Orthology). 	4	374	CD40;COL13A1;GCC2;HHEX
+endothelial.b	taipale_tf_pairs__HOXB2_ETV7_NSCGGAARNNNNNNMATTAN_CAP_repr	3.47	0.119	ETV7; HOXB2 (directAnnotation). 	DLX2; DLX3; ELF3; ELF5; ELK4; ETV2; ETV5; FLI1; GABPA; GABPB1; SOX15 (inferredBy_MotifSimilarity). ELF1; ELK1 (inferredBy_MotifSimilarity_n_Orthology). 	5	738	EBF1;GATA2;ICAM2;IGF1;NRP2
+endothelial.b	tfdimers__MD00547	3.45	0.119	FOXM1; TFAP2A (directAnnotation). 	HAND1; HNF4A; HNF4G; NR2F1; NR2F2; PPARA; TCF3; YY1 (inferredBy_MotifSimilarity). 	4	401	EBF1;IGF1;SOX17;TEK
+endothelial.b	transfac_pro__M06032	3.44	0.118	ZNF727 (directAnnotation). 		4	450	FEV;HHEX;ICAM2;TAL1
+endothelial.b	transfac_public__M00078	3.36	0.116	MECOM; RUNX1 (directAnnotation). 		3	136	CD40;GATA2;GCC2
+endothelial.b	metacluster_117.2	3.32	0.115	GATA3; GATA3; GATA3; GATA5; GATA5; GATA5; GATA5; GATA6; GATA6 (directAnnotation). 	GATA1; GATA1; GATA1; GATA1; GATA2; GATA2; GATA2; GATA2; GATA3; GATA3; GATA3; GATA3; GATA3; GATA3; GATA3; GATA3; GATA4; GATA4; GATA4; GATA5; GATA5; GATA5; GATA5; GATA5; GATA5; GATA5; GATA6; GATA6; GATA6; GATA6; GATA6; GATA6; GATA6; GATA6; GATA6; PAX4; YY1 (inferredBy_MotifSimilarity). 	4	309	CD40;GATA2;NRP2;TAL1
+endothelial.b	metacluster_122.17	3.31	0.115	IRF6 (directAnnotation). 		4	374	FAM89A;GAB1;NPR1;NRP2
+endothelial.b	transfac_pro__M05539	3.31	0.115	OSR2 (inferredBy_Orthology). 		13	4736	CD34;CDH5;COL13A1;DUSP4;EBF1;FAM89A;FEV;GAB1;GCC2;GIMAP1;HHEX;IGF1;SOX17
+endothelial.b	kznf__ZNF561_Imbeault2017_OM_MEME	3.3	0.115	ZNF561 (directAnnotation). 		15	4977	CD34;CD40;CDH5;COL13A1;DUSP4;FEV;GAB1;GATA2;GIMAP1;IGF1;LHFP;MAGEH1;NRP2;RHOJ;SOX17
+endothelial.b	metacluster_160.18	3.3	0.115	IRF6 (directAnnotation). 		4	267	FAM89A;GAB1;NPR1;NRP2
+endothelial.b	hocomoco__ZN652_HUMAN.H11MO.0.D	3.27	0.114	ZNF652 (directAnnotation). 		4	485	FAM89A;GATA2;IFITM3;TAL1
+endothelial.b	tfdimers__MD00516	3.25	0.113	SOX10 (directAnnotation). 	CDX2; CEBPB; CRX; DBX2; ETS1; FOXG1; FOXO1; HLTF; HMGA1; HMGA2; HOXA10; HOXA13; IKZF2; IRF8; MYB; NKX3-2; NKX6-2; PAX4; PBX1; PDX1; POU5F1; SMAD1; SRY; TAF6; TBP; YY1; ZNF217 (inferredBy_MotifSimilarity). 	10	3485	C1QL2;CD40;CDH5;DUSP4;EBF1;GATA2;IFITM3;IGF1;SOX17;TAL1
+endothelial.b	tfdimers__MD00575	3.24	0.113	HMGA1; HMGA2; SOX17 (directAnnotation). 	ELF1; ELF2; ELF4; ELF5; ELK1; ELK3; ELK4; ERG; ETS1; ETS2; ETV4; ETV6; ETV7; FLI1; GABPA; GABPB1; NFATC1; SOX4; SPI1; SPIB; SRY; YY1 (inferredBy_MotifSimilarity). SOX18 (inferredBy_MotifSimilarity_n_Orthology). 	5	655	CDH5;HHEX;IFITM3;NPR1;NRP2
+endothelial.b	transfac_pro__M04814	3.21	0.113	RELA (directAnnotation). 		5	655	FEV;GAB1;GATA2;NRP2;RHOJ
+endothelial.b	transfac_pro__M06182	3.2	0.112	ZNF132 (directAnnotation). 		5	875	CD40;DUSP4;EBF1;IGF1;RHOJ
+endothelial.b	taipale_tf_pairs__ETV2_GSC2_RSCGGAANNNNNGGATTA_CAP_repr	3.2	0.112	ETV2; GSC2 (directAnnotation). 	DLX2; DLX3; EHF; ELF1; ELF2; ELF3; ELF4; ELK1; ELK3; ELK4; ERF; ERG; ETS1; ETS2; ETV1; ETV3; ETV4; ETV5; ETV7; EVX1; FEV; FLI1; GABPA; HOXA2; HOXB2; ONECUT2; PITX1; SOX15; SPDEF (inferredBy_MotifSimilarity). ELF5 (inferredBy_MotifSimilarity_n_Orthology). 	6	1281	FXYD5;GCC2;HHEX;IGF1;RHOJ;TAL1
+endothelial.b	transfac_pro__M07392	3.19	0.112	PITX3 (directAnnotation). 		3	267	ICAM2;IGF1;TAL1
+endothelial.b	metacluster_150.7	3.19	0.112	UNCX; VSX1 (directAnnotation). 	ALX3; ARX; ARX; EMX2; EN1; EN1; HESX1; HOXD1; PDX1; PHOX2A; RAX; UNCX; VAX2; VSX1; VSX2 (inferredBy_MotifSimilarity). DLX2; NKX2-6 (inferredBy_MotifSimilarity_n_Orthology). 	6	738	DUSP4;HHEX;IFITM3;IGF1;NRP2;TAL1
+endothelial.b	hdpi__TSNAX	3.18	0.112	TSNAX (directAnnotation). 		5	741	DUSP4;EBF1;GAB1;GATA2;NRP2
+endothelial.b	taipale_tf_pairs__HOXD12_EOMES_NNNACGANNNNNNTCGTNNN_CAP_repr	3.17	0.111	EOMES; HOXD12 (directAnnotation). 		4	374	CDH5;GATA2;NPR1;RHOJ
+endothelial.b	metacluster_27.7	3.14	0.111	ZNF136 (directAnnotation). 		2	64	GIMAP1;NPR1
+endothelial.b	kznf__ZNF33B_Imbeault2017_RP_RCADE	3.11	0.11	ZNF33B (directAnnotation). 		6	1129	EBF1;GATA2;IFITM3;IGF1;LHFP;NRP2
+endothelial.b	tfdimers__MD00444	3.11	0.11	SIRT6; TFAP2C (directAnnotation). 	DBP; ETS1; GATA1; GATA2; GATA3; GATA4; GATA5; GATA6; GTF2IRD1; HOXA13; MZF1; RARA; RARB; RARG; RXRA; RXRB; RXRG; SRY; THRA; THRB (inferredBy_MotifSimilarity). 	6	1439	DUSP4;GATA2;GCC2;IFITM3;LHFP;NRP2
+endothelial.b	metacluster_5.2	3.09	0.109	ZNF564 (directAnnotation). 		4	428	CD34;COL13A1;NPR1;SOX17
+endothelial.b	transfac_pro__M06284	3.09	0.109	ZNF74 (directAnnotation). 		5	917	CDH5;GAB1;IGF1;LHFP;TBC1D22B
+endothelial.b	transfac_pro__M02269	3.05	0.108	FEV (directAnnotation). 	FLI1 (inferredBy_MotifSimilarity). 	17	4977	ABI3;C1QL2;CD34;CD40;CDH5;DUSP4;EBF1;FAM89A;FEV;FXYD5;HHEX;ICAM2;NRP2;RHOJ;SOX17;TAL1;TBC1D22B
+endothelial.b	tfdimers__MD00001	3.04	0.108	PURA; YY2 (directAnnotation). 	ASCL1; ATF1; ATF2; ATF3; ATF4; ATF7; BHLHE40; BHLHE41; CHURC1; CREB1; CREM; CUX1; ETS1; GATA1; GATA2; GATA3; GATA4; GATA5; GATA6; HAND1; HAND2; HNF4A; HNF4G; HOXA13; ING4; MAFA; MAX; MEIS1; MITF; MXD1; MXD3; MXD4; MXI1; MYB; MYC; MYCN; MYF5; MYF6; MYOD1; MYOG; MZF1; NEUROD1; NEUROG2; NHLH1; NR2F1; NR2F2; NR3C1; PBX1; PGR; PPARA; RFX1; RFX2; RFX3; RFX4; RFX5; RFXANK; RFXAP; RUNX3; SMAD3; SREBF1; SREBF2; STAT1; STAT6; TAL1; TAL2; TCF12; TCF3; TCF4; TFCP2; TFE3; TFEB; USF1; USF2; WT1; YY1; ZBTB14; ZFP42; ZNF354C (inferredBy_MotifSimilarity). ATOH1; MSGN1; NEUROD2 (inferredBy_MotifSimilarity_n_Orthology). 	4	465	CDH5;EBF1;ETV2;GATA2
+endothelial.b	transfac_pro__M06363	3.04	0.108	ZNF730 (directAnnotation). 		4	340	CD40;CDH5;FAM89A;GATA2
+endothelial.b	transfac_pro__M06519	3.04	0.108	ZNF397 (directAnnotation). 		3	96	CD34;CD40;CDH5

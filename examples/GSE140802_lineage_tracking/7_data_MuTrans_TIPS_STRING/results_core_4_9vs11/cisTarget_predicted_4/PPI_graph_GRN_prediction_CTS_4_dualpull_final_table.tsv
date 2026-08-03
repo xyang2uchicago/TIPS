@@ -1,0 +1,12 @@
+linkage	from	to	w1	w2	delta	abs_delta	direction	status	rank	TF_highConf	motif	NES
+CF	BHLHE41	PCYT1B	0.104533596699669	-0.0876928963945558	-0.192226493094225	0.192226493094225	decrease	changed	1	Gata1; Gata2; Gata3; Gata4; Gata5; Gata6; Smad4 (inferredBy_Orthology). 	tfdimers__MD00046	4.82
+CF	BHLHE41	COL1A2	0.00906725862237612	0.131745200752188	0.122677942129812	0.122677942129812	increase	changed	2	Gata1; Gata2; Gata3; Gata4; Gata5; Gata6; Smad4 (inferredBy_Orthology). 	tfdimers__MD00046	4.82
+CF	BHLHE41	SPTA1	-0.0370325010221873	0.0334291237208425	0.0704616247430298	0.0704616247430298	increase	changed	3	Gata1; Gata2; Gata3; Gata4; Gata5; Gata6; Smad4 (inferredBy_Orthology). 	tfdimers__MD00046	4.82
+CF	COL1A2	GATA1	0.207048815118081	0.0450459153561569	-0.162002899761924	0.162002899761924	decrease	changed	1	Gata1; Gata2; Gata3; Gata4; Gata5; Gata6; Smad4 (inferredBy_Orthology). 	tfdimers__MD00046	4.82
+CF	GATA1	SPTA1	0.125339642650257	0.0215288512206806	-0.103810791429576	0.103810791429576	decrease	changed	2	Gata1; Gata2; Gata3; Gata4; Gata5; Gata6; Smad4 (inferredBy_Orthology). 	tfdimers__MD00046	4.82
+CF	GATA1	HBB-BS	0.0528708044691392	0.00496415436312033	-0.0479066501060188	0.0479066501060188	decrease	changed	3	Gata1; Gata2; Gata3; Gata4; Gata5; Gata6; Smad4 (inferredBy_Orthology). 	tfdimers__MD00046	4.82
+CF	GATA1	PCYT1B	0.22825921591642	0.18131753683759	-0.0469416790788301	0.0469416790788301	decrease	changed	4	Gata1; Gata2; Gata3; Gata4; Gata5; Gata6; Smad4 (inferredBy_Orthology). 	tfdimers__MD00046	4.82
+CF	GATA2	HBB-BS	-0.351108930662652	0.104607962765128	0.45571689342778	0.45571689342778	increase	changed	1	Gata1; Gata2; Gata3; Gata4; Gata5; Gata6; Smad4 (inferredBy_Orthology). 	tfdimers__MD00046	4.82
+CF	COL1A2	GATA2	-0.194411063534943	0.242484179780804	0.436895243315747	0.436895243315747	increase	changed	2	Gata1; Gata2; Gata3; Gata4; Gata5; Gata6; Smad4 (inferredBy_Orthology). 	tfdimers__MD00046	4.82
+CF	GATA2	SPTA1	-0.246080587150844	0.136174749320341	0.382255336471185	0.382255336471185	increase	changed	3	Gata1; Gata2; Gata3; Gata4; Gata5; Gata6; Smad4 (inferredBy_Orthology). 	tfdimers__MD00046	4.82
+CF	GATA2	PCYT1B	-0.0827656372803187	0.0954132020794175	0.178178839359736	0.178178839359736	increase	changed	4	Gata1; Gata2; Gata3; Gata4; Gata5; Gata6; Smad4 (inferredBy_Orthology). 	tfdimers__MD00046	4.82
