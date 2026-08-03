@@ -1,6 +1,7 @@
 .DS_Store
 **/.DS_Store
 **/hg38_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather
+**/mm10_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather
 **/PPIN/human_annotated_PPIs.txt.gz
 .claude/
 examples/GSE116893/data/malignant_leiden.rds
