@@ -1,0 +1,672 @@
+library(EnrichedHeatmap)
+library(rtracklayer)
+library(GenomicRanges)
+library(ggplot2)
+library(dplyr)
+library(purrr)
+library(SingleCellExperiment)
+
+########## BEGINNING OF USER INPUT ##########
+
+source(here::here("examples", "config.R"))
+wd <- tips_path("examples", "cardiac", "GSE87038", "GSE87038_STRING/")
+dir.create(paste0(wd, "results_mouse_8/GSE181346_heart_scATAC/"), showWarnings = FALSE, recursive = TRUE)
+setwd(paste0(wd, "results_mouse_8/GSE181346_heart_scATAC/"))
+
+## Paths (derived from wd; only change if your directory structure differs)
+input_path             <- "../../../data/"   # relative to setwd() location
+db_specifc_result_path <- paste0(wd, "results/")
+db_specifc_input_path  <- paste0(wd, "../data/")
+db_specifc_CTS_path    <- paste0(wd, "../data/")
+shared_path            <- paste0(shared_data_path, "/")
+
+## Dataset: species and cell type cluster identifiers
+species      <- "mouse"   # gene symbols uppercased to match annotation datasets
+celltype_col <- "label"
+CP_cluster   <- "8"       # cardiac progenitor cluster
+CM_cluster   <- "17"      # cardiomyocyte cluster
+CF_cluster   <- "16"      # cardiac fibroblast cluster
+CMES_cluster <- "4"       # Mesp1+ mesoderm cluster
+
+## CTS to analyze
+CTS_ID  <- "8"
+seed_TF <- c("ISL1")
+
+## Analysis flags
+# rebuild_mat               <- TRUE   # TRUE: rebuild annotation matrix; FALSE: load from saved file. Set in other codes
+heatmap_coding_target_only <- TRUE
+
+########## END OF USER INPUT ##########
+
+CTS_name <- paste0("CTS_", CTS_ID)
+
+########################################################
+##  input 1   dataset specific ---
+
+### the gene expression dataset to calculate the delta edge for newly added edges between TF and CTS_target
+load(paste0(db_specifc_input_path, "sce_E8.25_uncorrected.RData"))
+sce #  10938 7240
+names(colData(sce))
+# [1] "cell"             "barcode"          "sample"           "pool"             "stage"
+#  [6] "sequencing.batch" "theiler"          "doub.density"     "doublet"          "cluster"
+# [11] "cluster.sub"      "cluster.stage"    "cluster.theiler"  "stripped"         "celltype"
+# [16] "colour"           "sizeFactor"       "batch"            "label"
+
+########################################################
+##  input 2.1   hg38 coding gene symbols & TF annotations  -- shared ---
+## the v38 gtf was downloaded from on 3/12/2021
+## https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/gencode.v38.annotation.gtf.gz
+
+coding_genes <- readRDS(file = paste0(shared_path, "coding_genes.rds")) %>% unique()
+length(coding_genes) # 19930
+names(coding_genes) <- NULL
+head(coding_genes, 3)
+# [1]  "OR4F5"  "OR4F29" "OR4F16"
+
+## get the TF database
+library(dorothea)
+packageVersion("dorothea") # ‘1.22.0’
+# human or mouse
+data(dorothea_hs, package = "dorothea")
+# data(dorothea_mm, package = "dorothea")
+TF_human <- unique(dorothea_hs$tf) # gene symbols
+length(TF_human) # 1333
+
+
+CHD <- readRDS(paste0(shared_path, "CHD_Cilia_Genelist.rds"))
+names(CHD)
+CHD <- CHD$Griffin2023_PCGC_AllCurated
+length(CHD) # 295
+
+########################################################
+##  input 2.2   maps -- shared ---
+maps <- read.delim(file = paste0(shared_path, "readme_filename_map_xy.txt"), sep = "\t", header = TRUE, comment.char = "#", stringsAsFactors = FALSE)
+dim(maps) # [1] 44  5
+head(maps)
+#           file_name                      identity NA. identity_simple category
+# 1               all                    pseudobulk  NA      pseudobulk
+# 2 hft_allFibroblast pesudobulk_cardiac_fibroblast  NA   pesudobulk_CF
+# 3        hft_allSMC      pseudobulk_smooth_muscle  NA  pseudobulk_SMC
+# 4      hft_arteries                      arteries  NA        arteries
+# 5        hft_atrial         atrial_cardiomyocytes  NA       atrial_CM  PCW8_CM
+# 6     hft_capillary                     capillary  NA       capillary
+maps <- maps[grepl("hft_", maps$file_name), ]
+dim(maps) # [1] 21  5
+unique(maps$identity)
+#  [1] "pesudobulk_cardiac_fibroblast"  "pseudobulk_smooth_muscle"
+#  [3] "arteries"                       "atrial_cardiomyocytes"
+#  [5] "capillary"                      "pre_Cardiac_fibroblast"
+#  [7] "maturecardiac_fibroblast"       "cardiac_fibroblast_progenitors"
+#  [9] "endocardium"                    "epicardium"
+# [11] "lymphatic_endothelial"          "early_cardiomyocyte"
+# [13] "neural_crest"                   "pericytes"
+# [15] "pre_smooth_muscle"              "smooth_muscle"
+# [17] "Outflow_tract"                  "Fibroblast_like_1"
+# [19] "Fibroblast_like_2"              "Venal_endothelial"
+# [21] "Ventricular_cardiomyocytes"
+table(maps$category)
+#                           early_CP_pool            PCW19_CF PCW19_CF&PCW198_SMC
+#                  8                   3                   1                   1
+#            PCW19_CM           PCW19_SMF             PCW6_CM             PCW8_CF
+#                   1                   2                   1                   2
+#             PCW8_CM            PCW8_SMF
+#                   1                   1
+
+########################################################
+##  input 2.3 published gene openness score -- shared ---
+## gene-level Marker genes (gene score) for fetal heart scATAC-seq clusters using differential test, published by authors
+# the table S3
+library(openxlsx)
+annotation_vitro <- read.xlsx(xlsxFile = paste0(input_path, "Ameen2022cell-supplement-10.xlsx"), sheet = 4)
+
+dim(annotation_vitro) # [1] 5262    8
+head(annotation_vitro)
+#  Chromosomes     start       end Gene.name   Log2FC      FDR  MeanDiff celltype
+# 1        chr3  32818018  32897826    TRIM71 1.646251 3.25e-67 1.1276613     iPSC
+# 2        chr4  92303622  93774556     GRID2 1.202665 1.59e-62 1.6245711     iPSC
+# 3        chr4  92277075  92268767 LNCPRESS2 2.492502 1.30e-61 0.6258600     iPSC
+# 4        chr3 109337572 109326141     DPPA4 2.435096 4.68e-58 0.5687305     iPSC
+# 5        chr3  54639857  54632122      ESRG 3.116906 5.13e-58 0.6729837     iPSC
+# 6        chr5 147870682 147882191   SCGB3A2 2.272151 2.51e-57 0.6195138     iPSC
+table(annotation_vitro$celltype) # No CFP accessibility data !!!!
+#     i-CF      i-CM      i-CP      i-EC     i-EPC     i-Mes i-Mes-End    i-MyoF     i-pCM     i-SMC      iPSC
+#       351       511       468       549       205       677       425        95       371       179       769
+#  iPSC-Mes
+#       662
+
+Ameen_annotation_list <- list()
+for (i in unique(annotation_vitro$celltype)) {
+    Ameen_annotation_list[[i]] <- annotation_vitro$Gene.name[which(annotation_vitro$celltype == i)]
+}
+lengths(Ameen_annotation_list)
+#     iPSC  iPSC-Mes     i-Mes      i-CP    i-MyoF i-Mes-End     i-pCM      i-CM      i-EC     i-EPC     i-SMC
+#       769       662       677       468        95       425       371       511       549       205       179
+#      i-CF
+#       351
+
+annotation_fetal <- read.xlsx(xlsxFile = paste0(input_path, "Ameen2022cell_Table1_sheet3_markergene_Laksshman2026update.xlsx"), sheet = 1)
+dim(annotation_fetal) # [1] 3536    9
+head(annotation_fetal)
+# Chromosomes     start       end strand     name   Log2FC          FDR  MeanDiff Cluster
+# 1       chr14  23376808  23379772      1    CMTM5 3.754208 1.021032e-34 3.3962760     aCM
+# 2        chr1  11841017  11848079      1 NPPA-AS1 2.902697 6.194079e-30 2.2110155     aCM
+# 3       chr14  23408277  23381990      2     MYH6 2.116923 1.484557e-23 1.1611431     aCM
+# 4       chr10  86668449  86736068      1     LDB3 1.530406 4.418635e-22 1.6215322     aCM
+# 5       chr15  73369264  73319859      2     HCN4 1.619006 6.473660e-22 0.9398254     aCM
+# 6        chr2 178830802 178525989      2      TTN 1.202148 1.148231e-20 1.2172846     aCM
+colnames(annotation_fetal)[9] <- "Cluster"
+subset(annotation_fetal, name == "PRRX1")
+# Chromosomes     start       end strand  name   Log2FC          FDR  MeanDiff Cluster
+# 1814        chr1 170662728 170739419      1 PRRX1 1.626475 9.563515e-16 0.7403641     FB1
+# 2141        chr1 170662728 170739419      1 PRRX1 1.461361 6.203403e-10 0.5604366     FB2
+subset(annotation_fetal, name == "ISL1")
+# Chromosomes    start      end strand name   Log2FC          FDR  MeanDiff Cluster
+# 1918        chr5 51383391 51394738      1 ISL1 1.119516 1.207509e-05 0.3203454     FB1
+# 2482        chr5 51383391 51394738      1 ISL1 1.159836 3.994425e-06 0.3741227     OFT
+
+
+table(annotation_fetal$Cluster) # No CFP accessibility data !!!!
+# aCM    aEC    Cap     CF    CFP    eCM  Endo1  Endo2    EPC    FB1    FB2    lEC     NC
+# 262    221    217    141    206    263    399     22     81    324     59     83    143
+# OFT     PC  preCF preSMC    vCM    vEC   vSMC
+# 262     52      2     75    476    176     72
+
+## rename Endo2 & Endo1, Endo1 to Endo, becasue we only have one Endo cluster in our data
+# annotation_fetal$Cluster[which(annotation_fetal$Cluster=="Endo2")] = 'Endo'
+# annotation_fetal$Cluster[which(annotation_fetal$Cluster=="Endo1")] = 'Endo'
+annotation_fetal$Cluster[which(annotation_fetal$Cluster == "vSMC")] <- "SMC"
+
+short_cluster_names <- unique(annotation_fetal$Cluster)
+length(unique(annotation_fetal$name)) # [1]  2823
+
+for (i in short_cluster_names) {
+    Ameen_annotation_list[[i]] <- annotation_fetal$name[which(annotation_fetal$Cluster == i)]
+}
+lengths(Ameen_annotation_list)
+#      iPSC  iPSC-Mes     i-Mes      i-CP    i-MyoF i-Mes-End     i-pCM      i-CM
+#       769       662       677       468        95       425       371       511
+#      i-EC     i-EPC     i-SMC      i-CF       aCM       aEC       Cap        CF
+#       549       205       179       351       262       221       217       141
+#       CFP       eCM     Endo1     Endo2       EPC       FB1       FB2       lEC
+#       206       263       399        22        81       324        59        83
+#        NC       OFT        PC     preCF    preSMC       vCM       vEC       SMC
+#       143       262        52         2        75       476       176        72
+
+
+names(Ameen_annotation_list)
+
+unique(maps$identity_simple)
+#  [1] "pesudobulk_CF"         "pseudobulk_SMC"        "arteries"
+#  [4] "atrial_CM"             "capillary"             "pre_CF"
+#  [7] "matureCF"              "CF_progenitors"        "endocardium"
+# [10] "epicardium"            "lymphatic_endothelial" "early_CM"
+# [13] "neural_crest"          "pericytes"             "pre_SMC"
+# [16] "SMC"                   "Outflow_tract"         "Fibroblast_like_1"
+# [19] "Fibroblast_like_2"     "Venal_endothelial"     "Ventricular_CM"
+maps$cluster_abb <- maps$identity_simple
+maps$cluster_abb[which(maps$identity_simple == "arteries")] <- "aEC"
+maps$cluster_abb[which(maps$identity_simple == "atrial_CM")] <- "aCM"
+maps$cluster_abb[which(maps$identity_simple == "capillary")] <- "Cap"
+maps$cluster_abb[which(maps$identity_simple == "pre_CF")] <- "preCF"
+maps$cluster_abb[which(maps$identity_simple == "matureCF")] <- "CF"
+maps$cluster_abb[which(maps$identity_simple == "CF_progenitors")] <- "CFP"
+maps$cluster_abb[which(maps$identity_simple == "endocardium")] <- "Endo"
+maps$cluster_abb[which(maps$identity_simple == "epicardium")] <- "EPC"
+maps$cluster_abb[which(maps$identity_simple == "lymphatic_endothelial")] <- "lEC"
+maps$cluster_abb[which(maps$identity_simple == "early_CM")] <- "eCM"
+maps$cluster_abb[which(maps$identity_simple == "neural_crest")] <- "NC"
+maps$cluster_abb[which(maps$identity_simple == "pericytes")] <- "PC"
+maps$cluster_abb[which(maps$identity_simple == "pre_SMC")] <- "preSMC"
+maps$cluster_abb[which(maps$identity_simple == "SMC")] <- "SMC"
+maps$cluster_abb[which(maps$identity_simple == "Outflow_tract")] <- "OFT"
+maps$cluster_abb[which(maps$identity_simple == "Fibroblast_like_1")] <- "FB1"
+maps$cluster_abb[which(maps$identity_simple == "Fibroblast_like_2")] <- "FB2"
+maps$cluster_abb[which(maps$identity_simple == "Venal_endothelial")] <- "vEC"
+maps$cluster_abb[which(maps$identity_simple == "Ventricular_CM")] <- "vCM"
+
+
+setdiff(maps$cluster_abb, names(Ameen_annotation_list)) # [1] "pesudobulk_CF"  "pseudobulk_SMC" "Endo"
+names(Ameen_annotation_list)
+# [1] "iPSC"      "iPSC-Mes"  "i-Mes"     "i-CP"      "i-MyoF"    "i-Mes-End" "i-pCM"     "i-CM"
+# [9] "i-EC"      "i-EPC"     "i-SMC"     "i-CF"      "aCM"       "aEC"       "Cap"       "CF"
+# [17] "CFP"       "eCM"       "Endo1"     "Endo2"     "EPC"       "FB1"       "FB2"       "lEC"
+# [25] "NC"        "OFT"       "PC"        "preCF"     "preSMC"    "vCM"       "vEC"       "SMC"
+
+colnames(annotation_vitro)[4] <- "name"
+colnames(annotation_vitro)[8] <- "Cluster"
+
+tmp <- intersect(colnames(annotation_vitro), colnames(annotation_fetal))
+ATAC_anno_df <- rbind(as.data.frame(annotation_vitro[, tmp]), as.data.frame(annotation_fetal[, tmp]))
+dim(ATAC_anno_df) # [1] 8798    8
+head(ATAC_anno_df)
+#   Chromosomes     start       end      name   Log2FC      FDR  MeanDiff Cluster
+# 1        chr3  32818018  32897826    TRIM71 1.646251 3.25e-67 1.1276613    iPSC
+# 2        chr4  92303622  93774556     GRID2 1.202665 1.59e-62 1.6245711    iPSC
+# 3        chr4  92277075  92268767 LNCPRESS2 2.492502 1.30e-61 0.6258600    iPSC
+# 4        chr3 109337572 109326141     DPPA4 2.435096 4.68e-58 0.5687305    iPSC
+# 5        chr3  54639857  54632122      ESRG 3.116906 5.13e-58 0.6729837    iPSC
+# 6        chr5 147870682 147882191   SCGB3A2 2.272151 2.51e-57 0.6195138    iPSC
+rm(annotation_vitro, annotation_fetal)
+
+###############################################################
+## BioTIP CTS identification (run previously in 23_atac_0ver_GaoChIP_ATAC_CTS.R — NOT repeat)
+## CTSs were required to contain at least 30 genes (n >= 30); significance by delta-Ic with p < 0.05
+## (https://github.com/xyang2uchicago/BioTIP/tree/master/examples/result/gastrulationE8.25_Pijuan-Sala2019/C_SNNGraph_allcells)
+## Additional filter: Ic_shrink must reach its maximum value in the corresponding cluster.
+###############################################################
+load(file = paste0(db_specifc_CTS_path, "BioTIP.res.RData"))
+names(res)
+# [1] "CTS.candidate" "CTS.score"     "Ic.shrink"     "significant"
+class(res$CTS.candidate) # list
+lengths(res$CTS.candidate)
+# 17  7 11 15 14  6 16 13  8 16
+# 47 32 52 67 45 90 40 60 54 79
+
+# Ic_shrink must reach its maximum value in the corresponding cluster, ensuring cluster-specific dominance
+load(paste0(db_specifc_CTS_path, "BioTIP_top0.1FDR0.2_IC_sim.Permutation.RData"))
+names(BioTIP_scores)
+# [1] "17" "7"  "11" "15" "14" "6"  "16" "13" "8"  "16"
+dim(SimResults_g[[1]]) # 19  100
+
+x <- which(duplicated(names(BioTIP_scores)))
+if (length(x) > 0) {
+    if (all(names(BioTIP_scores) == names(res$CTS.candidate))) {
+        ## assign distinct CTS name for cluster 16
+        x <- which(duplicated(names(res$CTS.candidate)))
+        names(res$CTS.candidate)[x] <- paste(names(res$CTS.candidate)[x], "1", sep = ".")
+
+        names(res$CTS.score[x]) <- names(res$CTS.candidate)[x]
+        names(res$Ic.shrink[x]) <- names(res$CTS.candidate)[x]
+        names(res$significant[x]) <- names(res$CTS.candidate)[x]
+
+        names(SimResults_g)[x] <- names(res$CTS.candidate)[x]
+        names(BioTIP_scores)[x] <- names(res$CTS.candidate)[x]
+    } else {
+        cat("pls let names(BioTIP_scores) == names(res$CTS.candidate)")
+    }
+    rm(x)
+}
+lengths(res$CTS.candidate)
+# 17    7   11   15   14    6   16   13    8 16.1
+# 47   32   52   67   45   90   40   60   54   79
+
+(Top_cluster <- lapply(BioTIP_scores, function(x) which.max(x) %>% names()) %>% unlist())
+# 17    7   11   15   14    6   16   13    8 16.1
+# "2"  "7" "11" "15" "12" "10" "16" "10"  "8" "16"
+
+x <- grep(".", names(Top_cluster), fixed = T, value = T)
+if (length(x) > 0) names(Top_cluster)[which(names(Top_cluster) == x)] <- unlist(strsplit(x, split = ".", fixed = T))[1]
+
+CTS <- res$CTS.candidate[which(res$significant == TRUE & Top_cluster == names(Top_cluster))]
+lengths(CTS)
+#    7   11   15   16    8 16.1
+#   32   52   67   40   54   79
+
+
+########################################################
+##  input 3 -- data-driven --- DEGs
+## wilcox test (human iPSC) / t-test (mouse); refer to 3.5_Filter_Plot_Marker_diffBar.R
+DEG <- readRDS(paste0(db_specifc_input_path, "DEG_perState_min.prop0.25_lfc0.6_FDFR0.01.rds"))
+lengths(DEG)
+# 1   2   3   4   5   6   9  10  12  14  17  18  19   7  11  15  16  13   8
+# 307 438 414 309 325 515 360 425 343 365 529 457 531 340 443 409 526 404 335
+head(DEG[["8"]], 4)
+# [1] "Arg1"    "Prrx2"   "Igfbpl1" "Id2"
+class(DEG[[1]]) # [1] "character"
+
+
+########################################################
+##  input 4 -- data-driven --- STRING v12 PPI
+## get the whole string v12 genes
+library(igraph)
+# refer to 11.2.0_weighted_graph_attack_robustness.R
+file <- paste0(db_specifc_result_path, "/PPI_weight/GSE87038_STRING_graph_perState_simplified_combinedweighted.rds")
+graph_list <- readRDS(file)
+
+# ## 2026 correction: C13 is not significant by the filter of maximal Is* at its cluster
+# if ("CTS_13" %in% names(graph_list)) graph_list <- graph_list[-which(names(graph_list) == "CTS_13")]
+names(graph_list)
+# [1] "HiG_1"       "HiG_2"       "HiG_3"       "HiG_4"       "HiG_5"       "HiG_6"
+# [7] "HiG_9"       "HiG_10"      "HiG_12"      "HiG_14"      "HiG_17"      "HiG_18"
+# [13] "HiG_19"      "HiG_7"       "HiG_11"      "HiG_15"      "HiG_16"      "HiG_13"
+# [19] "HiG_8"       "HiGCTS_7"    "HiGCTS_11"   "HiGCTS_15"   "HiGCTS_16"   "HiGCTS_16.1"
+# [25] "HiGCTS_8"    "CTS_7"       "CTS_11"      "CTS_15"      "CTS_16"      "CTS_16.1"
+# [31] "CTS_8"
+
+############## uppercase the mouse symbols to match the gene in the annotation datasets (e.g. TF_human, pseudo scATAC-seq accessibility data)
+
+if (species == "mouse") {
+    for (i in seq_along(graph_list)) V(graph_list[[i]])$name <- toupper(V(graph_list[[i]])$name)
+    for (i in seq_along(DEG)) DEG[[i]] <- toupper(DEG[[i]])
+    for (i in seq_along(CTS)) CTS[[i]] <- toupper(CTS[[i]])
+    rownames(sce) <- toupper(rownames(sce))
+    cat("uppercase the mouse symbols to match the gene in the annotation datasets (e.g. TF_human, pseudo scATAC-seq accessibility data) done\n")
+}
+graph_list[[1]]
+DEG[[1]]
+CTS[[1]]
+
+
+################# create ATAC_anno_df table and save it ####################
+### step 1.2) building the binary annotation matrix
+fileName <- paste0("binary_annot_", CTS_name, "_scATAC_Maven2023_gene_ISL1_v3.tsv")
+
+if (rebuild_mat) {
+    annotation_sub <- subset(ATAC_anno_df, name %in% CTS[[CTS_ID]])
+    length(unique(CTS[[CTS_ID]])) # 54
+    dim(annotation_sub) # [1] 44  8
+    length(unique(annotation_sub$name)) # 24
+    colnames(annotation_sub)
+    # [1] "Chromosomes" "start"       "end"         "name"        "Log2FC"      "FDR"         "MeanDiff"
+    # [8] "Cluster"
+
+    unique(maps$category)
+    # [1] ""                    "PCW8_CM"             "PCW8_CF"
+    # [4] "PCW19_CF"            "early_CP_pool"       "PCW19_CF&PCW198_SMC"
+    # [7] "PCW6_CM"             "PCW19_SMF"           "PCW8_SMF"
+    # [10] "PCW19_CM"
+    subset(maps, category == "early_CP_pool")$cluster_abb
+    # [1] "CFP" "OFT" "FB1"
+    subset(maps, category == "PCW8_CF")$cluster_abb # [1] "preCF" "FB2"
+    ## NOte that
+    ## 1) --- age of CFP and preCF was inconsistent in Fig1 and table S1  -- waiting for response from authors ------------------------
+    ## 2) --- we add PCW6_CM into the pool for flag gene accessibility at CP_pool
+    ## 3) --- we add CFP accessibile gene was missing from Table S3 -- waiting for response from authors ------------------------
+    names(Ameen_annotation_list)
+    # [1] "iPSC"      "iPSC-Mes"  "i-Mes"     "i-CP"      "i-MyoF"    "i-Mes-End" "i-pCM"     "i-CM"
+    # [9] "i-EC"      "i-EPC"     "i-SMC"     "i-CF"      "aCM"       "aEC"       "Cap"       "CF"
+    # [17] "CFP"       "eCM"       "Endo1"     "Endo2"     "EPC"       "FB1"       "FB2"       "lEC"
+    # [25] "NC"        "OFT"       "PC"        "preCF"     "preSMC"    "vCM"       "vEC"       "SMC"
+
+
+    ## here, we annotate the accessibility according to the published main figure 1
+    annotation_sub$PCW6CP_access <- ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c("CFP", "OFT", "FB1", "eCM", "i-CP")]), "1", "0")
+    annotation_sub$PCW8_CM_access <- ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c("aCM", "i-CM")]), "1", "0")
+    annotation_sub$PCW8_CF_access <- ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c("preCF", "FB2", "EPC", "i-CF")]), "1", "0")
+    annotation_sub$PCW8_SMC_access <- ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c("preSMC", "EPC", "i-SMC")]), "1", "0")
+    annotation_sub$PCW19_CM_access <- ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c("vCM")]), "1", "0")
+    annotation_sub$PCW19_CF_access <- ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c("CF", "EPC")]), "1", "0")
+    annotation_sub$PCW19_SMC_access <- ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c("SMC", "EPC")]), "1", "0")
+    # For E8.25 snapshot, cell are to early to show CF accessibility, thus the accessibility of PCW6 CF clusters are included for ‘CF_accessibility’ (FB1, preCF)
+    annotation_sub$PCW6_CF_access <- ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c("CFP", "FB1")]), "1", "0")
+    annotation_sub$PCW6_SMC_access <- ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c("OFT")]), "1", "0")
+    annotation_sub$PCW6_CM_access <- ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c("eCM")]), "1", "0")
+    annotation_sub$iEPC_access <- ifelse(annotation_sub$name %in% unlist(Ameen_annotation_list[c("i-EPC")]), "1", "0")
+
+    tmp <- apply(annotation_sub[, -(1:9)], 2, function(x) sum(as.numeric(x)))
+    which(tmp == 0)
+    # PCW19_CF_access     iEPC_access
+    #          5              10
+
+
+    annotation_sub$CMES_hi <- ifelse(annotation_sub$name %in% DEG[[CMES_cluster]], "1", "0")
+    annotation_sub$CP_hi <- ifelse(annotation_sub$name %in% DEG[[CP_cluster]], "1", "0")
+    annotation_sub$CM_hi <- ifelse(annotation_sub$name %in% DEG[[CM_cluster]], "1", "0")
+    annotation_sub$CF_hi <- ifelse(annotation_sub$name %in% DEG[[CF_cluster]], "1", "0")
+
+    int <- c(
+        # "CMES_hi",
+        "CP_hi", "CM_hi", "CF_hi", "PCW6CP_access",
+        "PCW8_CM_access", "PCW19_CM_access",
+        "PCW8_CF_access", "PCW19_CF_access",
+        "PCW8_SMC_access", "PCW19_SMC_access",
+        "PCW6_CM_access", "PCW6_CF_access", "PCW6_SMC_access", "iEPC_access"
+        # , "Maven2023_gene_PRRX1_up_E"  ,    "Maven2023_gene_PRRX1_up_T"  ,    "Maven2023_gene_PRRX1_up_L"
+        #  , "Maven2023_gene_PRRX1_dn_E"  ,    "Maven2023_gene_PRRX1_dn_T"  ,    "Maven2023_gene_PRRX1_dn_L"
+        #  , "Maven2023_gene_PRRX1_WT_d6CP"
+        #  , "Gao2019_gene_PRRX1_E825E9.bound"
+        #  , "Gao2019_gene_PRRX1.iCPC_CPC.bound"
+    )
+    mat <- as.matrix(sapply(annotation_sub[, int], as.numeric))
+    rownames(mat) <- annotation_sub$name
+    dim(mat) # [1] 44  14
+    length(unique(rownames(mat))) # 24
+
+    ## collapse transcript of the same genes if the same pattern in mat
+    # Sum across transcripts per gene
+    mat <- rowsum(mat, group = rownames(mat))
+    # Convert “>=1 transcript present” back to 0/1
+    mat <- (mat > 0) * 1 # TRUE/FALSE → 1/0
+    dim(mat) # [1] 24 14
+
+    ## add back the missing symbols
+    (missing <- setdiff(CTS[[CTS_ID]], rownames(mat)))
+    # [1] "IGFBPL1"  "OSR1"     "FAM213A"  "TSPAN7"   "CLU"      "GM266"    "IRX1"     "NR2F2"
+    # [9] "PDCD4"    "VEGFC"    "TRABD2B"  "OLFML3"   "SPRY1"    "ELMO1"    "EPHA7"    "PLXNA2"
+    # [17] "CHD3"     "RHOU"     "NRG1"     "RARB"     "EPHA2"    "B3GALNT1" "CDK6"     "FAM110B"
+    # [25] "DACH1"    "NCALD"    "BATF"     "SH3KBP1"  "ROBO2"    "STOX2"
+
+    missing_mat <- matrix(0, nrow = length(missing), ncol = ncol(mat))
+    rownames(missing_mat) <- missing
+    colnames(missing_mat) <- colnames(mat)
+    mat <- rbind(mat, missing_mat)
+    dim(mat) # [1] 54 14
+
+    # table for CTS.CP ==  high/low in CP ; high/low in CM;  high/low in CF;
+    # open in PCW6; open in PCW8 CM; open in PCW19 CM; open in PCW8 CF; open in PCW19 CF
+    mat <- as.data.frame(mat)
+    mat[, paste0("CTS_", CTS_ID)] <- ifelse(rownames(mat) %in% CTS[[CTS_ID]], "1", "0")
+    mat[, "CP_hi"] <- ifelse(rownames(mat) %in% DEG[[CP_cluster]], "1", "0")
+    mat[, "CM_hi"] <- ifelse(rownames(mat) %in% DEG[[CM_cluster]], "1", "0")
+    mat[, "CF_hi"] <- ifelse(rownames(mat) %in% DEG[[CF_cluster]], "1", "0")
+    # mat[, "CMES_hi"] <- ifelse(rownames(mat) %in% DEG[[CMES_cluster]], "1", "0")
+
+
+    ########################################################
+    ##  input 5 -- shared --- published ISL1-CP binding
+    ## Maven2023 ISL1 ChIP-seq: consistent peaks across replicates, annotated to nearest TSS (±1 kb, hg19)
+    ISL1_set <- readRDS(file = paste0(shared_path, "GSE195476_ISL1/ISL1_set.rds"))
+    lengths(ISL1_set)
+    # ISL1_NKO_d6CP    ISL1_WT_d18MNP      ISL1_WT_d6CP    NKX25_NKO_d6CP
+    # 1987              2917              1724               266
+    # NKX25_WT_d6CP         ISL_up_E         ISL_up_T         ISL_up_L
+    # 12141               121               155               946
+    # ISL_dn_E         ISL_dn_T         ISL_dn_L       ISL_up_MNP
+    # 449               242               586               144
+    # ISL_dn_MNP    ISL_DEG_d8CP_E    ISL_DEG_d8CP_L    ISL_DEG_d8CP_T
+    # 422               570              1532               397
+    # ISL_DEG_d18MNP ISL1_targets_CP_E ISL1_targets_CP_T ISL1_targets_CP_L
+    # 566               111               110               208
+    # ISL1_targets_MNP
+    # 119
+    names(ISL1_set) <- paste0("Maven2023_gene_", names(ISL1_set))
+
+    ########################################################
+    ##  input 5 -- shared --- published ISL1-CP binding
+    ## Gao2019 Isl1 chipseq set
+    # ISL1 targets were defined by assigning each ISL1 ChIP-seq peak to the nearest gene TSS, as previously reported.
+    load(paste0(shared_path, "GSE80383_Isl1/ISL1_Mm2Hg.GS_uniqueSymbol_FC1.2_padj0.05.RData"))
+    names(ISL1)
+    #  [1] "Isl1.embryo.bound"         "Isl1.iPSC.bound"           "Isl1KO.E8.75.up"           "Isl1KO.E8.75.dn"
+    #  [5] "Isl1.E8.75.DEG"            "Isl1KO.E10.5RV.OFT.up"     "Isl1KO.E10.5RV.OFT.dn"     "Isl1.E10.5RV.OFT.DEG"
+    #  [9] "Isl1.target"               "Isl1.target.E8.75"         "Isl1.target.E10.5"         "Isl1KO.CP.up"
+    # [13] "Isl1KO.CP.dn"              "Isl1.CP.DEG"               "Isl1.target.CP"            "iPSC.open"
+    # [17] "E8.75.open"                "Isl1.E8.75DE.pooled.bound" "Isl1.E10.5DE.pooled.bound"
+    names(ISL1)[2] <- "Isl1.iCPC_CPC.bound"
+    names(ISL1)[16] <- "iPSC_CPC.open"
+
+
+    mat[, "Maven2023_gene_ISL1_up_E"] <- ifelse(rownames(mat) %in% ISL1_set[["Maven2023_gene_ISL_up_E"]], "1", "0")
+    mat[, "Maven2023_gene_ISL1_up_T"] <- ifelse(rownames(mat) %in% ISL1_set[["Maven2023_gene_ISL_up_T"]], "1", "0")
+    mat[, "Maven2023_gene_ISL1_up_L"] <- ifelse(rownames(mat) %in% ISL1_set[["Maven2023_gene_ISL_up_L"]], "1", "0")
+
+    mat[, "Maven2023_gene_ISL1_dn_E"] <- ifelse(rownames(mat) %in% ISL1_set[["Maven2023_gene_ISL_dn_E"]], "1", "0")
+    mat[, "Maven2023_gene_ISL1_dn_T"] <- ifelse(rownames(mat) %in% ISL1_set[["Maven2023_gene_ISL_dn_T"]], "1", "0")
+    mat[, "Maven2023_gene_ISL1_dn_L"] <- ifelse(rownames(mat) %in% ISL1_set[["Maven2023_gene_ISL_dn_L"]], "1", "0")
+
+    mat[, "Maven2023_gene_ISL1_WT_d6CP"] <- ifelse(rownames(mat) %in% ISL1_set[["Maven2023_gene_ISL1_WT_d6CP"]], "1", "0")
+    mat[, "Gao2019_gene_Isl1_E825E9.bound"] <- ifelse(rownames(mat) %in% ISL1[["Isl1.embryo.bound"]], "1", "0")
+    mat[, "Gao2019_gene_Isl1.iCPC_CPC.bound"] <- ifelse(rownames(mat) %in% ISL1[["Isl1.iCPC_CPC.bound"]], "1", "0")
+
+    dim(mat) # [1] 54 24
+    colnames(mat)
+    # [1] "CP_hi"                            "CM_hi"                            "CF_hi"
+    # [4] "PCW6CP_access"                    "PCW8_CM_access"                   "PCW19_CM_access"
+    # [7] "PCW8_CF_access"                   "PCW19_CF_access"                  "PCW8_SMC_access"
+    # [10] "PCW19_SMC_access"                 "PCW6_CM_access"                   "PCW6_CF_access"
+    # [13] "PCW6_SMC_access"                  "iEPC_access"                      "CTS_8"
+    # [16] "Maven2023_gene_ISL1_up_E"         "Maven2023_gene_ISL1_up_T"         "Maven2023_gene_ISL1_up_L"
+    # [19] "Maven2023_gene_ISL1_dn_E"         "Maven2023_gene_ISL1_dn_T"         "Maven2023_gene_ISL1_dn_L"
+    # [22] "Maven2023_gene_ISL1_WT_d6CP"      "Gao2019_gene_Isl1_E825E9.bound"   "Gao2019_gene_Isl1.iCPC_CPC.bound"
+
+
+    ####################################################
+    ### extract subnetworks and add ISL1-bound links ###
+    ####################################################
+    dim(mat) # [1] 54 24
+
+    ##  step 1) binary annotation
+    ## ### block the genes instead of hcluster (new_strategy: must have ISL1-CP binding while in this step regardless promoter accessibility
+    # USED to be consistent with mouse dataset !!
+    mat <- as.data.frame(mat)
+    mat[, "ISL1_CP_bound"] <- ifelse((mat[, "Gao2019_gene_Isl1_E825E9.bound"] == 1 |
+        mat[, "Gao2019_gene_Isl1.iCPC_CPC.bound"] == 1 |
+        mat[, "Maven2023_gene_ISL1_WT_d6CP"] == 1), 1, 0)
+    table(mat$ISL1_CP_bound)
+    #  0  1
+    #  3  51
+
+    # one label per CTS&HiG module gene to prioritize candidates CTS member genes
+    # 1) must be CP_hi, CM_hi or CF_hi
+    # 2) must be ISL1_CP_bound
+    mat[, "ISL1_CP_candidate"] <- ifelse(mat[, "CP_hi"] == 1 & mat[, "ISL1_CP_bound"] == 1, 1, 0)
+    # 3) must be open at PCW8_CM or PCW19_CM for CM_hi
+    mat[, "ISL1_CM_candidate"] <- ifelse(mat[, "CM_hi"] == 1 & mat[, "ISL1_CP_bound"], 1, 0)
+    # 4) must be open at PCW8_CF or PCW19_CF for CF_hi
+    mat[, "ISL1_CF_candidate"] <- ifelse(mat[, "CF_hi"] == 1 & mat[, "ISL1_CP_bound"], 1, 0)
+    if ("SMC_hi" %in% colnames(mat)) mat[, "ISL1_SMC_candidate"] <- ifelse(mat[, "SMC_hi"] == 1 & mat[, "ISL1_CP_bound"], 1, 0)
+
+
+    dim(mat) # [1] 54 28
+
+    write.table(mat, file = fileName, sep = "\t", quote = FALSE, row.names = TRUE, col.names = TRUE) # !!!!!!!!!!!!
+} else {
+    mat <- read.table(fileName, header = TRUE, sep = "\t", check.names = FALSE)
+}
+
+########################################################
+##  input 6 -- data-driven --- RcisTarget predicted TF that are enriched among CTS genes
+library(RcisTarget)
+packageVersion("RcisTarget") # ‘1.29.0’
+library(data.table)
+
+## Mouse cistarget (mm10), uppercased to match this pipeline's existing uppercase-mouse
+## convention (graph_list/DEG/CTS/sce already toupper'd above for the ATAC/ISL1/ChIP
+## matching). RcisTarget's calcAUC() matches geneSets against colnames(rankings) by exact
+## string only positionally uses column 1 (the motif/feature id) -- renaming it is safe;
+## verified ~98% CTS/DEG gene overlap against the uppercased mm10 rankings.
+load_motif_annotations_mgi <- function() {
+  for (d in c("motifAnnotations_mgi", "motifAnnotations_mgi_v9")) {
+    env <- new.env(parent = emptyenv())
+    ok <- tryCatch({
+      utils::data(list = d, package = "RcisTarget", envir = env)
+      TRUE
+    }, error = function(e) FALSE)
+    if (!ok) next
+    if (exists("motifAnnotations", envir = env, inherits = FALSE)) {
+      return(get("motifAnnotations", envir = env))
+    }
+    if (exists(d, envir = env, inherits = FALSE)) {
+      return(get(d, envir = env))
+    }
+  }
+  stop(
+    "Could not load mouse motif annotations. Felix pattern:\n",
+    "  data(motifAnnotations_mgi); motifAnnot <- motifAnnotations\n",
+    "Update RcisTarget: BiocManager::install('RcisTarget')",
+    call. = FALSE
+  )
+}
+
+motifAnnot <- load_motif_annotations_mgi()
+dim(motifAnnot)
+
+# takes a while, do NOT repeat !!!
+if (!file.exists(file = "cisTarget_targets_in_all_CTS.rds")) {
+    # --- 1) Load rankings database (downloaded from cisTarget resources) ---
+    # https://resources.aertslab.org/cistarget/databases/mus_musculus/mm10/refseq_r80/mc_v10_clust/gene_based/
+
+    dbFile <- "mm10_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather"
+
+    feather_path <- paste0(shared_path, "cistarget/")
+
+    if (!file.exists(file = paste0(feather_path, dbFile))) {
+        url <- paste0(
+            "https://resources.aertslab.org/cistarget/databases/mus_musculus/",
+            "mm10/refseq_r80/mc_v10_clust/gene_based/", dbFile
+        )
+
+        # Local folder + destination file
+        dest_dir <- feather_path
+        dest_file <- file.path(
+            dest_dir,
+            basename(url)
+        )
+
+        # Create folder if it doesn't exist
+        if (!dir.exists(dest_dir)) {
+            dir.create(dest_dir, recursive = TRUE)
+        }
+
+        options(timeout = 600)
+
+        # Download
+        download.file(
+            url,
+            destfile = dest_file,
+            mode = "wb",
+            method = "libcurl"
+        )
+
+        cat("Downloaded to:", dest_file, "\n")
+    }
+
+    motifRankings <- importRankings(paste0(feather_path, dbFile)) # reads .feather into a rankingRcisTarget object
+    colnames(motifRankings@rankings) <- toupper(colnames(motifRankings@rankings))
+
+    # --- 1) calculate the enriched motifs among lineage-specific HiGs
+    ## haryngeal/cardiopharyngeal mesoderm is best known for producing cardiac muscle (especially SHF myocardium) and branchiomeric skeletal muscle, not epicardium-derived fibroblasts.
+    ## from epiblast cells exiting through the primitive streak; extraembryonic mesoderm migrates proximally (vs embryonic mesoderm migrating anteriorly as “wings”).
+    ## Pharyngeal / cardiopharyngeal mesoderm (SHF-like CP): SHF/CPM regulators (often ISL1/TBX1/FGF10 programs), early cardiac progenitor flavor.
+    ## Proepicardial / epicardial: WT1/TBX18/TCF21-type epicardial identity, then EMT to EPDC-like fibroblast/smooth muscle programs.
+    ## Extraembryonic mesoderm: proximal/ExM signatures, often PODXL + KRT8/18 plus strong ECM/adhesion/cytoskeleton programs
+
+    cisTarget.res_HiG <- cisTarget(
+        geneSets = DEG[c(CM_cluster, CF_cluster)],
+        motifRankings = motifRankings,
+        motifAnnot = motifAnnot,
+        nesThreshold = 3
+    )
+    # Genes in the gene sets NOT available in the dataset:
+    # 17:     34 (6% of 529)
+    # 16:     34 (6% of 526)
+
+    saveRDS(cisTarget.res_HiG, file = "cisTarget_targets_in_two_HiGs.rds")
+
+
+    # --- 2) calculate the enriched motifs among CTS genes
+
+    cisTarget.res <- cisTarget(
+        geneSets = CTS,
+        motifRankings = motifRankings,
+        motifAnnot = motifAnnot,
+        nesThreshold = 3
+    )
+    # Genes in the gene sets NOT available in the dataset:
+    # 7:      6 (19% of 32)
+    # 11:     6 (12% of 52)
+    # 15:     3 (4% of 67)
+    # 16:     5 (12% of 40)
+    # 8:      1 (2% of 54)
+    # 16.1:     5 (12% of 40)
+    # Using BiocParallel...
+
+
+    saveRDS(cisTarget.res, file = "cisTarget_targets_in_all_CTS.rds")
+    summary(cisTarget.res$NES)
+    #   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+    #   3.000   3.170   3.350   3.487   3.695   5.450
+    summary(cisTarget.res[which(cisTarget.res$geneSet == CTS_ID), ]$NES)
+    #   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+    #   3.050   3.197   3.355   3.434   3.607   4.560
+}

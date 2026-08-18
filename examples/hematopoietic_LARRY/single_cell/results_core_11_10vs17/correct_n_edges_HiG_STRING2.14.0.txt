@@ -1,0 +1,3 @@
+"graph_id"	"names"	"n_edge"	"STRING_id"	"vertex_index_to_remove"
+"HiG_13"	"NOV"	6	"10090.ENSMUSP00000054389"	"97"
+"HiG_13"	"NOV"	6	"10090.ENSMUSP00000131840"	"97"

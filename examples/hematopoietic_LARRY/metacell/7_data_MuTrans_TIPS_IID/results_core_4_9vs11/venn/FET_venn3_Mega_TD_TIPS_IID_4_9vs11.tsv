@@ -1,0 +1,4 @@
+set_a	set_b	universe_n	n_a	n_b	overlap_k	cell_in_both	cell_a_only	cell_b_only	cell_neither	fisher_cbind_col1	fisher_cbind_col2	overlap_genes	p_value	odds_ratio	fisher_alternative	ppi_arm	background	tag	pub_lineage	td_cut
+Mega (Weinreb)	TD (A4->A11)	3204	58	41	3	3	55	38	3108	3,38	55,3108	HBB-BT, MUC13, PBX1	0.0369122279485936	4.45646936952649	two.sided	IID	hvg3000_union_s3	4_9vs11	Megakaryocyte	0.7
+Mega (Weinreb)	TIPS	3204	58	8	2	2	56	6	3140	2,6	56,3140	GATA1, GATA2	0.00840905583476562	18.6140531423422	two.sided	IID	hvg3000_union_s3	4_9vs11	Megakaryocyte	0.7
+TD (A4->A11)	TIPS	3204	41	8	1	1	40	7	3156	1,7	40,3156	SPTB	0.098004850566304	11.2384148023306	two.sided	IID	hvg3000_union_s3	4_9vs11	Megakaryocyte	0.7

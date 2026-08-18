@@ -1,0 +1,5 @@
+linkage	from	to	w1	w2	delta	abs_delta	direction	status	rank	TF_highConf	motif	NES
+CM	HMGA2	MPPED2	-0.152884636389376	0.205327212002809	0.358211848392185	0.358211848392185	increase	changed	1	Stat6; Taf6; Tbp (inferredBy_Orthology). 	tfdimers__MD00373	3.82
+CM	FGF8	HMGA2	-0.124364221905998	0.00201438764228938	0.126378609548287	0.126378609548287	increase	changed	2	Stat6; Taf6; Tbp (inferredBy_Orthology). 	tfdimers__MD00373	3.82
+CF	DAB2	TCF3	0	0	0	0	unchanged	unchanged	1	Arid3a; Lhx3; Lhx5; Pitx1; Pou1f1; Sox14; Sry (directAnnotation). Dbx2; Dbx2; Emx2; Hhex; Hoxa9; Hoxd8; Isl2; Pou2f2 (inferredBy_Orthology). 	metacluster_192.2	3.15
+CF	BMP7	TCF3	0	0	0	0	unchanged	unchanged	1	Arid3a; Lhx3; Lhx5; Pitx1; Pou1f1; Sox14; Sry (directAnnotation). Dbx2; Dbx2; Emx2; Hhex; Hoxa9; Hoxd8; Isl2; Pou2f2 (inferredBy_Orthology). 	metacluster_192.2	3.15
