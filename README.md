@@ -3,7 +3,7 @@
 TIPS links tipping-point instability in single-cell data to interpretable interaction subnetworks, prioritizing bridge regulators and “dual-pull” lineage programs during fate transitions. For more details, refer to [**TIPS tutorial**](https://xyang2uchicago.github.io/TIPS/tutorial/TIPS.html)
 
 ### What is TIPS?
-- Name: **Transcriptional Instability Prediction of Subnetworks**.
+- Name: **Transcriptional Instability–guided Prediction of Subnetworks**.
 - Goal: Identify **semi-stable transition states** obscured by program mixing (Fig. 1A).
 - Output: Quantify **state-specific network rewiring** from uncommitted progenitors to descendant fates (Fig 1B).
 - Method: BioTIP + **coexpression-weighted protein–protein interaction networks + robustness (targeted-attack) + chromatin integration** to resolve lineage-leaning arms (Fig. 1C).

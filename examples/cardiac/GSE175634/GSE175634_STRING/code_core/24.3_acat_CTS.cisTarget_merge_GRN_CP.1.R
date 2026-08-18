@@ -1,0 +1,59 @@
+rebuild_mat <- FALSE
+source(here::here("examples", "cardiac", "GSE175634", "GSE175634_STRING", "code_core", "24.0_acat_load_input_clean_CP.1.R"))
+
+source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
+
+library(igraph)
+library(dplyr)
+
+(updir <- getwd())
+setwd(paste0(updir, "/cisTarget_predicted_", CTS_ID))
+
+(file <- list.files(pattern = "final_table.tsv"))
+# [1] "PPI_graph_GRN_prediction_CTS_CP.1_dualpull_final_table.tsv"
+if (length(file) == 0) stop("No final_table.tsv in cisTarget_predicted_CP.1 — 24.1 CP.1 produced no predictions at NES=4.5 (matches original 24.1.2 behavior)")
+
+final_table <- read.table(file = file, header = TRUE, sep = "\t")
+
+key_TFs <- lapply(
+    list.files(pattern = "PPI_graph_.*_GRN_prediction_.*_final.rds"),
+    function(x) strsplit(x, "_")[[1]][3] %>% unlist()
+) %>% unlist() %>% unique()
+key_TFs
+# character(0) — NES=4.5 produces no predictions; script stops above
+
+# deduplicate: same pair can appear under multiple TF sections with identical delta
+final_table <- final_table %>%
+    mutate(pair_key = paste(pmin(from, to), pmax(from, to), sep = "||")) %>%
+    group_by(linkage, pair_key) %>%
+    dplyr::slice(1) %>%
+    ungroup() %>%
+    select(-pair_key)
+
+for (lk in unique(final_table$linkage)) {
+    g_merged <- make_merged_TIPS_graph(
+        subset(final_table, linkage == lk),
+        CHD = CHD,
+        added_TF = setdiff(key_TFs, V(graph_list[[paste0("CTS_", CTS_ID)]])$name %>% toupper()),
+        top_n_label = 5,
+        g_string = graph_list[[paste0("CTS_", CTS_ID)]]
+    )
+    cat(lk, "merged graph: vcount =", vcount(g_merged), "ecount =", ecount(g_merged), "\n")
+    # not reached at NES=4.5 — script stops above (no predictions)
+
+    pdf(file = paste0("PPI_graph_merged_GRN_prediction_", CTS_name, "_", lk, "_final.pdf"))
+    set.seed(2)
+    plot(
+        g_merged,
+        layout = layout_with_fr(g_merged, weights = NA),
+        edge.curved = 0.15,
+        vertex.size = 22,
+        vertex.label.cex = 0.9,
+        main = paste0("Merged ", lk, "vsCP TIPS delta-edge reweighting")
+    )
+    mtext(paste0(lk, "vsCP edges labeled by delta (top abs_delta)"), side = 1, line = -1, cex = 1.2)
+    dev.off()
+    cat("Saved:", paste0("PPI_graph_merged_GRN_prediction_", CTS_name, "_", lk, "_final.pdf"), "\n")
+    # Saved: PPI_graph_merged_GRN_prediction_CTS_CP.1_CF_final.pdf
+    # Saved: PPI_graph_merged_GRN_prediction_CTS_CP.1_CM_final.pdf
+}
