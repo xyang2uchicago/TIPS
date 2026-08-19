@@ -48,7 +48,7 @@ library(igraph)
 library(data.table)
 
 # Mouse PPI file from IID (https://iid.ophid.utoronto.ca/) — mouse_annotated_PPIs.txt.gz
-iid_file <- Sys.glob("../data/mouse_annotated_PPIs.txt.gz")
+iid_file <- Sys.glob(paste0(shared_data_path, "/PPIN/mouse_annotated_PPIs.txt.gz"))
 (length(iid_file))
 stopifnot(length(iid_file) == 1)
 

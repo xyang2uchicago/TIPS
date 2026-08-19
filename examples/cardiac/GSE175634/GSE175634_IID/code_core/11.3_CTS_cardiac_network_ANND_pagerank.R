@@ -391,7 +391,7 @@ subset(df, gene=='ISL1')
  df_BC = read.table(file='df_betweeness.tsv',sep='\t', header=T) 
  df_BC$PPI_cat = factor(df_BC$PPI_cat,levels=c('CTS', 'HiGCTS', 'HiG')) 				
  
-	CHD = readRDS( file='D:/projects/DS/result/CHD/CHD_Cilia_Genelist.rds')
+	CHD = readRDS( file=here::here("examples", "Shared_Data", "CHD_Cilia_Genelist.rds"))
     df_BC$PCGC_AllCurated = df_BC$gene %in% unlist(CHD[c('Griffin2023_PCGC_AllCurated')])
 
 	# Calculate top 5 significant genes within each box
@@ -623,7 +623,7 @@ subset(df, gene=='ISL1')
 						subset(df, PPI_cat=='HiG')
 						)
 						
-	CHD = readRDS( file='D:/projects/DS/result/CHD/CHD_Cilia_Genelist.rds')
+	CHD = readRDS( file=here::here("examples", "Shared_Data", "CHD_Cilia_Genelist.rds"))
     df$PCGC_AllCurated = df$gene %in% unlist(CHD[c('Griffin2023_PCGC_AllCurated')])
 	
     # Calculate top 5 significant genes within each box
@@ -837,7 +837,7 @@ subset(df, gene=='ISL1')
 # 	  arrange(desc(annd)) %>%   # Sort in descending order of annd
 # 	  slice_head(n = 5)  # Take the top 5 rows for each signature
 # 	# subset the CHD genes within top 5 
-# 	CHD = readRDS( file='D:/projects/DS/result/CHD/CHD_Cilia_Genelist.rds')
+# 	CHD = readRDS( file=here::here("examples", "Shared_Data", "CHD_Cilia_Genelist.rds"))
  
 # 	top_genes_CHD = subset(top_genes, gene %in% unlist(CHD[c('Griffin2023_PCGC_AllCurated')]))
 # 	dim(top_genes)  #[1] 105   16
@@ -943,7 +943,7 @@ subset(df, gene=='ISL1')
     df$label=df$gene
     subset(df, signature=='HiGCTS_CP.1')
       
-	CHD = readRDS( file='D:/projects/DS/result/CHD/CHD_Cilia_Genelist.rds')
+	CHD = readRDS( file=here::here("examples", "Shared_Data", "CHD_Cilia_Genelist.rds"))
 	df$PCGC_AllCurated = df$gene %in% unlist(CHD[c('Griffin2023_PCGC_AllCurated')])
 
 	# Step 1: Filter top 5 genes by normalized.strength within each signature

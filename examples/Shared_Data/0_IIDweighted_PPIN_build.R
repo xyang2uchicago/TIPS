@@ -11,7 +11,7 @@ library("gridExtra")
 library(ggrepel)
 library(ggpubr) # resuired by stat_compare_means()
 
-setwd('F:/projects/scRNA/results/cardiac_CTS_GRN/GSE175634_iPSC_CM_weighted_IID')
+setwd(here::here("examples", "Shared_Data"))
 
 ######################################################
 # 3) build IID db GRN --- DO NOT repeat !!!!!!
@@ -21,8 +21,8 @@ setwd('F:/projects/scRNA/results/cardiac_CTS_GRN/GSE175634_iPSC_CM_weighted_IID'
 library(igraph)
 library(data.table)
 
-#This file downloaded from:
-IID_path = 'F:/projects/TIPS/Hai7_IID/data/PPIN/' 
+# Downloaded from https://iid.ophid.utoronto.ca/ ; expected at examples/Shared_Data/PPIN/
+IID_path <- here::here("examples", "Shared_Data", "PPIN/")
 iid <- fread(paste0(IID_path, 'human_annotated_PPIs.txt.gz'), sep="\t", header=TRUE)
 dim(iid) #  1675927     344
 colnames(iid)

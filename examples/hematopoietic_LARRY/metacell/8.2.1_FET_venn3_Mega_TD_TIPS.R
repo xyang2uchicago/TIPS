@@ -21,7 +21,7 @@ TAG <- "4_9vs11"
 TD.cut <- 0.7
 td_csv_dir <- Sys.getenv(
   "MUTRANS_TD_CSV_DIR",
-  "F:/projects/TIPS/results/GSE140802_lineage_tracking/larry/figures"
+  here::here("examples", "hematopoietic_LARRY", "data", "larry_figures")
 )
 pub_xlsx <- Sys.getenv(
   "WEINREB_TABLE_S3",

@@ -4,7 +4,7 @@
 ##   source("25_venn_CTS_MuTrans_pub_markers.R")
 
 ########## BEGINNING OF USER INPUT ##########
-code_dir <- get0("code_dir", ifnotfound = "F:/projects/TIPS/source/GSE140802_lineage_tracking/7_data_MuTrans_TIPS_IID/code_core_4_9vs11")
+code_dir <- get0("code_dir", ifnotfound = file.path(here::here("examples", "hematopoietic_LARRY", "metacell", "7_data_MuTrans_TIPS_IID"), "code_core_4_9vs11"))
 source(file.path(code_dir, "00_configuration.R"))
 ensure_tips_configured(code_dir)
 source(file.path(code_dir, "mutrans_sce_xy.R"))
@@ -15,7 +15,7 @@ TD.cut <- 0.7
 ## MuTrans TD gene scores (seacell CSV from larry figures)
 td_csv_dir <- Sys.getenv(
   "MUTRANS_TD_CSV_DIR",
-  "F:/projects/TIPS/results/GSE140802_lineage_tracking/larry/figures"
+  here::here("examples", "hematopoietic_LARRY", "data", "larry_figures")
 )
 
 ## Weinreb et al. Table S3 — in vitro progenitor DEG by lineage

@@ -3,6 +3,9 @@
 **/hg38_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather
 **/mm10_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather
 **/PPIN/human_annotated_PPIs.txt.gz
+examples/Shared_Data/coding_genes.rds
+examples/Shared_Data/coding_genes_mouse.rds
+examples/Shared_Data/iid2025_human_mouse_conserved_global.rds
 .claude/
 examples/GSE116893/data/malignant_leiden.rds
 examples/GSE116893/data/seurat_rna_malignant_harmony_cellstateannotated.rds

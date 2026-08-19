@@ -11,7 +11,7 @@ library(purrr)
 ########################################################
 ## 
 bw_dir = 'F:/projects/scATAC/data/GSE181346_heart/GSE181346_processed_data/'
-maps = read.delim(file=paste0(bw_dir, 'readme_filename_map_xy.txt'), sep='\t', header=TRUE, comment.char='#', stringsAsFactors=FALSE)
+maps = read.delim(file=here::here("examples", "cardiac", "data", "readme_filename_map_xy.txt"), sep='\t', header=TRUE, comment.char='#', stringsAsFactors=FALSE)
 dim(maps) #[1] 44  5
 head(maps)
 #           file_name                      identity NA. identity_simple category
@@ -163,7 +163,7 @@ names(DEG)[which(names(DEG)=='11')] = 'endoderm'
 # in which we did:
 # 1) define consistend peaks (present in at least 2 replciates)
 # 2) annotatePeak to the nearest proximal genes (within ±1 kb of transcription start sites, excluding “Distal Intergenic” peaks, hg19) to define ISL1-bound targets.
-ISL1_set = readRDS(file='D:/projects/DS/result/GSE195476_ISL1/ISL1_set.rds')
+ISL1_set = readRDS(file=here::here("examples", "cardiac", "data", "GSE195476_ISL1", "ISL1_set.rds"))
 lengths(ISL1_set)
     # ISL1_NKO_d6CP    ISL1_WT_d18MNP      ISL1_WT_d6CP    NKX25_NKO_d6CP 
              # 1987              2917              1724               266 
@@ -183,7 +183,7 @@ names(ISL1_set) = paste0('Maven2023_gene_', names(ISL1_set))
 
 ## Gao2019 Isl1 chipseq set
 # ISL1 targets were defined by assigning each ISL1 ChIP-seq peak to the nearest gene TSS, as previously reported.
-load('D:/projects/DS/result/GSE80383_Isl1/ISL1_Mm2Hg.GS_uniqueSymbol_FC1.2_padj0.05.RData')
+load(here::here("examples", "cardiac", "data", "GSE80383_Isl1", "ISL1_Mm2Hg.GS_uniqueSymbol_FC1.2_padj0.05.RData"))
 names(ISL1)
 #  [1] "Isl1.embryo.bound"         "Isl1.iPSC.bound"           "Isl1KO.E8.75.up"           "Isl1KO.E8.75.dn"          
 #  [5] "Isl1.E8.75.DEG"            "Isl1KO.E10.5RV.OFT.up"     "Isl1KO.E10.5RV.OFT.dn"     "Isl1.E10.5RV.OFT.DEG"     

@@ -18,6 +18,7 @@ db_specifc_result_path <- paste0(wd, "results/")
 db_specifc_input_path  <- paste0(wd, "../data/")
 db_specifc_CTS_path    <- paste0(wd, "../data/")
 shared_path            <- paste0(shared_data_path, "/")
+cardiac_data_path      <- paste0(tips_path("examples", "cardiac", "data"), "/")
 
 ## Dataset: species and cell type cluster identifiers
 species      <- "mouse"   # gene symbols uppercased to match annotation datasets
@@ -76,7 +77,7 @@ length(CHD) #295
 
 ########################################################
 ##  input 2.2   maps -- shared ---
-maps = read.delim(file=paste0(shared_path, 'readme_filename_map_xy.txt'), sep='\t', header=TRUE, comment.char='#', stringsAsFactors=FALSE)
+maps = read.delim(file=paste0(cardiac_data_path, 'readme_filename_map_xy.txt'), sep='\t', header=TRUE, comment.char='#', stringsAsFactors=FALSE)
 dim(maps) #[1] 44  5
 head(maps)
 #           file_name                      identity NA. identity_simple category
@@ -113,7 +114,7 @@ table(maps$category)
 ## gene-level Marker genes (gene score) for fetal heart scATAC-seq clusters using differential test, published by authors 
 # the table S3
 library(openxlsx)
-annotation_vitro = read.xlsx(xlsxFile = paste0(shared_data_path, '/Ameen2022cell-supplement-10.xlsx'), sheet = 4)  
+annotation_vitro = read.xlsx(xlsxFile = paste0(cardiac_data_path, 'Ameen2022cell-supplement-10.xlsx'), sheet = 4)  
 
 dim(annotation_vitro) #[1] 5262    8
 head(annotation_vitro)
@@ -141,7 +142,7 @@ lengths(Ameen_annotation_list)
 #       351 
 
 
-annotation_fetal = read.xlsx(xlsxFile = paste0(shared_data_path, '/Ameen2022cell_Table1_sheet3_markergene_Laksshman2026update.xlsx'), sheet = 1)  
+annotation_fetal = read.xlsx(xlsxFile = paste0(cardiac_data_path, 'Ameen2022cell_Table1_sheet3_markergene_Laksshman2026update.xlsx'), sheet = 1)  
 dim(annotation_fetal) #[1] 3536    9
 head(annotation_fetal)
   # Chromosomes     start       end strand     name   Log2FC          FDR  MeanDiff Cluster
@@ -413,7 +414,7 @@ if(rebuild_mat) {
 ########################################################
 ##  input 5 -- shared --- published ISL1-CP binding
 ## Maven2023 ISL1 ChIP-seq: consistent peaks across replicates, annotated to nearest TSS (±1 kb, hg19)
-ISL1_set = readRDS(file=paste0(shared_path, 'GSE195476_ISL1/ISL1_set.rds'))
+ISL1_set = readRDS(file=paste0(cardiac_data_path, 'GSE195476_ISL1/ISL1_set.rds'))
 lengths(ISL1_set)
 # ISL1_NKO_d6CP    ISL1_WT_d18MNP      ISL1_WT_d6CP    NKX25_NKO_d6CP 
             # 1987              2917              1724               266 
@@ -433,7 +434,7 @@ names(ISL1_set) = paste0('Maven2023_gene_', names(ISL1_set))
 ##  input 5 -- shared --- published ISL1-CP binding 
 ## Gao2019 Isl1 chipseq set
 # ISL1 targets were defined by assigning each ISL1 ChIP-seq peak to the nearest gene TSS, as previously reported.
-load(paste0(shared_path, 'GSE80383_Isl1/ISL1_Mm2Hg.GS_uniqueSymbol_FC1.2_padj0.05.RData'))
+load(paste0(cardiac_data_path, 'GSE80383_Isl1/ISL1_Mm2Hg.GS_uniqueSymbol_FC1.2_padj0.05.RData'))
 names(ISL1)
 #  [1] "Isl1.embryo.bound"         "Isl1.iPSC.bound"           "Isl1KO.E8.75.up"           "Isl1KO.E8.75.dn"          
 #  [5] "Isl1.E8.75.DEG"            "Isl1KO.E10.5RV.OFT.up"     "Isl1KO.E10.5RV.OFT.dn"     "Isl1.E10.5RV.OFT.DEG"     

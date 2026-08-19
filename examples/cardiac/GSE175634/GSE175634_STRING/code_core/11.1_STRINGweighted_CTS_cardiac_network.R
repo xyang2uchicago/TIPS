@@ -85,7 +85,7 @@ db=7
 		"E:/Git_Holly/scRNAseq_examples/result", 
 		"F:/projects/scRNA/results/GSE175634_iPSC_CM/")
 
-  load(file=paste0(inputDir, subfolds[db] ,'/',subsubfolds[db ],'/CTS_Lib_Scaledata.RData'))
+  load(file=here::here("examples", "cardiac", "GSE175634", "data", "CTS_Lib_Scaledata.RData"))
   lengths(CTS.Lib.Symbol)
 	# muscle   endoderm      CP/CF         CM         CF         CP    mix pro
 		# 63         66         77        113        109         76         69
@@ -105,7 +105,7 @@ db=7
 ########################
 ## load DEGs refer to 3.5_Filter_Plot_Marker_diffBar.R
 new_object <- new.env()                # Create a new environment
-load(paste0(inputDir, "2024_3kHVG/DEG.wc_padj0.01_score40.RData"), envir = new_object)  # Load .RData into this environment
+load(here::here("examples", "cardiac", "GSE175634", "data", "DEG.wc_padj0.01_score40.RData"), envir = new_object)  # Load .RData into this environment
 markers.up <- new_object[[ls(new_object)[1]]]
 names(markers.up)[which(names(markers.up)=='3')] = 'CP'
 names(markers.up)[which(names(markers.up)=='8')] = 'muscle'
@@ -119,7 +119,7 @@ head(markers.up[[1]], 4)
 # 4      PTMA 222.5636            NaN     0         0
 	
 	
- load(paste0(inputDir,'2024_3kHVG/DEG.wc_padj0.01_score40.RData'))
+ load(here::here("examples", "cardiac", "GSE175634", "data", "DEG.wc_padj0.01_score40.RData"))
  lapply(DEG.wc, nrow) %>% unlist
    # 0    1    2    3    4    5    6    7    8    9   10   11   12 
  # 344 1224  257  152  110  350  110  117  119 1633   81   44   25 
@@ -252,7 +252,7 @@ for(i in names(DEG)){
  
  ## lastly, build for CTS
  # refer to 6.3_DE.statistics_CTS.R 
- markers.up_all = readRDS(paste0(inputDir,subfolds[db] ,'/DEG.wc_nofiltering.rds'))
+ markers.up_all = readRDS(here::here("examples", "cardiac", "GSE175634", "data", "DEG.wc_nofiltering.rds"))
  names(markers.up_all)[which(names(markers.up_all)=='3')] = 'CP'
  names(markers.up_all)[which(names(markers.up_all)=='8')] = 'muscle'
  names(markers.up_all)[which(names(markers.up_all)=='11')] = 'endoderm'

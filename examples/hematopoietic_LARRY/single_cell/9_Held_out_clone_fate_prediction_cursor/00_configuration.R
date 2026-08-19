@@ -10,13 +10,13 @@
 heldout_configure <- function(envir = .GlobalEnv) {
   cfg <- list(
     code_dir = normalizePath(
-      "F:/projects/TIPS/source/GSE140802_lineage_tracking/9_Held_out_clone_fate_prediction_cursor",
+      here::here("examples", "hematopoietic_LARRY", "single_cell", "9_Held_out_clone_fate_prediction_cursor"),
       winslash = "/", mustWork = FALSE
     ),
     results_dir = normalizePath(
       Sys.getenv(
         "HELDOUT_RESULTS_DIR",
-        "F:/projects/TIPS/results/GSE140802_lineage_tracking/inVitro_NMtrajectory/9_heldout_clone_fate"
+        here::here("examples", "hematopoietic_LARRY", "single_cell", "9_Held_out_clone_fate_prediction_cursor", "results")
       ),
       winslash = "/", mustWork = FALSE
     ),
@@ -30,14 +30,14 @@ heldout_configure <- function(envir = .GlobalEnv) {
     seurat_rds = normalizePath(
       Sys.getenv(
         "HELDOUT_SEURAT_RDS",
-        "F:/projects/TIPS/results/GSE140802_lineage_tracking/inVitro_NMtrajectory/Reanalyzed_NMtrajectory_Seurat5_noCellCycle.PCA_UMAP.rds"
+        here::here("examples", "hematopoietic_LARRY", "data", "Reanalyzed_NMtrajectory_Seurat5_noCellCycle.PCA_UMAP.rds")
       ),
       winslash = "/", mustWork = FALSE
     ),
     obs_metadata_csv = normalizePath(
       Sys.getenv(
         "HELDOUT_OBS_CSV",
-        "F:/projects/TIPS/results/GSE140802_lineage_tracking/inVitro_NMtrajectory/h5ad_export/obs_metadata.csv"
+        here::here("examples", "hematopoietic_LARRY", "data", "h5ad_export", "obs_metadata.csv")
       ),
       winslash = "/", mustWork = FALSE
     ),
@@ -51,38 +51,38 @@ heldout_configure <- function(envir = .GlobalEnv) {
     mutrans_td_dir = normalizePath(
       Sys.getenv(
         "MUTRANS_TD_CSV_DIR",
-        "F:/projects/TIPS/results/GSE140802_lineage_tracking/larry/figures"
+        here::here("examples", "hematopoietic_LARRY", "data", "larry_figures")
       ),
       winslash = "/", mustWork = FALSE
     ),
     cell_tips_root = normalizePath(
       Sys.getenv(
         "TINGJUN_TIPS_ROOT",
-        "F:/projects/TIPS/results/GSE140802_lineage_tracking/Tingjunl/TIPS/7_scaledata_leiden_r0_8_TIPS_STRING"
+        here::here("examples", "hematopoietic_LARRY", "single_cell")
       ),
       winslash = "/", mustWork = FALSE
     ),
     cell_biotip_dir = normalizePath(
       Sys.getenv(
         "TINGJUN_BIOTIP_C11",
-        "F:/projects/TIPS/results/GSE140802_lineage_tracking/Tingjunl/BioTIP/results/BioTIP_leiden_r0_8"
+        here::here("examples", "hematopoietic_LARRY", "single_cell", "9_Held_out_clone_fate_prediction_cursor", "data")
       ),
       winslash = "/", mustWork = FALSE
     ),
     metacell_tips_string = normalizePath(
-      "F:/projects/TIPS/source/GSE140802_lineage_tracking/7_data_MuTrans_TIPS_STRING/results_core_4_9vs11",
+      here::here("examples", "hematopoietic_LARRY", "metacell", "7_data_MuTrans_TIPS_STRING", "results_core_4_9vs11"),
       winslash = "/", mustWork = FALSE
     ),
     metacell_tips_iid = normalizePath(
-      "F:/projects/TIPS/source/GSE140802_lineage_tracking/7_data_MuTrans_TIPS_IID/results_core_4_9vs11",
+      here::here("examples", "hematopoietic_LARRY", "metacell", "7_data_MuTrans_TIPS_IID", "results_core_4_9vs11"),
       winslash = "/", mustWork = FALSE
     ),
     string_iid_jaccard = normalizePath(
-      "F:/projects/TIPS/results/GSE140802_lineage_tracking/inVitro_NMtrajectory/larry_BioTIP/jaccard_STRING_vs_IID_4_9vs11.tsv",
+      here::here("examples", "hematopoietic_LARRY", "data", "larry_BioTIP", "jaccard_STRING_vs_IID_4_9vs11.tsv"),
       winslash = "/", mustWork = FALSE
     ),
     hvg_rds = normalizePath(
-      "F:/projects/TIPS/results/GSE140802_lineage_tracking/inVitro_NMtrajectory/cell_cycle_signature_cor_3khvg.rds",
+      here::here("examples", "hematopoietic_LARRY", "data", "cell_cycle_signature_cor_3khvg.rds"),
       winslash = "/", mustWork = FALSE
     ),
     ## Frozen C11 state (fate-blind leiden). Sensitivity: set HELDOUT_REMAP_STATE=1.
@@ -112,7 +112,7 @@ heldout_configure <- function(envir = .GlobalEnv) {
     tips_arm_wd = normalizePath(
       Sys.getenv(
         "TIPS_ARM_WD",
-        "F:/projects/TIPS/results/GSE140802_lineage_tracking/Tingjunl/TIPS/7_scaledata_leiden_r0_8_TIPS_STRING"
+        here::here("examples", "hematopoietic_LARRY", "single_cell")
       ),
       winslash = "/", mustWork = FALSE
     ),
@@ -158,7 +158,7 @@ heldout_configure <- function(envir = .GlobalEnv) {
   cfg$fold_modules_dir <- file.path(cfg$results_dir, "03_fold_modules")
   cfg$string_id_cache <- file.path(cfg$tips_arm_wd, "data", "unique_STRING_mapping_correction.txt")
   if (!file.exists(cfg$string_id_cache)) {
-    cfg$string_id_cache <- "F:/projects/TIPS/source/GSE140802_lineage_tracking/7_data_MuTrans_TIPS_STRING/data/unique_STRING_mapping_correction.txt"
+    cfg$string_id_cache <- here::here("examples", "hematopoietic_LARRY", "metacell", "7_data_MuTrans_TIPS_STRING", "data", "unique_STRING_mapping_correction.txt")
   }
 
   dir.create(cfg$results_dir, recursive = TRUE, showWarnings = FALSE)

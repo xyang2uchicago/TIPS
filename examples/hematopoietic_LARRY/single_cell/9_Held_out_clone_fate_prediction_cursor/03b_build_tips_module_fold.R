@@ -6,7 +6,7 @@
 
 heldout_code_dir <- get0(
   "heldout_code_dir",
-  ifnotfound = "F:/projects/TIPS/source/GSE140802_lineage_tracking/9_Held_out_clone_fate_prediction_cursor"
+  ifnotfound = here::here("examples", "hematopoietic_LARRY", "single_cell", "9_Held_out_clone_fate_prediction_cursor")
 )
 if (!exists("heldout_cfg")) {
   source(file.path(heldout_code_dir, "00_configuration.R"))

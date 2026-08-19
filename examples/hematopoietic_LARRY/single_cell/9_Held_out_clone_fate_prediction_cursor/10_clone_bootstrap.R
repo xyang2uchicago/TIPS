@@ -24,7 +24,7 @@
 
 code_dir <- get0(
   "heldout_code_dir",
-  ifnotfound = "F:/projects/TIPS/source/GSE140802_lineage_tracking/9_Held_out_clone_fate_prediction_cursor"
+  ifnotfound = here::here("examples", "hematopoietic_LARRY", "single_cell", "9_Held_out_clone_fate_prediction_cursor")
 )
 source(file.path(code_dir, "00_configuration.R"))
 source(file.path(code_dir, "00_helpers.R"))

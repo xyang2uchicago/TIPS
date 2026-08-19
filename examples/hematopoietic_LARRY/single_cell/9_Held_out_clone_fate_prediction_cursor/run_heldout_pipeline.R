@@ -8,7 +8,7 @@
 ##   from_lock            02–08, 10, and 11 using an existing LOCKED file
 ##   01 .. 08, 03b, 10, 11 a single step
 
-code_dir <- "F:/projects/TIPS/source/GSE140802_lineage_tracking/9_Held_out_clone_fate_prediction_cursor"
+code_dir <- here::here("examples", "hematopoietic_LARRY", "single_cell", "9_Held_out_clone_fate_prediction_cursor")
 heldout_code_dir <- code_dir
 
 run <- Sys.getenv("HELDOUT_RUN", "step1")

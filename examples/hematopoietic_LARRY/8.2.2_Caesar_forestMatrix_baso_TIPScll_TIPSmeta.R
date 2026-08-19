@@ -22,7 +22,7 @@ GSE140802_cell_ROOT <- Sys.getenv("GSE140802_cell_ROOT", "F:/projects/TIPS/resul
 pub_xlsx    <- Sys.getenv("WEINREB_TABLE_S3", "F:/projects/TIPS/data/GSE140802_lineage_tracking/doc/aaw3381-Weinreb-Table-S3.xlsx")
 pub_lineage <- "Basophil"; pub_sheet <- "DGE of progenitors in vitro"
 TD.cut <- 0.7
-td_csv_dir <- Sys.getenv("MUTRANS_TD_CSV_DIR", "F:/projects/TIPS/results/GSE140802_lineage_tracking/larry/figures")
+td_csv_dir <- Sys.getenv("MUTRANS_TD_CSV_DIR", here::here("examples", "hematopoietic_LARRY", "data", "larry_figures"))
 CP_cluster <- 4; CM_cluster <- 9  # larry_transition_4_to_9
 fisher_alt <- Sys.getenv("TIPS_FET_ALTERNATIVE", "two.sided")
 tingjun_tips  <- Sys.getenv("TINGJUN_TIPS_ROOT", "F:/projects/TIPS/results/GSE140802_lineage_tracking/Tingjunl/TIPS/7_scaledata_leiden_r0_8_TIPS_STRING")

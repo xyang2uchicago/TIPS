@@ -1,6 +1,6 @@
 ## 24.3_acat_CTS.cisTarget_merge_GRN.R — Felix STRING (Larry MuTrans)
 
-code_dir <- get0("code_dir", ifnotfound = "F:/projects/TIPS/source/GSE140802_lineage_tracking/7_data_MuTrans_TIPS_STRING/code_core_4_9vs11")
+code_dir <- get0("code_dir", ifnotfound = file.path(here::here("examples", "hematopoietic_LARRY", "single_cell"), "code_core_11_10vs17"))
 if (!exists("rebuild_mat")) rebuild_mat <- FALSE
 source(file.path(code_dir, "24.0_acat_load_input_clean.R"))
 source(file.path(tips_r_dir, paste0("celltype_specific_weight_v", celltype_specific_weight_version, ".R")))

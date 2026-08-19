@@ -106,7 +106,7 @@ string_db <- STRINGdb$new( version="12.0", species=9606,   # species= 10090 for 
 string_db
 
 inputDir= "F:/projects/scRNA/results/GSE175634_iPSC_CM/"
-load(paste0(inputDir,'2024_3kHVG/DEG.wc_padj0.01_score40.RData'))
+load(here::here("examples", "cardiac", "GSE175634", "data", "DEG.wc_padj0.01_score40.RData"))
 lapply(DEG.wc, nrow) %>% unlist
    # 0    1    2    3    4    5    6    7    8    9   10   11   12 
  # 344 1224  257  152  110  350  110  117  119 1633   81   44   25 
@@ -123,7 +123,7 @@ N['HiG_1']  # 1156
 ## build PPIN again and track back the correct number of edges for the duplciated gene ####
 
 new_object <- new.env()                # Create a new environment
-load(paste0(inputDir, "2024_3kHVG/DEG.wc_padj0.01_score40.RData"), envir = new_object)  # Load .RData into this environment
+load(here::here("examples", "cardiac", "GSE175634", "data", "DEG.wc_padj0.01_score40.RData"), envir = new_object)  # Load .RData into this environment
 markers.up <- new_object[[ls(new_object)[1]]]
 
 graph_list <- readRDS( file= 'GSE175634_STRING_graph_perState_notsimplified.rds')  

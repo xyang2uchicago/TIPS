@@ -19,6 +19,7 @@ library(SingleCellExperiment)
 
 heatmap_coding_target_only = TRUE
 shared_input_path = 'F:/projects/TIPS/data/'  
+cardiac_data_path <- paste0(here::here("examples", "cardiac", "data"), "/")
 
 species = 'human'   # we upcase gene signature symbols to match the gene in the annotation datasets (e.g. TF_human, pseudo scATAC-seq accessibility data)
  
@@ -89,7 +90,7 @@ length(CHD) #295
 ########################################################
 ##  input 2.1   maps -- shared ---
 # bw_dir = 'F:/projects/scATAC/data/GSE181346_heart/GSE181346_processed_data/'
-maps = read.delim(file=paste0(shared_input_path, 'readme_filename_map_xy.txt'), sep='\t', header=TRUE, comment.char='#', stringsAsFactors=FALSE)
+maps = read.delim(file=paste0(cardiac_data_path, 'readme_filename_map_xy.txt'), sep='\t', header=TRUE, comment.char='#', stringsAsFactors=FALSE)
 dim(maps) #[1] 44  5
 head(maps)
 #           file_name                      identity NA. identity_simple category
@@ -128,7 +129,7 @@ table(maps$category)
 ## gene-level Marker genes (gene score) for fetall heart scATAC-seq clusters using differential test, published by authors 
 # the table S3
 library(openxlsx)
-annotation_vitro = read.xlsx(xlsxFile = paste0(shared_input_path, 'Ameen2022cell-supplement-10.xlsx'), sheet = 4)  
+annotation_vitro = read.xlsx(xlsxFile = paste0(cardiac_data_path, 'Ameen2022cell-supplement-10.xlsx'), sheet = 4)  
 dim(annotation_vitro) #[1] 5262    8
 head(annotation_vitro)
 #  Chromosomes     start       end Gene.name   Log2FC      FDR  MeanDiff celltype
@@ -159,7 +160,7 @@ lengths(Ameen_annotation_list)
 # annotation_fetal = read.xlsx(xlsxFile = paste0(annotation_dir, 'media-1.xlsx'), sheet = 4) 
 # annotation_fetal = read.xlsx(xlsxFile = paste0(shared_input_path, 'Ameen2022cell_media-1.xlsx'), sheet = 4)  
 # annotation_fetal_0 = read.xlsx(xlsxFile = paste0(shared_input_path, 'Ameen2022cell_media-1.xlsx'), sheet = 4)  
-annotation_fetal = read.xlsx(xlsxFile = paste0(shared_input_path, 'Ameen2022cell_Table1_sheet3_markergene_Laksshman2026update.xlsx'), sheet = 1)  
+annotation_fetal = read.xlsx(xlsxFile = paste0(cardiac_data_path, 'Ameen2022cell_Table1_sheet3_markergene_Laksshman2026update.xlsx'), sheet = 1)  
 dim(annotation_fetal) #[1] 3536    9
 head(annotation_fetal)
   # Chromosomes     start       end strand     name   Log2FC          FDR  MeanDiff Cluster
@@ -463,7 +464,7 @@ for(CTS_name in c('CP', 'CP.1')) {
 	# in which we did:
 	# 1) define consistend peaks (present in at least 2 replciates)
 	# 2) annotatePeak to the nearest proximal genes (within ±1 kb of transcription start sites, excluding “Distal Intergenic” peaks, hg19) to define ISL1-bound targets.
-	ISL1_set = readRDS(file='D:/projects/DS/result/GSE195476_ISL1/ISL1_set.rds')
+	ISL1_set = readRDS(file=paste0(cardiac_data_path, 'GSE195476_ISL1/ISL1_set.rds'))
 	lengths(ISL1_set)
 		# ISL1_NKO_d6CP    ISL1_WT_d18MNP      ISL1_WT_d6CP    NKX25_NKO_d6CP 
 				# 1987              2917              1724               266 
@@ -485,7 +486,7 @@ for(CTS_name in c('CP', 'CP.1')) {
 	##  input 5 -- shared --- published ISL1-CP binding 
 	## Gao2019 Isl1 chipseq set
 	# ISL1 targets were defined by assigning each ISL1 ChIP-seq peak to the nearest gene TSS, as previously reported.
-	load('D:/projects/DS/result/GSE80383_Isl1/ISL1_Mm2Hg.GS_uniqueSymbol_FC1.2_padj0.05.RData')
+	load(paste0(cardiac_data_path, 'GSE80383_Isl1/ISL1_Mm2Hg.GS_uniqueSymbol_FC1.2_padj0.05.RData'))
 	names(ISL1)
 	#  [1] "Isl1.embryo.bound"         "Isl1.iPSC.bound"           "Isl1KO.E8.75.up"           "Isl1KO.E8.75.dn"          
 	#  [5] "Isl1.E8.75.DEG"            "Isl1KO.E10.5RV.OFT.up"     "Isl1KO.E10.5RV.OFT.dn"     "Isl1.E10.5RV.OFT.DEG"     

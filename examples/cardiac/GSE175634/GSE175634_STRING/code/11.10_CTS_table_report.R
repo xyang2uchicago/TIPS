@@ -105,7 +105,7 @@ GS[['Xie2025_JCF_n_SHF']] <- XieStb1 %>% filter(Cluster == "Common") %>% pull(Ge
 ###################################
 ## Maven 2023 paper
 ## refer to D:\projects\DS\source\GSE195476_ISL1\ISL1_GS.R
-ISL1_set = readRDS(file='D:/projects/DS/result/GSE195476_ISL1/ISL1_set.rds')
+ISL1_set = readRDS(file=here::here("examples", "cardiac", "data", "GSE195476_ISL1", "ISL1_set.rds"))
 lengths(ISL1_set)
     # ISL1_NKO_d6CP    ISL1_WT_d18MNP      ISL1_WT_d6CP    NKX25_NKO_d6CP 
              # 1987              2917              1724               266 
@@ -126,7 +126,7 @@ GS = c(GS, ISL1_set)
 #######################################################
 ## Gao 2019 paper: 
 ## refer toGSE80383_Isl1/Isl1_GS.R generated genesets, mapped to  human symbols already
-load('D:/projects/DS/result/GSE80383_Isl1/ISL1_Mm2Hg.GS_uniqueSymbol_FC1.2_padj0.05.RData')
+load(here::here("examples", "cardiac", "data", "GSE80383_Isl1", "ISL1_Mm2Hg.GS_uniqueSymbol_FC1.2_padj0.05.RData"))
 names(ISL1)
 #  [1] "Isl1.embryo.bound"         "Isl1.iPSC.bound"           "Isl1KO.E8.75.up"           "Isl1KO.E8.75.dn"          
 #  [5] "Isl1.E8.75.DEG"            "Isl1KO.E10.5RV.OFT.up"     "Isl1KO.E10.5RV.OFT.dn"     "Isl1.E10.5RV.OFT.DEG"     

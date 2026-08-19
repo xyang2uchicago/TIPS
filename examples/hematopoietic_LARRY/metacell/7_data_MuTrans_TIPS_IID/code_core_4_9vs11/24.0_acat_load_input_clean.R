@@ -72,7 +72,7 @@ load_motif_annotations <- function(annot_type = NULL) {
 }
 
 ########## BEGINNING OF USER INPUT ##########
-code_dir <- get0("code_dir", ifnotfound = "F:/projects/TIPS/source/GSE140802_lineage_tracking/7_data_MuTrans_TIPS_IID/code_core_4_9vs11")
+code_dir <- get0("code_dir", ifnotfound = file.path(here::here("examples", "hematopoietic_LARRY", "metacell", "7_data_MuTrans_TIPS_IID"), "code_core_4_9vs11"))
 source(file.path(code_dir, "00_configuration.R"))
 ensure_tips_configured(code_dir)
 setwd(results_dir)
