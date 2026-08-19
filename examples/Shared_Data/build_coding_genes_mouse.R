@@ -2,7 +2,7 @@
 ## Output: character vector of MGI gene symbols for protein-coding genes
 ## Run once; downstream scripts read coding_genes_mouse.rds directly.
 
-shared_path <- "/Users/felixyu/Documents/GitHub/TIPS/examples/Shared_Data/"
+shared_path <- here::here("examples", "Shared_Data/")
 
 ########################################################
 ## Method 1: org.Mm.eg.db (offline, primary)

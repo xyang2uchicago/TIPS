@@ -51,7 +51,7 @@ library(igraph)
 library(data.table)
 
 # This file downloaded from:
-iid_file <- Sys.glob("../data/PPIN/human_annotated_PPIs.txt.gz")
+iid_file <- Sys.glob(paste0(shared_data_path, "/PPIN/human_annotated_PPIs.txt.gz"))
 (length(iid_file))
 stopifnot(length(iid_file) == 1)
 

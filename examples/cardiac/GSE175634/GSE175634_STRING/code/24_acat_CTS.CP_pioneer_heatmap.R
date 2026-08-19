@@ -11,7 +11,7 @@ library(purrr)
 ########################################################
 ## 
 bw_dir = 'F:/projects/scATAC/data/GSE181346_heart/GSE181346_processed_data/'
-maps = read.delim(file=paste0(bw_dir, 'readme_filename_map_xy.txt'), sep='\t', header=TRUE, comment.char='#', stringsAsFactors=FALSE)
+maps = read.delim(file=here::here("examples", "cardiac", "data", "readme_filename_map_xy.txt"), sep='\t', header=TRUE, comment.char='#', stringsAsFactors=FALSE)
 dim(maps) #[1] 44  5
 head(maps)
 #           file_name                      identity NA. identity_simple category
@@ -159,7 +159,7 @@ names(DEG)[which(names(DEG)=='8')] = 'muscle'
 names(DEG)[which(names(DEG)=='11')] = 'endoderm'
 
 ### maven2023 ISL1 set
-ISL1_set = readRDS(file='D:/projects/DS/result/GSE195476_ISL1/ISL1_set.rds')
+ISL1_set = readRDS(file=here::here("examples", "cardiac", "data", "GSE195476_ISL1", "ISL1_set.rds"))
 lengths(ISL1_set)
     # ISL1_NKO_d6CP    ISL1_WT_d18MNP      ISL1_WT_d6CP    NKX25_NKO_d6CP 
              # 1987              2917              1724               266 
@@ -178,7 +178,7 @@ lengths(ISL1_set)
 names(ISL1_set) = paste0('Maven2023_gene_', names(ISL1_set))
 
 ## Gao2019 Isl1 chipseq set
-load('D:/projects/DS/result/GSE80383_Isl1/ISL1_Mm2Hg.GS_uniqueSymbol_FC1.2_padj0.05.RData')
+load(here::here("examples", "cardiac", "data", "GSE80383_Isl1", "ISL1_Mm2Hg.GS_uniqueSymbol_FC1.2_padj0.05.RData"))
 names(ISL1)
 #  [1] "Isl1.embryo.bound"         "Isl1.iPSC.bound"           "Isl1KO.E8.75.up"           "Isl1KO.E8.75.dn"          
 #  [5] "Isl1.E8.75.DEG"            "Isl1KO.E10.5RV.OFT.up"     "Isl1KO.E10.5RV.OFT.dn"     "Isl1.E10.5RV.OFT.DEG"     

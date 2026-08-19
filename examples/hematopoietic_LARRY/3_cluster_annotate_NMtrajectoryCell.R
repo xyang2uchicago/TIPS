@@ -106,7 +106,7 @@ colnames(larry_nm@meta.data)
 # [10] "SPRING.x"             "SPRING.y"             "cell_index0"         
 # [13] "cell_id"              "NM_trajectory"        "Fig6B_label"         
 # [16] "CellCycleSig1"        "Cell.type.clean"      "leiden_r0_2"         
-# [19] "leiden_r0_4"          "leiden_r0_6"          "leiden_r0_8"         
+# [19] "leiden_r0_4"          "leiden_r0_8"          "leiden_r0_8"         
 # [22] "leiden_r1"            "leiden_r1_2"          "leiden_r0_5"
 all(cluster_col %in% colnames(larry_nm@meta.data)) #T
 
@@ -116,7 +116,7 @@ for (i in cluster_col){
 
 # leiden_r0_2 :  8 Clusters:  32787 22175 14234 10301 6010 4674 1824 522 
 # leiden_r0_4 :  12 Clusters:  18850 14134 10428 10093 9573 9532 6621 6416 4353 1868 521 138 
-# leiden_r0_6 :  18 Clusters:  11623 10714 10385 8422 8267 8163 6707 6344 4687 4119 3947 3530 1924 1857 930 526 245 137 
+# leiden_r0_8 :  18 Clusters:  11623 10714 10385 8422 8267 8163 6707 6344 4687 4119 3947 3530 1924 1857 930 526 245 137 
 # leiden_r0_8 :  19 Clusters:  10332 10234 8030 6954 6798 6583 6387 5020 4823 4637 4517 4077 3638 3630 2623 1865 1717 525 137 
 # leiden_r1 :  22 Clusters:  8624 8188 7336 6707 6362 5591 5138 4868 4822 4678 3942 3821 3597 3573 3325 3132 2936 1986 1858 1376 530 137 
 # leiden_r1_2 :  22 Clusters:  8432 8318 7271 7030 6687 5665 4813 4786 4656 4272 3940 3855 3806 3588 3573 3335 2602 1995 1858 1378 530 137 
@@ -184,7 +184,7 @@ dev.off()
 ## choose the best leiden cluster r=0.6 for trajectory analysis
 ## becasue until 0.6, Meg can be distinguished until leiden_0.6;  
 
-r <- "leiden_r0_6"
+r <- "leiden_r0_8"
 
 md <- larry_nm@meta.data %>%
   as.data.frame() %>%
@@ -247,7 +247,7 @@ cluster_summary %>% as.data.frame()
 # 18      9  4687        0               0             0 0.355664604 0.18028590 0.46404950        Unddiff          6       0.5824621   0.4640495    Mixed_Unddiff_6
 
 
-table(larry_nm@meta.data[["leiden_r0_6"]],larry_nm$Cell.type.clean)
+table(larry_nm@meta.data[["leiden_r0_8"]],larry_nm$Cell.type.clean)
   #     Baso Ccr7_DC   Eos Erythroid Lymphoid  Mast   Meg  Mono  Neut   pDC Unddiff
   # 1      0       0     0         0        1     0     0     1    10     0   11611
   # 2      0       0     0         0        0     0     0     0 10309     0     405
@@ -275,7 +275,7 @@ cluster_summary[which(cluster_summary$leiden == 13), 'cluster_annotation'] <- "U
 
 larry_nm$leiden_r0_6_anno <- cluster_summary$cluster_annotation[
   match(
-    larry_nm$leiden_r0_6,
+    larry_nm$leiden_r0_8,
     cluster_summary$leiden
   )
 ] 
@@ -312,11 +312,15 @@ library(ggplot2)
 library(scales)
 library(ggalluvial)
 
-for(r in c("leiden_r0_6", "Cell.type.clean","leiden_r0_6_anno", "leiden_r1")){
+for(r in c("leiden_r0_8")){  #"leiden_r0_6",  "Cell.type.clean","leiden_r0_6_anno", "leiden_r1"
 
   ## 1. define ONE shared cluster order and palette
-  cluster_levels <- sort(unique(as.character(larry_nm@meta.data[[r]])))
-  cluster_levels <- as.character(cluster_levels)
+  cluster_levels <- unique(as.character(larry_nm@meta.data[[r]]))
+  cluster_levels <- if (length(cluster_levels) && all(grepl("^[0-9]+$", cluster_levels))) {
+    as.character(sort(as.numeric(cluster_levels)))
+  } else {
+    sort(cluster_levels)
+  }
 
   cluster_pal <- setNames(
     scales::hue_pal()(length(cluster_levels)),
@@ -455,12 +459,12 @@ for(r in c("leiden_r0_6", "Cell.type.clean","leiden_r0_6_anno", "leiden_r1")){
 }
 
 
-######### river plot of cell-type composition over leiden_r0_6 clusters #########
+######### river plot of cell-type composition over leiden_r0_8 clusters #########
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
 
-r <- "leiden_r0_6"
+r <- "leiden_r0_8"
 
 ## same cluster color palette as UMAP/Slingshot
 cluster_levels <- as.character(sort(as.numeric(unique(as.character(larry_nm@meta.data[[r]])))))

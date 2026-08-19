@@ -55,7 +55,7 @@ names(CHD)
 ########################################################
 ## GSE80383_Isl1/Isl1_GS.R generated genesets, mapped to  human symbols already
 ########################################################
-load('D:/projects/DS/result/GSE80383_Isl1/ISL1_Mm2Hg.GS_uniqueSymbol_FC1.2_padj0.05.RData')
+load(here::here("examples", "cardiac", "data", "GSE80383_Isl1", "ISL1_Mm2Hg.GS_uniqueSymbol_FC1.2_padj0.05.RData"))
 names(ISL1)
 #  [1] "Isl1.embryo.bound"         "Isl1.iPSC.bound"           "Isl1KO.E8.75.up"           "Isl1KO.E8.75.dn"          
 #  [5] "Isl1.E8.75.DEG"            "Isl1KO.E10.5RV.OFT.up"     "Isl1KO.E10.5RV.OFT.dn"     "Isl1.E10.5RV.OFT.DEG"     
@@ -174,7 +174,7 @@ g <- graph_list[["HiGCTS_CP.1"]]
 
 graph_name = 'HiGCTS_CP.1'
 
-ISL1_set = readRDS( file='D:/projects/DS/result/GSE195476_ISL1/ISL1_set.rds')
+ISL1_set = readRDS( file=here::here("examples", "cardiac", "data", "GSE195476_ISL1", "ISL1_set.rds"))
 ISL1_set[['ISL1.targets_CP']] = intersect(ISL1_set[['ISL1_WT_d6CP']], 
 									unique(c(ISL1_set[['ISL_DEG_d8CP_E']], ISL1_set[['ISL_DEG_d8CP_L']], ISL1_set[['ISL_DEG_d8CP_T']]))
 									)    # catdiac specific union 207     

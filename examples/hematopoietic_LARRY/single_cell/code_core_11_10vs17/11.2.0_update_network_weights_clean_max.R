@@ -4,7 +4,7 @@ library(SingleCellExperiment)
 library(igraph)
 
 ########## BEGINNING OF USER INPUT ##########
-code_dir <- get0("code_dir", ifnotfound = "F:/projects/TIPS/source/GSE140802_lineage_tracking/7_data_MuTrans_TIPS_STRING/code_core_4_9vs11")
+code_dir <- get0("code_dir", ifnotfound = file.path(here::here("examples", "hematopoietic_LARRY", "single_cell"), "code_core_11_10vs17"))
 source(file.path(code_dir, "00_configuration.R"))
 ensure_tips_configured(code_dir)
 setwd(ppi_path)
@@ -17,7 +17,7 @@ step2 <- TRUE
 
 source(file.path(tips_r_dir, paste0("celltype_specific_weight_v", celltype_specific_weight_version, ".R")))
 
-Sys.setenv(SEURAT_RDS = "F:/projects/TIPS/results/GSE140802_lineage_tracking/inVitro_NMtrajectory/larry_BioTIP/BioTIP_attractor/seu_attractor_MuTrans_HVG.rds")
+Sys.setenv(SEURAT_RDS = file.path(here::here("examples", "hematopoietic_LARRY", "data"), "seu_attractor_MuTrans_HVG.rds"))
 Sys.unsetenv("SCE_RDS")
 
 sce <- load_larry_sce()

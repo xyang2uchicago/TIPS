@@ -4,10 +4,11 @@
 ## Step scripts: source this file, then ensure_tips_configured(code_dir).
 ##
 ## Two sources (no other pipelines):
-##   1) Felix:  F:/projects/TIPS/results/felix/TIPS/examples/Shared_Data/
-##              F:/projects/TIPS/results/felix/TIPS/R/
-##              F:/projects/Share/PPIN/STRING/STRINGdb/mouse/full/  (STRING)
-##   2) Larry:  .../larry_BioTIP/BioTIP_attractor/  (Seurat + BioTIP CTS from your pipeline)
+##   1) Repo:   here::here("examples", "Shared_Data")/, here::here("R")/,
+##              here::here("examples", "Shared_Data", "PPIN")/  (STRING)
+##              Override via FELIX_EXAMPLES / TIPS_R_DIR / STRING_PPIN_DIR env vars.
+##   2) Larry:  examples/hematopoietic_LARRY/data/
+##              (Seurat + BioTIP CTS; override via LARRY_BIOTIP_DIR)
 
 tips_deg_paths <- function(logFC.cut, fdr.cut, min_prop, data_dir) {
   tag <- paste0("min.prop", min_prop, "_lfc", logFC.cut, "_FDFR", fdr.cut)
@@ -143,9 +144,9 @@ resolve_species_resources <- function(db_species, shared_path) {
   if (db_species == 10090L) {
     list(
       species = "mouse",
-      string_ppin_default = "F:/projects/Share/PPIN/STRING/STRINGdb/mouse/full",
+      string_ppin_default = file.path(shared_path, "PPIN"),
       cistarget_db = "mm10_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather",
-      cistarget_dir_default = "F:/projects/Share/TF/cistarget/mus_musculus/mm10/refseq_r80/mc_v10_clust/gene_based",
+      cistarget_dir_default = file.path(shared_path, "cistarget"),
       cistarget_dir_env = "CISTARGET_MM10_DIR",
       cistarget_url_base = paste0(
         "https://resources.aertslab.org/cistarget/databases/mus_musculus/",
@@ -157,7 +158,7 @@ resolve_species_resources <- function(db_species, shared_path) {
   } else if (db_species == 9606L) {
     list(
       species = "human",
-      string_ppin_default = "F:/projects/Share/PPIN/STRING/STRINGdb/human/full",
+      string_ppin_default = file.path(shared_path, "PPIN"),
       cistarget_db = "hg38_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather",
       cistarget_dir_default = file.path(shared_path, "cistarget"),
       cistarget_dir_env = "CISTARGET_HG38_DIR",
@@ -165,7 +166,7 @@ resolve_species_resources <- function(db_species, shared_path) {
         "https://resources.aertslab.org/cistarget/databases/homo_sapiens/",
         "hg38/refseq_r80/mc_v10_clust/gene_based/"
       ),
-      coding_genes_rds = file.path(shared_path, "coding_genes_human.rds"),
+      coding_genes_rds = file.path(shared_path, "coding_genes.rds"),
       motif_annot_type = "hgnc"
     )
   } else {
@@ -219,7 +220,7 @@ tips_configure <- function(
     motif_target_strategy = NULL,
     wd = Sys.getenv(
       "TIPS_WD",
-      "F:/projects/TIPS/source/GSE140802_lineage_tracking/7_data_MuTrans_TIPS_STRING/"
+      here::here("examples", "hematopoietic_LARRY", "single_cell/")
     ),
     envir = .GlobalEnv
 ) {
@@ -237,7 +238,7 @@ tips_configure <- function(
   assign("ppi_path", paste0(get("results_dir", envir = envir), "PPI_weight/"), envir = envir)
 
   felix_examples <- normalizePath(
-    Sys.getenv("FELIX_EXAMPLES", "F:/projects/TIPS/results/felix/TIPS/examples"),
+    Sys.getenv("FELIX_EXAMPLES", here::here("examples")),
     winslash = "/", mustWork = FALSE
   )
   shared_path <- normalizePath(
@@ -245,13 +246,13 @@ tips_configure <- function(
     winslash = "/", mustWork = FALSE
   )
   tips_r_dir <- normalizePath(
-    Sys.getenv("TIPS_R_DIR", "F:/projects/TIPS/results/felix/TIPS/R"),
+    Sys.getenv("TIPS_R_DIR", here::here("R")),
     winslash = "/", mustWork = FALSE
   )
   larry_biotip_dir <- normalizePath(
     Sys.getenv(
       "LARRY_BIOTIP_DIR",
-      "F:/projects/TIPS/results/GSE140802_lineage_tracking/inVitro_NMtrajectory/larry_BioTIP/BioTIP_attractor"
+      here::here("examples", "hematopoietic_LARRY", "data")
     ),
     winslash = "/", mustWork = FALSE
   )
@@ -334,11 +335,7 @@ tips_configure <- function(
     default <- file.path(larry_biotip_dir, "seu_attractor_MuTrans_HVG.rds")
     if (nzchar(env) && file.exists(env)) env else default
   }
-  LARRY_SEURAT_RDS <- paste0(
-    "F:/projects/TIPS/results/GSE140802_lineage_tracking/",
-    "inVitro_NMtrajectory/larry_BioTIP/BioTIP_attractor/",
-    "seu_attractor_MuTrans_HVG.rds"
-  )
+  LARRY_SEURAT_RDS <- file.path(here::here("examples", "hematopoietic_LARRY", "data"), "seu_attractor_MuTrans_HVG.rds")
   if (!file.exists(seurat_rds) && file.exists(LARRY_SEURAT_RDS)) {
     seurat_rds <- LARRY_SEURAT_RDS
   }
@@ -432,10 +429,10 @@ infer_tips_wd <- function(code_dir = "") {
   if (nzchar(env_wd)) return(env_wd)
   if (nzchar(code_dir)) {
     if (grepl("MuTrans_TIPS_IID", code_dir, fixed = TRUE)) {
-      return("F:/projects/TIPS/source/GSE140802_lineage_tracking/7_data_MuTrans_TIPS_IID/")
+      return(here::here("examples", "hematopoietic_LARRY", "metacell", "7_data_MuTrans_TIPS_IID/"))
     }
     if (grepl("MuTrans_TIPS_STRING", code_dir, fixed = TRUE)) {
-      return("F:/projects/TIPS/source/GSE140802_lineage_tracking/7_data_MuTrans_TIPS_STRING/")
+      return(here::here("examples", "hematopoietic_LARRY", "metacell", "7_data_MuTrans_TIPS_STRING/"))
     }
     parent <- sub("code_core_.*/$", "", code_dir)
     if (nzchar(parent)) return(parent)
@@ -468,7 +465,7 @@ ensure_tips_configured <- function(code_dir = get0("code_dir", ifnotfound = ""))
   wd_arg <- infer_tips_wd(code_dir)
   default_wd <- if (!is.null(wd_arg)) wd_arg else Sys.getenv(
     "TIPS_WD",
-    "F:/projects/TIPS/source/GSE140802_lineage_tracking/7_data_MuTrans_TIPS_STRING/"
+    here::here("examples", "hematopoietic_LARRY", "single_cell/")
   )
   tips_configure(
     TAG = tag,
@@ -488,7 +485,7 @@ load_larry_sce <- function() {
   .code_dir <- if (exists("code_dir", inherits = TRUE)) {
     get("code_dir", inherits = TRUE)
   } else {
-    "F:/projects/TIPS/source/GSE140802_lineage_tracking/7_data_MuTrans_TIPS_STRING/code_core_4_9vs11"
+    file.path(here::here("examples", "hematopoietic_LARRY", "single_cell"), "code_core_11_10vs17")
   }
   source(file.path(.code_dir, "mutrans_sce_xy.R"), local = FALSE)
 

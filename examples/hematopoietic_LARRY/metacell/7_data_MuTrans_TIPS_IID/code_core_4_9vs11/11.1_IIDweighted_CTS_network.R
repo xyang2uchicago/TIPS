@@ -10,7 +10,7 @@ suppressPackageStartupMessages({
 })
 
 ########## BEGINNING OF USER INPUT ##########
-code_dir <- get0("code_dir", ifnotfound = "F:/projects/TIPS/source/GSE140802_lineage_tracking/7_data_MuTrans_TIPS_IID/code_core_4_9vs11")
+code_dir <- get0("code_dir", ifnotfound = file.path(here::here("examples", "hematopoietic_LARRY", "metacell", "7_data_MuTrans_TIPS_IID"), "code_core_4_9vs11"))
 source(file.path(code_dir, "00_configuration.R"))
 ensure_tips_configured(code_dir)
 source(file.path(code_dir, "mutrans_sce_xy.R"))
@@ -38,7 +38,7 @@ cts_ic_s_delta_p_cut <- 0.05
 cts_require_localmax <- TRUE
 ########## END OF USER INPUT ##########
 
-Sys.setenv(SEURAT_RDS = "F:/projects/TIPS/results/GSE140802_lineage_tracking/inVitro_NMtrajectory/larry_BioTIP/BioTIP_attractor/seu_attractor_MuTrans_HVG.rds")
+Sys.setenv(SEURAT_RDS = file.path(here::here("examples", "hematopoietic_LARRY", "data"), "seu_attractor_MuTrans_HVG.rds"))
 
 sce <- load_larry_sce()
 sce <- sync_sce_cluster_labels(sce, group_col = group_col)

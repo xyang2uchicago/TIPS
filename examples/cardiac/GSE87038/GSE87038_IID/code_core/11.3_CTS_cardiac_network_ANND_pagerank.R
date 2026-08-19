@@ -385,7 +385,7 @@ write.table(df_BC, file = "df_betweeness.tsv", sep = "\t", row.names = F) # !!!!
 df_BC <- read.table(file = "df_betweeness.tsv", sep = "\t", header = T)
 df_BC$PPI_cat <- factor(df_BC$PPI_cat, levels = c("CTS", "HiGCTS", "HiG"))
 
-CHD <- readRDS(file.path(inputdir, "CHD_Cilia_Genelist.rds"))
+CHD <- readRDS(here::here("examples", "Shared_Data", "CHD_Cilia_Genelist.rds"))
 df_BC$PCGC_AllCurated <- toupper(df_BC$gene) %in% toupper(unlist(CHD["Griffin2023_PCGC_AllCurated"]))
 
 # Calculate top 5 significant genes within each box
@@ -602,7 +602,7 @@ df <- rbind(
   subset(df, PPI_cat == "HiG")
 )
 
-CHD <- readRDS(file.path(inputdir, "CHD_Cilia_Genelist.rds"))
+CHD <- readRDS(here::here("examples", "Shared_Data", "CHD_Cilia_Genelist.rds"))
 df$PCGC_AllCurated <- toupper(df$gene) %in% toupper(unlist(CHD["Griffin2023_PCGC_AllCurated"]))
 
 # Calculate top 5 significant genes within each box
@@ -823,7 +823,7 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     arrange(desc(annd)) %>% # Sort in descending order of annd
     slice_head(n = 5) # Take the top 5 rows for each signature
   # subset the CHD genes within top 5
-  CHD <- readRDS(file.path(inputdir, "CHD_Cilia_Genelist.rds"))
+  CHD <- readRDS(here::here("examples", "Shared_Data", "CHD_Cilia_Genelist.rds"))
 
   top_genes_CHD <- subset(top_genes, toupper(gene) %in% toupper(unlist(CHD[c("Griffin2023_PCGC_AllCurated")])))
   (dim(top_genes)) # [1] 130  17
@@ -932,7 +932,7 @@ dev.off() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   df$label <- df$gene
   subset(df, signature == "HiGCTS_8")
 
-  CHD <- readRDS(file.path(inputdir, "CHD_Cilia_Genelist.rds"))
+  CHD <- readRDS(here::here("examples", "Shared_Data", "CHD_Cilia_Genelist.rds"))
   df$PCGC_AllCurated <- toupper(df$gene) %in% toupper(unlist(CHD["Griffin2023_PCGC_AllCurated"]))
 
   # Step 1: Filter top 5 genes by normalized.strength within each signature

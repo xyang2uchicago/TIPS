@@ -11,14 +11,9 @@ CF_cluster <- Sys.getenv("TIPS_CF_CLUSTER", "11")  # Meg
 Real_names <- c(CP = "progenitor", CM = "Baso", CF = "Meg")
 motif_target_strategy <- "merge"  # c("solo", "fam", "merge"); or TIPS_MOTIF_TARGET_STRATEGY env
 
-code_dir <- paste0(
-  "F:/projects/TIPS/source/GSE140802_lineage_tracking/7_data_MuTrans_TIPS_STRING/code_core_",
-  TAG
-)
+tips_wd <- here::here("examples", "hematopoietic_LARRY", "metacell", "7_data_MuTrans_TIPS_STRING/")
 
-tips_wd <- paste0(
-  "F:/projects/TIPS/source/GSE140802_lineage_tracking/7_data_MuTrans_TIPS_STRING/"
-)
+code_dir <- paste0(tips_wd, "code_core_", TAG)
 
 source(file.path(code_dir, "00_configuration.R"))
 tips_configure(

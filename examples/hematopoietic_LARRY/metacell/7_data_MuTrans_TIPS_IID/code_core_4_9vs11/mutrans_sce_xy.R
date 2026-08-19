@@ -4,9 +4,8 @@ tips_sce_assay_name <- function() {
   get0("tips_sce_assay", ifnotfound = "logcounts")
 }
 
-DEFAULT_LARRY_SEURAT_RDS <- paste0(
-  "F:/projects/TIPS/results/GSE140802_lineage_tracking/",
-  "inVitro_NMtrajectory/larry_BioTIP/BioTIP_attractor/",
+DEFAULT_LARRY_SEURAT_RDS <- file.path(
+  here::here("examples", "hematopoietic_LARRY", "data"),
   "seu_attractor_MuTrans_HVG.rds"
 )
 

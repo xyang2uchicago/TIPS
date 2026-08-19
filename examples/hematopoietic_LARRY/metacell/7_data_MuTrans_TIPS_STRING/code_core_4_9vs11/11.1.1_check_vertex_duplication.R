@@ -13,7 +13,7 @@ suppressPackageStartupMessages({
 })
 
 ########## BEGINNING OF USER INPUT ##########
-code_dir <- get0("code_dir", ifnotfound = "F:/projects/TIPS/source/GSE140802_lineage_tracking/7_data_MuTrans_TIPS_STRING/code_core_4_9vs11")
+code_dir <- get0("code_dir", ifnotfound = file.path(here::here("examples", "hematopoietic_LARRY", "metacell", "7_data_MuTrans_TIPS_STRING"), "code_core_4_9vs11"))
 source(file.path(code_dir, "00_configuration.R"))
 ensure_tips_configured(code_dir)
 setwd(results_dir)
@@ -147,7 +147,8 @@ if (!length(dup_hig)) {
     stop("[11.1.1] biomaRt failed on all Ensembl mirrors", call. = FALSE)
   }
 
-  peptide_cache_file <- file.path(data_dir, "ensembl_peptide_to_gene_mmusculus.rds")
+  # Shared across metacell/ and single_cell/ arms (see hematopoietic_LARRY/data/)
+  peptide_cache_file <- file.path(dirname(dirname(wd)), "data", "ensembl_peptide_to_gene_mmusculus.rds")
   load_peptide_gene_map <- function(peptide_ids) {
     peptide_ids <- unique(peptide_ids[nzchar(peptide_ids)])
     cached <- if (file.exists(peptide_cache_file)) {
