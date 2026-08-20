@@ -3,7 +3,7 @@
 Reference resources shared across the `hematopoietic_LARRY` subtrees (`metacell/`,
 `single_cell/`, and top-level `8.x`/`2.x` scripts) but not used anywhere outside
 `hematopoietic_LARRY/` — genuinely cross-tree resources live in `../../Shared_Data/`
-instead. See `../../MISSING_DATA.md` for outstanding data gaps.
+instead.
 
 ## MuTrans attractor-level BioTIP run
 
