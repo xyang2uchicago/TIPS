@@ -2,6 +2,47 @@
 
 TIPS links tipping-point instability in single-cell data to interpretable interaction subnetworks, prioritizing bridge regulators and “dual-pull” lineage programs during fate transitions. For more details, refer to [**TIPS tutorial**](https://xyang2uchicago.github.io/TIPS/tutorial/TIPS.html)
 
+### Repository Structure
+
+```
+TIPS/
+├── R/                              # shared helper functions sourced by analysis scripts
+├── imgs/                           # figures used in this README
+├── tutorial/                       # step-by-step walkthrough (GSE87038)
+└── examples/
+    ├── config.R                    # here::here()-based path resolution, shared by all trees
+    ├── Shared_Data/                 # cross-tree reference data (STRING/IID PPINs, cisTarget, gene lists)
+    │
+    ├── cardiac/                     # case study: cardiac development
+    │   ├── data/                    # cardiac-only shared reference files
+    │   ├── evaluation/              # cross-dataset evaluation figures/scripts
+    │   ├── GSE175634/
+    │   │   ├── data/
+    │   │   ├── GSE175634_IID/
+    │   │   │   ├── code/            # original analysis scripts
+    │   │   │   ├── code_core/       # cleaned, portable pipeline
+    │   │   │   └── results_core/    # networks, figures, tables
+    │   │   └── GSE175634_STRING/    # same code / code_core / results_core layout
+    │   ├── GSE87038/                 # same IID / STRING × code_core / results_core layout
+    │   └── IbarraSoria2018/          # same layout
+    │
+    ├── hematoendothelial/           # case study: hematoendothelial development
+    │   ├── GSE87038/                 # code_core_13 + results_core_13
+    │   └── IbarraSoria2018/          # code_core_endothelial.b + results_core_endothelial.b
+    │
+    └── hematopoietic_LARRY/         # case study: hematopoiesis
+        ├── data/                     # LARRY-wide shared reference data
+        ├── metacell/
+        │   ├── 7_data_MuTrans_TIPS_IID/
+        │   │   ├── code_core_4_9vs11/
+        │   │   └── results_core_4_9vs11/
+        │   └── 7_data_MuTrans_TIPS_STRING/   # same layout
+        └── single_cell/
+            ├── code_core_11_10vs17/
+            ├── results_core_11_10vs17/
+            └── 9_Held_out_clone_fate_prediction_cursor/  # held-out clone-fate validation
+```
+
 ### What is TIPS?
 - Name: **Transcriptional Instability–guided Prediction of Subnetworks**.
 - Goal: Identify **semi-stable transition states** obscured by program mixing (Fig. 1A).
