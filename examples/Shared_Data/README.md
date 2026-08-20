@@ -3,8 +3,8 @@
 Species- and publication-level reference resources shared across multiple experiment
 trees (`cardiac/`, `hematoendothelial/`, `hematopoietic_LARRY/`). Anything
 here is read by more than one pipeline — dataset-specific inputs live in each
-experiment's own `data/` folder instead. See `../MISSING_DATA.md` for what's still
-missing and where each gap stands (get from Holly / published / code-generated / undecided).
+experiment's own `data/` folder instead. Files marked "not present" below are published/
+downloadable (source given in each table) rather than redistributed here.
 
 ## Gene annotation
 

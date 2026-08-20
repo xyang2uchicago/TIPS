@@ -3,7 +3,7 @@
 Reference resources shared across the `cardiac/` dataset trees (`GSE175634`, `GSE87038`,
 `IbarraSoria2018`) but not used anywhere outside `cardiac/` — genuinely cross-tree
 resources (used by `hematoendothelial/` or `hematopoietic_LARRY/` too) live in
-`../../Shared_Data/` instead. See `../../MISSING_DATA.md` for outstanding data gaps.
+`../../Shared_Data/` instead.
 
 ## Fetal/in-vitro heart annotation (Ameen et al. 2022, *Cell*)
 

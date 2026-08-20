@@ -7,9 +7,5 @@ examples/Shared_Data/coding_genes.rds
 examples/Shared_Data/coding_genes_mouse.rds
 examples/Shared_Data/iid2025_human_mouse_conserved_global.rds
 .claude/
-examples/GSE116893/data/malignant_leiden.rds
-examples/GSE116893/data/seurat_rna_malignant_harmony_cellstateannotated.rds
-examples/GSE116893/data/sce.rds
-examples/GSE116893/data/sce_C9split.rds
 examples/cardiac/GSE175634/data/sce.rds
 **/Rplots.pdf
