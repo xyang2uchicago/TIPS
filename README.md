@@ -38,7 +38,8 @@ We applied TIPS across three developmental settings (see [examples](https://gith
   Dataset: [Weinreb, C., Rodriguez-Fraticelli, A., Camargo, F.D. & Klein, A.M. Lineage tracing on transcriptional landscapes links state to fate during differentiation. *Science* 367 (2020).](https://pubmed.ncbi.nlm.nih.gov/31974159/)
 
 - **Hematoendothelial development** — *We ask: does an independently-inferred module generalize to a completely different dataset?*
-  Datasets: Dataset 1 — 12.7k genes in 11k E8.25 cells, with 16 predefined developing mesoderm subtypes ([Ibarra-Soria et al., 2018](https://www.nature.com/articles/s41556-017-0013-z)); Dataset 2 — 10.9k genes of 7,240 developing mesoderm cells collected at embryonic day (E) 8.25 when precursor cells of major organs have been formed ([Pijuan-Sala et al., 2019](https://pubmed.ncbi.nlm.nih.gov/30787436/)).
+  Datasets: Dataset 1 — 12.7k genes in 11k E8.25 cells, with 16 predefined developing mesoderm subtypes ([Ibarra-Soria et al., 2018](https://www.nature.com/articles/s41556-017-0013-z));
+  Dataset 2 — 10.9k genes of 7,240 developing mesoderm cells collected at embryonic day (E) 8.25 when precursor cells of major organs have been formed ([Pijuan-Sala et al., 2019](https://pubmed.ncbi.nlm.nih.gov/30787436/)).
 
 - **Cardiac development** — *We ask: is TIPS prediction biologically and clinically relevant?*
   Datasets: Dataset 1 ([Ibarra-Soria et al., 2018](https://www.nature.com/articles/s41556-017-0013-z)); Dataset 2 ([Pijuan-Sala et al., 2019](https://pubmed.ncbi.nlm.nih.gov/30787436/)); Dataset 3 — 38.9k genes in 230,786 human embryonic stem cells (hESCs) of 13 clusters ([Elorbany et al., 2022](https://pubmed.ncbi.nlm.nih.gov/35061661/)). MuTrans evaluation is given at https://github.com/MohsenZand/ipsc_cardiomyocyte.
