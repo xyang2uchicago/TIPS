@@ -1149,13 +1149,13 @@ subset(df, gene=='ISL1')
                   n_sig.annd = n.annd.high) 
     df_compare$PPI_cat = lapply(df_compare$signature, function(x) unlist(strsplit(x , split='_'))[1]) %>% unlist %>%
 						 factor(.,levels=c('CTS', 'HiGCTS', 'HiG')) 
-    ggplot(df_compare,aes(x= n_sig.pagerank, y=n_sig.annd)) +
-      geom_point(aes(shape= PPI_cat, colour=PPI_cat), show.legend = FALSE) + 
+    pdf(file='n.sig.pageRank_vs_n.sig.annd.pdf')
+    print(ggplot(df_compare,aes(x= n_sig.pagerank, y=n_sig.annd)) +
+      geom_point(aes(shape= PPI_cat, colour=PPI_cat), show.legend = FALSE) +
 	  scale_color_manual(values = PPI_color_platte) +
       geom_text_repel(aes(label=signature), hjust= -0.1, vjust=0) +
-      theme(legend.position=c(0, 0), legend.justification=c(0, 0))   
-	  
-   dev.copy2pdf(file='n.sig.pageRank_vs_n.sig.annd.pdf')
+      theme(legend.position=c(0, 0), legend.justification=c(0, 0)))
+   dev.off()
     
     
     
