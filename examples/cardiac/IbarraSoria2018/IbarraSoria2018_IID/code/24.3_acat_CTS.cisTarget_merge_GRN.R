@@ -39,7 +39,7 @@ key_TFs # [1] "CBFB"   "ETV2"   "GATA4"  "HMGA2"  "PRDM6"  "RBFOX2"
 
 final_table <- read.table(file = file, header = TRUE, sep = "\t")
 head(final_table)
-#   linkeage  from    to          w1            w2        delta   abs_delta
+#   linkage  from    to          w1            w2        delta   abs_delta
 # 1       CM  CBFB GATA6  0.03651142 -0.0056903109 -0.042201727 0.042201727
 # 2       CM  CBFB  TBX5 -0.01286985 -0.0002101566  0.012659694 0.012659694
 # 3       CM GATA6  TBX5  0.01000000  0.0007727979 -0.009227202 0.009227202
@@ -65,13 +65,14 @@ source(here::here("R", "celltype_specific_weight_v10.R"))
 
 # g = graph_from_data_frame(final_table[,c('from','to')], directed = FALSE)
 
-g_merged <- make_merged_TIPS_graph(subset(final_table, linkeage == "CM"),
+g_merged <- make_merged_TIPS_graph(subset(final_table, linkage == "CM"),
   CHD = CHD,
   added_TF = setdiff(key_TFs, V(graph_list[[paste0("CTS_", CTS_ID)]])$name %>% toupper()), top_n_label = 5,
   g_string = graph_list[[paste0("CTS_", CTS_ID)]]
 )
 
 set.seed(2)
+pdf(file = "PPI_graph_merged_GRN_prediction_CTS_cardiac.a_CM_final.pdf")
 plot(
   g_merged,
   layout = layout_with_fr(g_merged, weights = NA),
@@ -81,24 +82,31 @@ plot(
   main = "Merged CMvsCP TIPS delta-edge reweighting"
 )
 mtext("CMvsCP edges labeled by delta (top abs_delta)", side = 1, line = -1, cex = 1.2)
-
-dev.copy2pdf(file = "PPI_graph_merged_GRN_prediction_CTS_cardiac.a_CM_final.pdf")
+dev.off()
 
 
 ######## query the HMGA2 appeaing often in the results #########
+## Non-essential exploratory diagnostics + an unfinished publication-figure
+## snippet (markers[[i]] below has no defined i) -- the real pipeline output
+## (final_table.tsv, merged GRN graphs) is already written above this point.
+## Wrapped so a failure here (e.g. a scater plotExpression version quirk, or
+## the incomplete snippet at the end) doesn't block driver completion.
+tryCatch({
 ## 1) Is HMGA2 actually highly expressed in the relevant cells? == yes, increased along cardiac trajectory from a->c
 p <- plotExpression(sce, features = c("HMGA2", "HMGA1"), x = celltype_col)
-p + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
-dev.copy2pdf(file = "HMGA2_HMGA1_expression_across_clusters.pdf", width = 7, height = 5)
+pdf(file = "HMGA2_HMGA1_expression_across_clusters.pdf", width = 7, height = 5)
+print(p + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)))
+dev.off()
 
 ## 2) How often does HMGA2 appear in TF_highConf among DEGs and CTS ?
 cisTarget.res[grepl("HMGA2", cisTarget.res$TF_highConf) | grepl("HMGA2", cisTarget.res$motif), ]$geneSet
 # [1] "cardiac.a"     "endothelial.b"
+if (!exists("cisTarget.res_HiG")) cisTarget.res_HiG <- readRDS(file = "../cisTarget_targets_in_two_HiGs.rds")
 cisTarget.res_HiG[grepl("HMGA2", cisTarget.res_HiG$TF_highConf) | grepl("HMGA2", cisTarget.res_HiG$motif), ]$geneSet
 # 0
 
 ## 3) 3) Is HMGA2 supported by many distinct motifs or only one recurring composite?
-hits_hmga <- subset(final_table, linkeage == "CM" & grepl("HMGA2", TF_highConf))
+hits_hmga <- subset(final_table, linkage == "CM" & grepl("HMGA2", TF_highConf))
 sort(tapply(hits_hmga$NES, hits_hmga$motif, max), decreasing = TRUE)
 # transfac_pro__M07320
 #                 3.81
@@ -113,3 +121,4 @@ setdiff(markers, rownames(sce))
 
 #' Tagln'
 plotReducedDim(sce, "UMAP", colour = markers[[i]], by_exprs_values = "logcounts")
+}, error = function(e) message("[24.3] exploratory HMGA2/publication-figure tail skipped: ", e$message))

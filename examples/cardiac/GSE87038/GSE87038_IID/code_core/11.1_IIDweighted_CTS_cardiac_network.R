@@ -11,18 +11,15 @@ library("SingleCellExperiment")
 
 ########## BEGINNING OF USER INPUT ##########
 
-source(here::here("examples", "config.R"))
-wd <- tips_path("examples", "cardiac", "GSE87038", "GSE87038_IID/")
+code_dir <- here::here("examples", "cardiac", "GSE87038", "GSE87038_IID", "code_core")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
 outdir <- file.path(wd, "data")
 dir.create(outdir, recursive = TRUE, showWarnings = FALSE)
 setwd(outdir)
 
-db <- "GSE87038"
-
-db_species <- 10090 # 10090 for mouse, 9606 for human
-
-load(file = "../../data/BioTIP.res.RData")
-load("../../data/sce_E8.25_uncorrected.RData")
+load(file = paste0(data_dir, "BioTIP.res.RData"))
+load(paste0(data_dir, "sce_E8.25_uncorrected.RData"))
 
 CTS <- res$CTS.candidate[which(res$significant)]
 
@@ -34,11 +31,11 @@ CTS <- c(CTS[1:4], CTS[7], CTS[5:6])
 names(CTS)
 # [1] "7"    "11"   "15"   "16"   "16.1" "13"   "8"
 
-markers.up <- readRDS("../../data/markers.up_ttest_min.prop0.25.rds")
+markers.up <- readRDS(paste0(data_dir, "markers.up_ttest_min.prop0.25.rds"))
 
 ########## END OF USER INPUT ##########
 # downloaded from GitHub
-DEG <- readRDS(file = paste0("../../data/DEG_perState_min.prop0.25_lfc", logFC.cut <- 0.6, "_FDFR0.01.rds"))
+DEG <- readRDS(file = paste0(data_dir, "DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.01.rds"))
 lengths(DEG)
 
 ######################################################
@@ -151,14 +148,14 @@ for (i in names(CTS)) {
   graph_list[[paste0("HiGCTS_", i)]] <- graph
 }
 
-## lastly, build for CTS
+## lastly, build for CTS (no significance filter — raw CTS[[i]] membership,
+## matching the STRING arm's CTS loop, which also takes CTS[[i]] as-is)
 # refer to 6.3_DE.statistics_CTS.R
-markers.up_all <- readRDS("../../data/markers.up_all_ttest.rds")
 
 # CTS
 for (i in names(CTS)) {
   j <- if (grepl("\\.", i) && grepl("^[0-9]+$", sub("^[^.]*\\.", "", i))) sub("\\..*$", "", i) else i
-  diff_exp <- markers.up_all[[j]][CTS[[i]], ]
+  diff_exp <- markers.up[[j]][CTS[[i]], ]
   diff_exp$symbol <- rownames(diff_exp)
 
   hits <- diff_exp$symbol
@@ -247,7 +244,7 @@ which(graphs_with_duplicates)
 # named integer(0)
 
 # Show actual edges for duplicated vertices
-g1 <- graph_list[["HiG_1"]]
+g1 <- graph_list[[names(graph_list)[1]]]
 vertex_names <- toupper(V(g1)$name)
 (duplicated_names <- unique(vertex_names[duplicated(vertex_names)]))
 # character(0)

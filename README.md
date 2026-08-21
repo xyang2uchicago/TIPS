@@ -1,6 +1,8 @@
-# TIPS: Linking tipping-point instability to interaction networks for transition-state regulators 
+# TIPS
 
-TIPS links tipping-point instability in single-cell data to interpretable interaction subnetworks, prioritizing bridge regulators and “dual-pull” lineage programs during fate transitions. For more details, refer to [**TIPS tutorial**](https://xyang2uchicago.github.io/TIPS/tutorial/TIPS.html)
+TIPS links transition-prone states in single-cell data to interpretable interaction subnetworks, prioritizing bridge regulators and “dual-pull” lineage programs during fate transitions. The rationale is critical-transition genes-derived progenitor networks were ordered yet selectively fragile. For more details, refer to [**regulated stochasticity tutorial**](https://xyang2uchicago.github.io/TIPS/tutorial/TIPS.html)
+
+[**DOI**](https://doi.org/10.5281/zenodo.22031075)
 
 ### Repository Structure
 
@@ -68,7 +70,7 @@ Figure 1C
 
 ### Why TIPS?
 - Vulnerable progenitor states are transient, heterogeneous, and difficult to capture using markers alone.
-- Pinpointing when—and how—perturbations rewire developmental programs remains challenging.
+- Resolving how perturbations rewire developmental programs remains challenging.
 - TIPS maps defect-vulnerable windows and prioritizes lineage-selective regulatory programs from mixed progenitor pools.
 
 ### Case Studies
@@ -92,7 +94,15 @@ We applied TIPS across three developmental settings (see [examples](https://gith
 
 ### How to use TIPS analysis? 
 
-1. [**TIPS tutorial**](https://xyang2uchicago.github.io/TIPS/tutorial/TIPS.html): This is a detailed walkthrough of TIPS on one of our key results (E8.25 Mouse Gastrulation, GSE87038, [Pijian-Sala 2019](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE87038)). 
+1. [**regulated stochasticity tutorial**](https://xyang2uchicago.github.io/TIPS/tutorial/TIPS.html) — "Ordered Yet Selectively Fragile Progenitor Networks": a detailed walkthrough of PPIN construction and topological robustness analysis on one of our key results (E8.25 Mouse Gastrulation, GSE87038, [Pijian-Sala 2019](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE87038)). It covers the network-topology portion of TIPS (Fig. 3d,e of the manuscript); TF–target edge reweighting, CM/CF lineage-biased module resolution, CHD-program convergence and cross-dataset/disease transfer are demonstrated in `examples/` and described in the manuscript.
+
+2. **Run a case study's pipeline directly**: every `code_core*` folder shown in the [Repository Structure](#repository-structure) above (`code_core`, `code_core_13`, `code_core_endothelial.b`, `code_core_4_9vs11`, `code_core_11_10vs17`) is self-contained and driven by a single `run_TIPS_core.R` script. Set the tunable parameters (species, cluster IDs, thresholds, etc.) in that same folder's `00_configuration.R`, then run the driver, e.g.:
+   ```r
+   Rscript examples/cardiac/GSE87038/GSE87038_IID/code_core/run_TIPS_core.R
+   ```
+   All `code_core*` folders share one centralized config engine (`examples/tips_core_shared_config.R`) and follow the pattern established in `hematopoietic_LARRY`. Cardiac case studies also keep the original, non-centralized analysis scripts under each dataset's `code/` folder, sequenced for reference by a thin `run_TIPS_code.R` driver (no shared config — each script sets its own parameters).
+
+   Note: `GSE175634` (230,786 cells) needs an HPC node with substantial memory for `11.2.0`'s network-specificity step — not a laptop; see the comments at the top of its `code_core/midway3_submit*.sbatch` scripts.
 
 ### How to install?
 To use the newest TIPS package, clone/download this repository:
@@ -101,4 +111,4 @@ git clone https://github.com/xyang2uchicago/TIPS.git
 ```
 
 ### Acknowledgements
-TIPS is made possible by contributions from the following authors: Xinan H Yang and Felix Yu
+TIPS is made possible by contributions from the following authors: Xinan H Yang, Felix Yu, Horatio Ai, Tinjun Luo, and Mohsen Zand.

@@ -35,7 +35,7 @@ BioTIP_version <- "06232025"
 source(paste0("https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v", celltype_specific_weight_version, ".R"))
 source(paste0("https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/heads/master/R/BioTIP_update_", BioTIP_version, ".R"))
 
-load(paste0(wd, "data/sce_E8.25_uncorrected.RData"))
+load(paste0(wd, "../data/sce_E8.25_uncorrected.RData"))
 rownames(sce) <- toupper(rownames(sce)) # !!!!!!!
 
 

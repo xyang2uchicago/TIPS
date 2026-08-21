@@ -3,11 +3,10 @@ library(dplyr)
 library(data.table)
 
 ########## BEGINNING OF USER INPUT ##########
-source(here::here("examples", "config.R"))
-wd <- tips_path("examples", "hematoendothelial", "GSE87038", "GSE87038_IID/")
-setwd(paste0(wd, "results_core_13/PPI_weight/"))
-db <- "GSE87038"
-s  <- "combined"
+code_dir <- here::here("examples", "hematoendothelial", "GSE87038", "GSE87038_IID", "code_core_13")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+setwd(ppi_path)
 ########## END OF USER INPUT ##########
 
 file <- paste0(db, "_IID_graph_perState_simplified_", s, "weighted.rds")

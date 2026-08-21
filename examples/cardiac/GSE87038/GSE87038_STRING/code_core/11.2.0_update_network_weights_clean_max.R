@@ -6,32 +6,18 @@ library(igraph)
 
 ########## BEGINNING OF USER INPUT ##########
 
-source(here::here("examples", "config.R"))
-wd = tips_path("examples", "cardiac", "GSE87038", "GSE87038_STRING/")
-setwd(paste0(wd, "results/PPI_weight/"))
+code_dir <- here::here("examples", "cardiac", "GSE87038", "GSE87038_STRING", "code_core")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+outdir <- ppi_path
+setwd(outdir)
 
-db <- "GSE87038"
-
-specificity_methods <- c("combined", "ratio", "zscore", "diff") # Other methods: "ratio", "zscore", "diff"
-
-isl1_cluster <- "HiGCTS_8" # cluster containing ISL1 gene
-
-cluster_labels <- "label"
-
-core_count <- 1 # number of cores used for parallel processing in steps 1 and 2. Use core_count = 1 if on Windows.
-
-step1 <- TRUE # calculate gene correlations and specificity
-step2 <- TRUE # update network edge weights
-step3 <- TRUE # graph comparing specificity methods for all clusters
-step4 <- TRUE # graph comparing specificity methods for isl1_cluster
-
-celltype_specific_weight_version <- '10'
-BioTIP_version <- '06232025'
+cluster_labels <- celltype_col
 
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/heads/master/R/BioTIP_update_', BioTIP_version, '.R'))
 
-load(paste0(wd, "../data/sce_E8.25_uncorrected.RData"))
+load(paste0(data_dir, "sce_E8.25_uncorrected.RData"))
 
 ########## END OF USER INPUT ##########
 
@@ -219,135 +205,3 @@ if (step2) {
     edge_attr_names(g) # "weight"         "norm_PPI_score" "corexp_sign"    "coexp_focal"
 }
 
-###################################################
-## compare weights methods
-## check new weights for ISL1 in "HiGCTS_8"
-#####################################################
-library(ggplot2)
-library(hexbin)
-
-
-if (step3) {
-    pdf(file = paste0("compare_specificity_method_vs_PPIscores.pdf"))
-
-    for (net_name in names(network_specificity_list))
-    {
-        plot_data <- NULL
-        par(mfrow = c(2, 2))
-
-        for (s in specificity_methods) {
-            graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_simplified_", s, "weighted.rds"))
-            g <- graph_list[[net_name]]
-            # Safeguard to skip graphs with missing original weights
-            if (is.null(E(g)$norm_PPI_score) || length(E(g)$norm_PPI_score) == 0) {
-                cat("⚠️  Skipping", net_name, "- no 'norm_PPI_score' on edges.\n")
-                next
-            }
-
-            # Check for ISL1 vertex and mark edges
-            isl1_vertex <- which(tolower(V(g)$name) == "isl1")
-            is_isl1_edge <- rep(FALSE, length(E(g)))
-            if (length(isl1_vertex) > 0) {
-                isl1_edges <- incident(g, isl1_vertex, mode = "all")
-                is_isl1_edge[isl1_edges] <- TRUE
-            }
-
-            temp_data <- data.frame(
-                net_name = net_name,
-                norm_PPI_score = E(g)$norm_PPI_score,
-                log_weight = log10(E(g)$weight),
-                method = s,
-                is_isl1 = is_isl1_edge
-            )
-
-            plot_data <- rbind(plot_data, temp_data)
-        }
-        if (!is.null(plot_data) && "is_isl1" %in% colnames(plot_data)) {
-            p2 <- ggplot(plot_data, aes(x = norm_PPI_score, y = log_weight)) +
-                stat_binhex(bins = 50, alpha = 0.7) +
-                geom_point(
-                    data = subset(plot_data, is_isl1 == TRUE),
-                    aes(x = norm_PPI_score, y = log_weight),
-                    color = "red", size = 1.5
-                ) +
-                scale_fill_viridis_c() +
-                facet_wrap(~method, scales = "free") +
-                theme_minimal() +
-                labs(
-                    title = paste("Edge Weight Density -", net_name),
-                    x = "E(g)$norm_PPI_score",
-                    y = "log10(E(g)$weight)",
-                    fill = "Count"
-                ) +
-                theme(legend.position = "bottom")
-
-            print(p2)
-        } else {
-            message("⚠️  Skipping plot for ", net_name, " — plot_data is empty or malformed.")
-        }
-    }
-    dev.off()
-}
-
-if (step4) {
-    net_name <- isl1_cluster
-    plot_data <- NULL
-
-    for (s in specificity_methods) {
-        graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_simplified_", s, "weighted.rds"))
-        g <- graph_list[[net_name]]
-
-        graphs_with_duplicates <- sapply(graph_list, function(g) {
-            vertex_names <- V(g)$name
-            if (is.null(vertex_names)) {
-                # If no names, use vertex indices
-                vertex_names <- V(g)
-            }
-            any(duplicated(vertex_names))
-        })
-
-        which(graphs_with_duplicates)
-
-        # Check for ISL1 vertex and mark edges
-        isl1_vertex <- which(tolower(V(g)$name) == "isl1")
-        is_isl1_edge <- rep(FALSE, length(E(g)))
-        if (length(isl1_vertex) > 0) {
-            isl1_edges <- incident(g, isl1_vertex, mode = "all")
-            is_isl1_edge[isl1_edges] <- TRUE
-        }
-        else{
-            print(paste0("No ISL1 found in ", isl1_cluster))
-            break
-        }
-
-        temp_data <- data.frame(
-            net_name = net_name,
-            norm_PPI_score = E(g)$norm_PPI_score,
-            log_weight = log10(E(g)$weight),
-            method = s,
-            is_isl1 = is_isl1_edge
-        )
-
-        plot_data <- rbind(plot_data, temp_data)
-    }
-
-    if (length(isl1_vertex) > 0) {
-        temp <- subset(plot_data, is_isl1 == TRUE)
-        pdf(file = paste0("compare_specificity_method_", isl1_cluster, "_vs_PPIscores.pdf"))
-        print(
-            ggplot(temp, aes(x = norm_PPI_score, y = log_weight, color = as.factor(norm_PPI_score))) +
-                geom_point() +
-                scale_fill_viridis_c() +
-                facet_wrap(~method, scales = "free") +
-                theme_minimal() +
-                labs(
-                    title = paste("Isl1 linkages -", net_name),
-                    x = "E(g)$norm_PPI_score",
-                    y = "log10(E(g)$weight)"
-                ) +
-                theme(legend.position = "bottom")
-        )
-
-        dev.off()
-    }
-}

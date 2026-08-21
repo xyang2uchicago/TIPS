@@ -36,7 +36,7 @@ step4 <- TRUE # ISL1-network focused distribution
 source(here::here("R", "celltype_specific_weight_v10.R"))
 source(paste0("https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/heads/master/R/BioTIP_update_", BioTIP_version, ".R"))
 
-load(file.path(wd, "data", "sce_16subtype.RData"))
+load(file.path(wd, "../data", "sce_16subtype.RData"))
 
 ########## END OF USER INPUT ##########
 
@@ -378,7 +378,7 @@ if (step4) {
     plot_data <- rbind(plot_data, temp_data)
   }
 
-  if (nrow(plot_data) > 0) {
+  if (!is.null(plot_data) && any(plot_data$is_isl1)) {
     pdf(file = paste0(
       "2018_compare_specificity_method_",
       isl1_cluster,
@@ -405,5 +405,7 @@ if (step4) {
 
     print(p3)
     dev.off()
+  } else {
+    message("⚠️ Step4: no ISL1 edges collected for ", isl1_cluster)
   }
 }

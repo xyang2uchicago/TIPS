@@ -25,7 +25,7 @@ specificity_methods <- c("combined") # Other methods: "ratio", "zscore", "diff"
 
 isl1_cluster <- "HiGCTS_cardiac.a" # cluster containing ISL1 gene
 
-core_count <- 8 # number of cores used for parallel processing in steps 1 and 2. Use core_count = 1 if on Windows.
+core_count <- 1 # lowered from 8 for a safe local test-run (2026-08-20); raise back if running on a machine with more headroom
 
 step1 <- TRUE # calculate gene correlations and specificity
 step2 <- TRUE # update network edge weights
@@ -34,7 +34,7 @@ step3 <- TRUE # graph comparing specificity methods for all clusters and isl1_cl
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/heads/master/R/BioTIP_update_', BioTIP_version, '.R'))
 
-load(paste0(wd, 'data/sce_16subtype.RData'))
+load(paste0(wd, '../data/sce_16subtype.RData'))
 
 ########## END OF USER INPUT ##########
 

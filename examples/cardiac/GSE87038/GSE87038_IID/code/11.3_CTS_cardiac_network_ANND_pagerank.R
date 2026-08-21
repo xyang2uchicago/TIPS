@@ -15,7 +15,7 @@ library(brainGraph)
 source(here::here("examples", "config.R"))
 wd <- tips_path("examples", "cardiac", "GSE87038", "GSE87038_IID/")
 setwd(paste0(wd, "results/PPI_weight/"))
-inputdir <- file.path(wd, "data/")
+inputdir <- paste0(shared_data_path, "/")
 
 PPI_color_palette <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
 
@@ -520,15 +520,18 @@ df_median$PPI_cat <- factor(df_median$PPI_cat, levels = c("CTS", "HiGCTS", "HiG"
 a <- grepl("^HiG_", df_median$signature)
 b <- grepl("^HiGCTS_", df_median$signature)
 c <- grepl("^CTS_", df_median$signature)
-ks.test(df_median$bc.median[a], df_median$bc.median[b]) # p-value = 0.1  HiG vs HiGCTS
-ks.test(df_median$bc.median[a], df_median$bc.median[c]) # p-value = 1.129e-05	HiG vs CTS
-ks.test(df_median$bc.median[b], df_median$bc.median[c]) # p-value =  1	HiGCTS vs CTS
-wilcox.test(df_median$bc.median[a], df_median$bc.median[b]) # p-value = 0.1183  HiG vs HiGCTS
-wilcox.test(df_median$bc.median[a], df_median$bc.median[c]) # p-value = 0.0002936	HiG vs CTS
-wilcox.test(df_median$bc.median[b], df_median$bc.median[c]) # p-value = NA	HiGCTS vs CTS
+## Diagnostic-only significance checks (printed, not saved/used downstream).
+## Wrapped since group sizes vary by dataset (e.g. HiGCTS_* may have too few
+## signatures for t.test/ks.test to run) -- not fatal to the driver's output.
+tryCatch(print(ks.test(df_median$bc.median[a], df_median$bc.median[b])), error = function(e) message("[11.3] ks.test a vs b skipped: ", e$message)) # p-value = 0.1  HiG vs HiGCTS
+tryCatch(print(ks.test(df_median$bc.median[a], df_median$bc.median[c])), error = function(e) message("[11.3] ks.test a vs c skipped: ", e$message)) # p-value = 1.129e-05	HiG vs CTS
+tryCatch(print(ks.test(df_median$bc.median[b], df_median$bc.median[c])), error = function(e) message("[11.3] ks.test b vs c skipped: ", e$message)) # p-value =  1	HiGCTS vs CTS
+tryCatch(print(wilcox.test(df_median$bc.median[a], df_median$bc.median[b])), error = function(e) message("[11.3] wilcox.test a vs b skipped: ", e$message)) # p-value = 0.1183  HiG vs HiGCTS
+tryCatch(print(wilcox.test(df_median$bc.median[a], df_median$bc.median[c])), error = function(e) message("[11.3] wilcox.test a vs c skipped: ", e$message)) # p-value = 0.0002936	HiG vs CTS
+tryCatch(print(wilcox.test(df_median$bc.median[b], df_median$bc.median[c])), error = function(e) message("[11.3] wilcox.test b vs c skipped: ", e$message)) # p-value = NA	HiGCTS vs CTS
 # t.test(df_median$bc.median[a], df_median$bc.median[b]) # not enough HiGCTS
-t.test(df_median$bc.median[a], df_median$bc.median[c]) # p-value =  3.73e-05	HiG vs CTS
-t.test(df_median$bc.median[b], df_median$bc.median[c]) # p-value = 3.73e-05	HiGCTS vs CTS
+tryCatch(print(t.test(df_median$bc.median[a], df_median$bc.median[c])), error = function(e) message("[11.3] t.test a vs c skipped: ", e$message)) # p-value =  3.73e-05	HiG vs CTS
+tryCatch(print(t.test(df_median$bc.median[b], df_median$bc.median[c])), error = function(e) message("[11.3] t.test b vs c skipped: ", e$message)) # p-value = 3.73e-05	HiGCTS vs CTS
 
 
 density_median_bc_plot <- ggplot(df_median, aes(x = log10(bc.median), color = PPI_cat, fill = PPI_cat)) +

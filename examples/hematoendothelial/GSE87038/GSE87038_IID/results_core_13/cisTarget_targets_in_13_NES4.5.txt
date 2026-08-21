@@ -1,4 +1,0 @@
-geneSet	motif	NES	AUC	TF_highConf	TF_lowConf	nEnrGenes	rankAtMax	enrichedGenes
-13	metacluster_68.8	5.17	0.116	HAND1; HAND2 (directAnnotation). 	HAND1; HAND2 (inferredBy_MotifSimilarity). 	12	1193	ADORA2A;CD38;EGLN3;ETS1;KCNE3;MAP3K11;PLXND1;RHOJ;TIE1;TMEM255A;TSPAN8;UBASH3B
-13	metacluster_155.3	4.7	0.108	PLAG1 (directAnnotation). PLAG1 (inferredBy_Orthology). 		7	533	CD38;ELK3;GCC2;GNGT2;GRAP;ICAM2;TNNT1
-13	metacluster_130.18	4.68	0.107	FOXD2; FOXD2 (directAnnotation). FOXA2; FOXD2; FOXD2 (inferredBy_Orthology). 	FOXD2 (inferredBy_MotifSimilarity). FOXA2; FOXA2; FOXA2; FOXA2 (inferredBy_MotifSimilarity_n_Orthology). 	7	393	DUSP2;ETV2;GNGT2;GRAP;N4BP3;PLXND1;UPP1

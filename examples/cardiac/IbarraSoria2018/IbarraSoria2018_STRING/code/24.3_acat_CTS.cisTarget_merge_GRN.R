@@ -73,6 +73,7 @@ g_merged <- make_merged_TIPS_graph(subset(final_table, linkage == "CM"),
 )
 
 set.seed(2)
+pdf(file = "PPI_graph_merged_GRN_prediction_CTS_cardiac.a_CM_final.pdf")
 plot(
     g_merged,
     layout = layout_with_fr(g_merged, weights = NA),
@@ -82,15 +83,15 @@ plot(
     main = "Merged CMvsCP TIPS delta-edge reweighting"
 )
 mtext("CMvsCP edges labeled by delta (top abs_delta)", side = 1, line = -1, cex = 1.2)
-
-dev.copy2pdf(file = "PPI_graph_merged_GRN_prediction_CTS_cardiac.a_CM_final.pdf")
+dev.off()
 
 
 ######## query the HMGA2 appeaing often in the results #########
 ## 1) Is HMGA2 actually highly expressed in the relevant cells? == yes, increased along cardiac trajectory from a->c
 p <- plotExpression(sce, features = c("HMGA2", "HMGA1"), x = celltype_col)
-p + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
-dev.copy2pdf(file = "HMGA2_HMGA1_expression_across_clusters.pdf", width = 7, height = 5)
+pdf(file = "HMGA2_HMGA1_expression_across_clusters.pdf", width = 7, height = 5)
+print(p + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)))
+dev.off()
 
 cisTarget.res <- readRDS(file = "../cisTarget_targets_in_all_CTS.rds")
 cisTarget.res_HiG <- readRDS(file = "../cisTarget_targets_in_two_HiGs.rds")

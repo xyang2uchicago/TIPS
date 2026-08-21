@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>Transcriptional Instability–guided Prediction of Subnetworks (TIPS)</title>
+<title>TIPS Tutorial: Ordered Yet Selectively Fragile Progenitor Networks</title>
 <link rel="icon" type="image/x-icon" href="figures/favicon.png">
 <style>
 body {
@@ -186,11 +186,24 @@ html { scroll-padding-top: 150px; }
     </div>
 </nav>
 
-<h1 class="page-title">TIPS Tutorial</h1>
+<h1 class="page-title">TIPS Tutorial: CTS-Derived Progenitor Networks Are Ordered Yet Selectively Fragile</h1>
 
 <div id="introduction">
     <h2>Introduction</h2>
     <div id="tips-intro">
+        <p style="background:#fff8e1; border-left:4px solid #f0ad4e; padding:12px 16px; border-radius:4px;">
+            <strong>Scope of this walkthrough:</strong> TIPS has grown into a multi-stage framework
+            (see the accompanying manuscript). This tutorial covers only the first half of the
+            pipeline — constructing state-specific, edge-weighted PPINs from CTS/HiG gene sets and
+            testing their topology and robustness to targeted node removal, i.e., showing that
+            CTS-derived progenitor networks are topologically <strong>ordered yet selectively
+            fragile</strong> (Panels A–J, corresponding to Fig. 3d,e and related Supplementary
+            Figures). It does <em>not</em> walk through the downstream steps added since — cisTarget/
+            ChIP-seq-supported TF–target edge reweighting, resolution of CM- and CF-leaning lineage-
+            biased subnetworks, convergence with CHD-associated programs, or cross-dataset,
+            perturbation and disease transfer (Figs. 4–7). Those analyses are documented in the
+            manuscript and package examples rather than here.
+        </p>
         <h2>1. Purpose of TIPS (Fig 1)</h2>
 
         <p>
@@ -353,9 +366,9 @@ html { scroll-padding-top: 150px; }
           (t-test; logFC &gt; 0.6; min.prop = 0.25; FDR &lt; 0.01).
         </p>
       </div>
-      Following, we detail the main delivery of TIPS analysis presented in the following
-      Figure by walking through the R set up, and each panel – the purpose, R code,
-      interpretation, inputs and outputs.
+      Following, we detail the PPIN construction and ordered-yet-selectively-fragile robustness
+      analysis presented in the following Figure by walking through the R set up, and each panel –
+      the purpose, R code, interpretation, inputs and outputs.
 </div>
 &nbsp;
 <hr>

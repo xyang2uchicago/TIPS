@@ -1,8 +1,22 @@
-# Set True if running 24.0 the first time
-rebuild_mat <- TRUE
-source(here::here("examples", "cardiac", "GSE175634", "GSE175634_STRING", "code_core", "24.0_acat_load_input_clean_CP.1.R"))
+## ---------------------------------------------------------------------------
+## KNOWN BUG (fixed in 00_configuration.R/24.0, but NOT re-validated below):
+## CP_cluster was previously hardcoded to "3" instead of "CP" here and in
+## 24.0_acat_load_input_clean_CP.1.R. 11.1 already renames names(DEG) from
+## "3" to "CP", so DEG[["3"]] no longer existed -- every DEG[[CP_cluster]]
+## lookup silently returned NULL, dropping all CP-cluster signal from both
+## the CP_hi column (24.0) and the auto TF candidate pool below. Fixed by
+## setting CP_cluster="CP" in 00_configuration.R.
+## TODO: this file's key_TFs are auto-selected from that candidate pool (no
+## manual override, unlike the CP-only variant). Re-run with the fix in
+## place and compare the new key_TFs / outputs against the old committed
+## results before treating this as publication-ready.
+## ---------------------------------------------------------------------------
+code_dir <- here::here("examples", "cardiac", "GSE175634", "GSE175634_STRING", "code_core")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+source(file.path(code_dir, "24.0_acat_load_input_clean_CP.1.R"))
 
-source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
+source(here::here("R", paste0("celltype_specific_weight_v", celltype_specific_weight_version, ".R")))
 
 ## check the loaded objects =========================
 seed_TF  # character(0)
@@ -15,8 +29,6 @@ dir.create(file.path(updir, paste0("cisTarget_predicted_", CTS_ID)),
     showWarnings = FALSE, recursive = TRUE
 )
 setwd(paste0(updir, "/cisTarget_predicted_", CTS_ID))
-
-NES_threshold <- 4.5
 
 ########################################################
 ##  input 6 -- RcisTarget predicted TF enriched among CTS genes

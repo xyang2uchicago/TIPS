@@ -33,33 +33,15 @@ library("gridExtra")
 library(ggrepel)
 library(ggpubr) # resuired by stat_compare_means()
 
-setwd('F:/projects/scRNA/results/cardiac_CTS_GRN/GSE175634_iPSC_CM_weight')
-score_threshold = 'weight'
-PPI_color_platte = c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
+code_dir <- here::here("examples", "cardiac", "GSE175634", "GSE175634_STRING", "code_core")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+setwd(results_dir)
 
-HVG <- list()
-## refer to F:\projects\scRNA\source\GSE87038_gastrulation\SC3_GSE87038_E8.25_HEP.R, 
-# Note the published is a subset of the original 7k cell object 
-# load('../data/gastrulationE8.25_Pijuan-Sala2019/sce_E8.25_HEP.RData')
-# sce
-# # dim: 3073 1362
-load('F:/projects/scRNA/results/GSE87038_gastrulation/uncorrected/E8.25_mesoderm/sce_E8.25_uncorrected.RData')
-HVG[[1]] <- rownames(sce)
-load('E:/Git_Holly/scRNAseq_examples/data/gastrulationE8.25_Ibarra-Soria2018/sce_16subtype.RData')
-HVG[[2]] <- rownames(sce)
-load('E:/Git_Holly/scRNAseq_examples/data/EB_Zhao2019/sce.GSE130146_noenderdormPgerm.RData')
-HVG[[3]] <- rownames(sce)
-load('E:/Git_Holly/scRNAseq_examples/data/hESC_Bargaje2017/sce_hESC.RData')
-HVG[[4]] <- rownames(sce)
-
-tmp = read.csv('F:/projects/scRNA/results/GSE175634_iPSC_CM/2024_3kHVG/3khvg.tsv', header=F)
-HVG[[5]] <- tmp[,1]
-
-names(HVG) <- c('Pijuan-Sala2019','Ibarra-Soria2018', 'EB', 'hESC2017', 'hiPSC_CM2022')
-lengths(HVG)
-# Pijuan-Sala2019 Ibarra-Soria2018               EB         hESC2017     hiPSC_CM2022 
-#           10938             4000             4000               96             3000 
-
+## Dead code removed here: this script used to build an HVG list from 5
+## external files (2 of which — EB_Zhao2019 and hESC_Bargaje2017 — do not
+## exist anywhere in this repo) for cross-dataset comparison purposes. HVG
+## is never referenced again anywhere in this file.
 ################################################################
 ############testing the GSE175634 dataset ###############
 ## TF-target using PROGENy, becasue 'PROGENy with 500 or 1000 footprint genes per pathway yields the best performance' 
@@ -70,20 +52,7 @@ lengths(HVG)
 ################################################################
 ## manually record the Ic predictions
 
-subfolds <- c('hESC_Bargaje2017', 'lung_Treutlein2014', 
-			  'gastrulationE8.25_Pijuan-Sala2019','gastrulationE8.25_Ibarra-Soria2018',
-			  'EB_Zhao2019','simulated_EMT',
-			  '2024_3kHVG/')
-subsubfolds <- c('C_Consensus_929cells', 'C_Leiden_0.4', 
-					 'C_SNNGraph_allcells', 'subcelltype',
-					 'C_SNNGraph_k5', 'C_cell_type',
-					 'BioTIP')
-
-
 db=7
-	inputDir = ifelse(db<7,
-		"E:/Git_Holly/scRNAseq_examples/result", 
-		"F:/projects/scRNA/results/GSE175634_iPSC_CM/")
 
   load(file=here::here("examples", "cardiac", "GSE175634", "data", "CTS_Lib_Scaledata.RData"))
   lengths(CTS.Lib.Symbol)
@@ -144,11 +113,26 @@ names(DEG)[which(names(DEG)=='11')] = 'endoderm'
  library("STRINGdb")
  packageVersion('STRINGdb') # '2.14.0'
  library(tibble)
- 
- string_db <- STRINGdb$new( version="12.0", species=9606,   # species= 10090 for mouse;    ?? for human 2021 version
-                            score_threshold = 200, #!!!!!!!!!!!default is 200
-							network_type="full", 
-                            input_directory="F:/projects/Share/PPIN/STRING/STRINGdb/human/full/") 
+
+ if (download_files) {
+     base_url <- "https://stringdb-static.org/download"
+     files <- c(
+         paste0("protein.aliases.v12.0/", db_species, ".protein.aliases.v12.0.txt.gz"),
+         paste0("protein.info.v12.0/", db_species, ".protein.info.v12.0.txt.gz"),
+         paste0("protein.links.v12.0/", db_species, ".protein.links.v12.0.txt.gz")
+     )
+     if (!dir.exists(paste0(shared_data_path, "/PPIN"))) {
+         dir.create(paste0(shared_data_path, "/PPIN"))
+     }
+     for (f in files) {
+         download.file(paste0(base_url, "/", f), paste0(shared_data_path, "/PPIN/", basename(f)))
+     }
+ }
+
+ string_db <- STRINGdb$new( version="12.0", species=db_species,
+                            score_threshold = score_threshold,
+							network_type="full",
+                            input_directory=paste0(shared_data_path, "/PPIN"))
  string_db
  # version 12.0  / 11.5
  # proteins: 19699    / for mouse: 22048

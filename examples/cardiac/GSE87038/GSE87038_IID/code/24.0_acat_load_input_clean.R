@@ -9,10 +9,10 @@ library(SingleCellExperiment)
 ########## BEGINNING OF USER INPUT ##########
 source(here::here("examples", "config.R"))
 wd <- tips_path("examples", "cardiac", "GSE87038", "GSE87038_IID/")
-setwd(paste0(wd, "results/PijuanSara2019_vsCF18/GSE181346_heart_scATAC/"))
+setwd(paste0(wd, "results/PijuanSala2019_vsCF18/GSE181346_heart_scATAC/"))
 db_specifc_result_path <- paste0(wd, "results/")
-db_specifc_input_path <- paste0(wd, "data/")
-db_specifc_CTS_path <- paste0(wd, "data/")
+db_specifc_input_path <- paste0(wd, "../data/")
+db_specifc_CTS_path <- paste0(wd, "../data/")
 shared_path <- paste0(shared_data_path, "/")
 cardiac_data_path <- paste0(tips_path("examples", "cardiac", "data"), "/")
 species <- "mouse"
@@ -357,7 +357,7 @@ class(DEG[[1]]) # [1] "character"
 ## get the whole string v12 genes
 library(igraph)
 # refer to 11.2.0_weighted_graph_attack_robustness.R
-file <- paste0(db_specifc_input_path, "GSE87038_IID_graph_perState_simplified_combinedweighted.rds")
+file <- paste0(db_specifc_result_path, "PPI_weight/GSE87038_IID_graph_perState_simplified_combinedweighted.rds")
 graph_list <- readRDS(file)
 
 ## 2026 correction: C13 is not significant by the filter of maximal Is* at its clutster
@@ -609,7 +609,7 @@ if (!file.exists(file = "cisTarget_targets_in_all_CTS.rds")) {
 
   dbFile <- "hg38_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather"
 
-  feather_path <- paste0(db_specifc_input_path, "cistarget/")
+  feather_path <- paste0(shared_path, "cistarget/")
 
   if (!file.exists(file = paste0(feather_path, dbFile))) {
     url <- "https://resources.aertslab.org/cistarget/databases/homo_sapiens/hg38/refseq_r80/mc_v10_clust/gene_based/hg38_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather"

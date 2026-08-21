@@ -10,32 +10,16 @@ library(stringr)
 
 ########## BEGINNING OF USER INPUT ##########
 
-source(here::here("examples", "config.R"))
-wd <- tips_path("examples", "cardiac", "GSE87038", "GSE87038_IID/")
-outdir <- paste0(wd, "results_core/PPI_weight/")
-dir.create(outdir, recursive = TRUE, showWarnings = FALSE)
+code_dir <- here::here("examples", "cardiac", "GSE87038", "GSE87038_IID", "code_core")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+outdir <- ppi_path
 setwd(outdir)
-
-db <- "GSE87038"
-
-specificity_methods <- c("combined") # Other methods: "ratio", "zscore", "diff"
-
-isl1_cluster <- "HiGCTS_8" # cluster containing ISL1 gene
-
-core_count <- 1 # number of cores used for parallel processing in steps 1 and 2. Use core_count = 1 if on Windows.
-
-step1 <- TRUE # calculate gene correlations and specificity
-step2 <- TRUE # update network edge weights
-step3 <- TRUE # graph comparing specificity methods for all clusters
-step4 <- TRUE # graph comparing specificity methods for isl1_cluster
-
-celltype_specific_weight_version <- "10"
-BioTIP_version <- "06232025"
 
 source(paste0("https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v", celltype_specific_weight_version, ".R"))
 source(paste0("https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/heads/master/R/BioTIP_update_", BioTIP_version, ".R"))
 
-load(paste0(wd, "../data/sce_E8.25_uncorrected.RData"))
+load(paste0(data_dir, "sce_E8.25_uncorrected.RData"))
 rownames(sce) <- toupper(rownames(sce)) # !!!!!!!
 
 
@@ -207,162 +191,3 @@ if (step2) {
   edge_attr_names(g) # "weight"         "norm_PPI_score" "corexp_sign"    "coexp_focal"
 }
 
-###################################################
-## compare weights methods
-## check new weights for ISL1 in "HiGCTS_8"
-#####################################################
-library(ggplot2)
-library(hexbin)
-
-if (step3) {
-  pdf(file = "compare_specificity_method_edgeweights.pdf")
-
-  for (net_name in names(network_specificity_list)) {
-    plot_data <- NULL
-
-    for (s in specificity_methods) {
-      weighted_graph_list <- readRDS(
-        paste0(db, "_IID_graph_perState_simplified_", s, "weighted.rds")
-      )
-
-      g <- weighted_graph_list[[net_name]]
-
-      # ---- SAFETY CHECKS ----
-      if (is.null(g) || !igraph::is_igraph(g) || igraph::vcount(g) == 0 || igraph::ecount(g) == 0) {
-        message("⚠️ Skipping ", net_name, " (empty/invalid graph) for method ", s)
-        next
-      }
-      vn <- igraph::V(g)$name
-      if (is.null(vn)) {
-        message("⚠️ Skipping ", net_name, " (missing vertex names) for method ", s)
-        next
-      }
-      w <- igraph::E(g)$weight
-      if (is.null(w) || length(w) == 0) {
-        message("⚠️ Skipping ", net_name, " (missing edge weights) for method ", s)
-        next
-      }
-      # make log10 safe
-      w[w <= 0] <- .Machine$double.xmin
-      log_w <- log10(w)
-      # -----------------------
-
-      # mark edges incident to Isl1 (if present)
-      isl1_vertex <- which(tolower(vn) == "isl1")
-      is_isl1_edge <- rep(FALSE, igraph::ecount(g))
-      if (length(isl1_vertex) > 0) {
-        isl1_edges <- igraph::incident(g, isl1_vertex, mode = "all")
-        is_isl1_edge[isl1_edges] <- TRUE
-      }
-
-      temp_data <- data.frame(
-        net_name = net_name,
-        log_weight = log_w,
-        method = s,
-        is_isl1 = is_isl1_edge
-      )
-
-      plot_data <- rbind(plot_data, temp_data)
-    }
-
-    if (!is.null(plot_data) && nrow(plot_data) > 0) {
-      p2 <- ggplot(plot_data, aes(x = log_weight)) +
-        geom_histogram(bins = 80) +
-        geom_vline(
-          data = subset(plot_data, is_isl1 == TRUE),
-          aes(xintercept = log_weight),
-          color = "red",
-          alpha = 0.15
-        ) +
-        facet_wrap(~method, scales = "free") +
-        theme_minimal() +
-        labs(
-          title = paste("Edge weight distribution -", net_name),
-          x = "log10(E(g)$weight)",
-          y = "Edge count"
-        )
-
-      print(p2)
-    } else {
-      message("⚠️ Skipping plot for ", net_name, " — no data collected.")
-    }
-  }
-
-  dev.off()
-}
-
-
-if (step4) {
-  net_name <- isl1_cluster
-  plot_data <- NULL
-
-  for (s in specificity_methods) {
-    weighted_graph_list <- readRDS(
-      paste0(db, "_IID_graph_perState_simplified_", s, "weighted.rds")
-    )
-
-    g <- weighted_graph_list[[net_name]]
-
-    # ---- SAFETY CHECKS ----
-    if (is.null(g) || !igraph::is_igraph(g) || igraph::vcount(g) == 0 || igraph::ecount(g) == 0) {
-      message("⚠️ Skipping ", net_name, " (empty/invalid) for method ", s)
-      next
-    }
-    vn <- igraph::V(g)$name
-    if (is.null(vn)) {
-      message("⚠️ Skipping ", net_name, " (missing vertex names) for method ", s)
-      next
-    }
-    w <- igraph::E(g)$weight
-    if (is.null(w) || length(w) == 0) {
-      message("⚠️ Skipping ", net_name, " (missing edge weights) for method ", s)
-      next
-    }
-    w[w <= 0] <- .Machine$double.xmin
-    log_w <- log10(w)
-    # -----------------------
-
-    isl1_vertex <- which(tolower(vn) == "isl1")
-    if (length(isl1_vertex) == 0) {
-      message("No ISL1 found in ", isl1_cluster, " for method ", s)
-      next
-    }
-
-    is_isl1_edge <- rep(FALSE, igraph::ecount(g))
-    isl1_edges <- igraph::incident(g, isl1_vertex, mode = "all")
-    is_isl1_edge[isl1_edges] <- TRUE
-
-    temp_data <- data.frame(
-      net_name = net_name,
-      log_weight = log_w,
-      method = s,
-      is_isl1 = is_isl1_edge
-    )
-
-    plot_data <- rbind(plot_data, temp_data)
-  }
-
-  if (!is.null(plot_data) && any(plot_data$is_isl1)) {
-    temp <- subset(plot_data, is_isl1 == TRUE)
-
-    pdf(file = paste0("compare_specificity_method_", isl1_cluster, "_isl1_edgeweights.pdf"))
-
-    print(
-      ggplot(temp, aes(x = log_weight)) +
-        geom_histogram(bins = 60) +
-        facet_wrap(~method, scales = "free") +
-        theme_minimal() +
-        labs(
-          title = paste("ISL1-incident edge weights -", net_name),
-          x = "log10(E(g)$weight)",
-          y = "Edge count"
-        )
-    )
-
-    dev.off()
-  } else {
-    message("⚠️ Step4: no ISL1 edges collected for ", isl1_cluster)
-  }
-  # ⚠️ Skipping HiGCTS_8 (empty/invalid) for method combined
-  # ⚠️ Step4: no ISL1 edges collected for HiGCTS_8
-}

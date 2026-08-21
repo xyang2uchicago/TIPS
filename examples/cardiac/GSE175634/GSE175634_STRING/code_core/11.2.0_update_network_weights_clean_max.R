@@ -32,14 +32,15 @@
 # module load python/anaconda-2022.05
 # source activate /project/xyang2/software-packages/env/velocity_2025Feb_xy
 
-#setwd('F:/projects/scRNA/results/cardiac_CTS_GRN/GSE175634_iPSC_CM_weight_shrink')
-setwd('/project/imoskowitz/xyang2/heart_dev/GSE175634_iPSC_CM/PPI_weighted_v9/')  #!!!!!!!!
+code_dir <- here::here("examples", "cardiac", "GSE175634", "GSE175634_STRING", "code_core")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+setwd(ppi_path)
 library('SingleCellExperiment')
 library(Seurat)
-library(dplyr) 
-# devtools::install_github("xyang2uchicago/BioTIP")
+library(dplyr)
 library(BioTIP)
-packageVersion('BioTIP')  # 1.16.0
+packageVersion('BioTIP')
 library(scuttle)
 
 ## dependence to run BioTIP
@@ -47,10 +48,7 @@ library(igraph)
 require(psych)
 library(stringr)
 
-# source('/project/imoskowitz/xyang2/heart_dev/GSE175634_iPSC_CM/BioTIP/BioTIP_update_06162025.R')
-PPI_color_platte = c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
-
-sce = readRDS('/project/imoskowitz/xyang2/heart_dev/GSE175634_iPSC_CM/BioTIP/sce.rds')
+sce <- readRDS(paste0(data_dir, "sce.rds"))
 sce
 colnames(colData(sce))
  # [1] "orig.ident"                       "nCount_RNA"
@@ -95,14 +93,12 @@ if(diagnoze){
 
 
 
-# scp -p -r F:\projects\scRNA\results\cardiac_CTS_GRN\GSE175634_iPSC_CM_weight\GSE175634_STRING_graph_perState_notsimplified.rds xyang2@midway3.rcc.uchicago.edu:/project/imoskowitz/xyang2/heart_dev/GSE175634_iPSC_CM/PPI_weight/.
-inputdir = '/project/imoskowitz/xyang2/heart_dev/GSE175634_iPSC_CM/PPI_weight/'   ## shared input !!!!!!!!
-graph_list <- readRDS( file= paste0(inputdir,'GSE175634_STRING_graph_perState_notsimplified.rds') ) 
+graph_list <- readRDS( file= paste0(results_dir,'GSE175634_STRING_graph_perState_notsimplified.rds') )
 N0 = sapply(graph_list, vcount)
 
 ########## clean 1) remove name-duplicated Vertex due to inconsistence in STRING.db ###########
-## refer to 11.1.0_correct_vertex_duplication.R 
-correct_n_edges = readRDS(paste0(inputdir,'correct_n_edges_HiG_STRING2.14.0.rds'))
+## refer to 11.1.0_correct_vertex_duplication.R
+correct_n_edges = readRDS(paste0(results_dir,'correct_n_edges_HiG_STRING2.14.0.rds'))
 for(g_name in unique(correct_n_edges$graph_id)){
 	vertices_to_remove = subset(correct_n_edges, graph_id == g_name)$vetex_index_to_remove
 	if(any(is.na(vertices_to_remove))) vertices_to_remove = vertices_to_remove[!is.na(vertices_to_remove)]
@@ -136,10 +132,7 @@ edge_counts
             # 159
 
 
-# scp -p -r E:/Git_Holly/TIPS-main/celltype_specific_weight_v9_xy.R  xyang2@midway3.rcc.uchicago.edu:/project/xyang2/heart_dev/source_midway3/GSE175634_iPSC_CM/.
-# source('F:/projects/scRNA/source/cardiac_CTS_GRN/celltype_specific_weight_v5.R')
-# source('/project/xyang2/heart_dev/source_midway3/GSE175634_iPSC_CM/celltype_specific_weight_v5.R')
-source('/project/xyang2/heart_dev/source_midway3/GSE175634_iPSC_CM/celltype_specific_weight_v9_xy.R')
+source(here::here("R", paste0("celltype_specific_weight_v", celltype_specific_weight_version, ".R")))
 
 step1 = TRUE
 if(step1){
@@ -156,9 +149,9 @@ if(step1){
 											 graph_list, 
 											 assayName,
 											 celltype_col = "cluster",
-											 method = "pearson", 
-											 cores = 4,
-											 shrink = TRUE,    
+											 method = "pearson",
+											 cores = core_count,
+											 shrink = TRUE,
 											 verbose = FALSE)
 	saveRDS(network_specificity_list, 'network_specificity_list.rds')
 	names(network_specificity_list)
@@ -196,14 +189,13 @@ if(step2){
     # negative positive
     # 19744    85881
 	   
-	for(s in c("combined","ratio", "zscore", "diff"))
-	# s = "combined"
-	{										 
+	for(s in specificity_methods)
+	{
 		weighted_graph_list <- update_network_weights(graph_list,
 									  network_specificity_list,
-									  specificity_method = s, #"combined", #"ratio", "zscore", "diff",
+									  specificity_method = s,
 									  verbose = FALSE,
-									  cores = 4) 	
+									  cores = core_count)
 		saveRDS(weighted_graph_list, file = paste0('GSE175634_STRING_graph_perState_simplified_',s,'weighted.rds'))
 	}
   
@@ -219,103 +211,3 @@ if(step2){
 # scp -p -r  xyang2@midway3.rcc.uchicago.edu:/project/imoskowitz/xyang2/heart_dev/GSE175634_iPSC_CM/PPImax_weight/* F:\projects\scRNA\results\cardiac_CTS_GRN\GSE175634_iPSC_CM_weight_PPImax\.
 		
 
-###################################################
-## compare weights methoids
-## check new weights for ISL1 in "HiGCTS_CP.1"	
-#####################################################
-step3 = TRUE
-library(ggplot2)
-library(hexbin)
-
-
-if(step3){
-	pdf(file=paste0('compare_specificity_method_vs_PPIscores.pdf'))
-
-	for(net_name in names(graph_list))
-		{
-		#net_name = "HiGCTS_CP.1"	
-		plot_data = NULL
-		par(mfrow=c(2,2))
-		for(s in c("combined","ratio", "zscore", "diff")) {
-			graph_list = readRDS( file = paste0('GSE175634_STRING_graph_perState_simplified_',s,'weighted.rds'))
-			g = graph_list[[net_name]]
-			
-			# Check for ISL1 vertex and mark edges
-			isl1_vertex <- which(V(g)$name == 'ISL1')
-			is_isl1_edge <- rep(FALSE, length(E(g)))
-			if(length(isl1_vertex) > 0) {
-				isl1_edges <- incident(g, isl1_vertex, mode = "all")
-				is_isl1_edge[isl1_edges] <- TRUE
-			}
-			
-			temp_data <- data.frame(
-				net_name=net_name,
-				original_weight = E(g)$original_weight,
-				log_weight = log10(E(g)$weight),
-				method = s,
-				is_isl1 = is_isl1_edge
-			)
-
-			plot_data <- rbind(plot_data, temp_data)
-		}
-		# plot(E(g)$original_weight, log10(E(g)$weight), 
-			# main = paste(s, net_name),
-			# col = edge_colors ,
-			# ptch = )
-		p2 <- ggplot(plot_data, aes(x = original_weight, y = log_weight)) +
-			stat_binhex(bins = 50, alpha=0.7) +
-			geom_point(data = subset(plot_data, is_isl1 == TRUE), 
-					   aes(x = original_weight, y = log_weight), 
-					   color = "red", size = 1.5) +
-			scale_fill_viridis_c() +
-			facet_wrap(~method, scales = "free") +
-			theme_minimal() +
-			labs(title = paste("Edge Weight Density -", net_name),
-				 x = "E(g)$original_weight", 
-				 y = "log10(E(g)$weight)",
-				 fill = "Count") +
-			theme(legend.position = "bottom")
-
-		print(p2)
-	}
-	dev.off()
-}								  
-
-net_name = "HiGCTS_CP.1"	
-plot_data = NULL
-
-for(s in c("combined","ratio", "zscore", "diff")) {
-	graph_list = readRDS( file = paste0('GSE175634_STRING_graph_perState_simplified_',s,'weighted.rds'))
-	g = graph_list[[net_name]]
-	
-	# Check for ISL1 vertex and mark edges
-	isl1_vertex <- which(V(g)$name == 'ISL1')
-	is_isl1_edge <- rep(FALSE, length(E(g)))
-	if(length(isl1_vertex) > 0) {
-		isl1_edges <- incident(g, isl1_vertex, mode = "all")
-		is_isl1_edge[isl1_edges] <- TRUE
-	}
-	
-	temp_data <- data.frame(
-		net_name=net_name,
-		original_weight = E(g)$original_weight,
-		log_weight = log10(E(g)$weight),
-		method = s,
-		is_isl1 = is_isl1_edge
-	)
-
-	plot_data <- rbind(plot_data, temp_data)
-}
-
-temp = subset(plot_data,is_isl1==TRUE)
-pdf(file='compare_specificity_method_HiGCTS_CP.1_vs_PPIscores.pdf')	
-ggplot(temp, aes(x = original_weight, y = log_weight, color=as.factor(original_weight))) +
-			geom_point() +
-			scale_fill_viridis_c() +
-			facet_wrap(~method, scales = "free") +
-			theme_minimal() +
-			labs(title = paste("Isl1 linkages -", net_name),
-				 x = "E(g)$original_weight", 
-				 y = "log10(E(g)$weight)") +
-			theme(legend.position = "bottom")
-dev.off()		

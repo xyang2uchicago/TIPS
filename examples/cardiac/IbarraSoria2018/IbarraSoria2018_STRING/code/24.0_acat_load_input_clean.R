@@ -62,7 +62,7 @@ head(coding_genes, 3)
 
 ## get the TF database 
 library(dorothea)
-packageVersion(‘dorothea’) # ‘1.22.0’
+packageVersion('dorothea') # '1.22.0'
 # human or mouse
 data(dorothea_hs, package = "dorothea")
 # data(dorothea_mm, package = "dorothea")
@@ -569,7 +569,7 @@ if(!file.exists(file= "cisTarget_targets_in_all_CTS.rds")) {
     # cardiac.c:              33 (7% of 448)
     # extraembryonicMesoderm: 23 (6% of 369)
 
-    saveRDS(cisTarget.res_HiG, file=”cisTarget_targets_in_two_HiGs.rds”)
+    saveRDS(cisTarget.res_HiG, file='cisTarget_targets_in_two_HiGs.rds')
 
     # --- 2) calculate the enriched motifs among CTS genes
     cisTarget.res <- cisTarget(
@@ -582,7 +582,7 @@ if(!file.exists(file= "cisTarget_targets_in_all_CTS.rds")) {
     # cardiac.a:     0 (0% of 37)
     # endothelial.b: 3 (9% of 33)
 
-    saveRDS(cisTarget.res, file=”cisTarget_targets_in_all_CTS.rds”)
+    saveRDS(cisTarget.res, file='cisTarget_targets_in_all_CTS.rds')
     summary(cisTarget.res$NES)
     #   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
     #   3.010   3.180   3.310   3.571   3.772   5.840

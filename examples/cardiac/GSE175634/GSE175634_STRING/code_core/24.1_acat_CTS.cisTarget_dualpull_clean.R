@@ -1,8 +1,22 @@
-# Set True if running 24.0 the first time
-rebuild_mat <- TRUE
-source(here::here("examples", "cardiac", "GSE175634", "GSE175634_STRING", "code_core", "24.0_acat_load_input_clean.R"))
+## ---------------------------------------------------------------------------
+## KNOWN BUG (fixed in 00_configuration.R/24.0, but NOT re-validated below):
+## CP_cluster was previously hardcoded to "3" instead of "CP" here and in 24.0.
+## 11.1 already renames names(DEG) from "3" to "CP", so DEG[["3"]] no longer
+## existed -- every DEG[[CP_cluster]] lookup silently returned NULL, dropping
+## all CP-cluster signal from both the CP_hi column (24.0) and the auto TF
+## candidate pool below. Fixed by setting CP_cluster="CP" in 00_configuration.R.
+## TODO: the manual `key_TFs <- c("TEAD1", "ETS2")` selection below was chosen
+## by reviewing the (bug-affected) candidate pool. Re-run with the fix in
+## place, compare the new auto-candidate list against the old committed
+## results, and re-confirm (or revise) the manual picks before treating this
+## as publication-ready.
+## ---------------------------------------------------------------------------
+code_dir <- here::here("examples", "cardiac", "GSE175634", "GSE175634_STRING", "code_core")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+source(file.path(code_dir, "24.0_acat_load_input_clean.R"))
 
-source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
+source(here::here("R", paste0("celltype_specific_weight_v", celltype_specific_weight_version, ".R")))
 
 ## check the loaded objects =========================
 seed_TF
@@ -10,7 +24,7 @@ names(graph_list)
 names(DEG)
 
 celltype_col # "leiden_0.5"
-CP_cluster # "3"
+CP_cluster # "CP"
 CM_cluster # "5"
 CF_cluster # "1"
 
@@ -32,8 +46,6 @@ dir.create(file.path(updir, paste0("cisTarget_predicted_", CTS_ID)),
     showWarnings = FALSE, recursive = TRUE
 )
 setwd(paste0(updir, "/cisTarget_predicted_", CTS_ID))
-
-NES_threshold <- 4.5
 
 ########################################################
 ##  input 6 -- RcisTarget predicted TF enriched among CTS genes
@@ -129,10 +141,10 @@ if (length(files) > 0) {
         if (length(idx) > 0) idx[1] else NA_integer_
     })
     x <- x[!is.na(x)]
+    key_TFs <- names(x)  # re-sync: drop any manually-selected TF that had no matching cisTarget column
     x
     colnames(mat)[x]
 
-    names(x) <- names(x)  # names already set by sapply
     if (length(x) > 0) {
         for (j in seq_along(x)) {
             key <- names(x)[j]

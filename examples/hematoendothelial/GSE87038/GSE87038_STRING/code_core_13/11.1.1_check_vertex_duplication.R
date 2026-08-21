@@ -9,15 +9,17 @@ library(igraph)
 
 ########## BEGINNING OF USER INPUT ##########
 
-source(here::here("examples", "config.R"))
-wd = tips_path("examples", "hematoendothelial", "GSE87038", "GSE87038_STRING/")
-setwd(paste0(wd, "results_core_13/"))
-score_threshold <- "weight"
+code_dir <- here::here("examples", "hematoendothelial", "GSE87038", "GSE87038_STRING", "code_core_13")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+setwd(results_dir)
 
-db <- "GSE87038"
-db_species <- 10090 # 10090 for mouse, 9606 for human
-
-# ATTENTION: MANUAL INPUT REQUIRED AFTER LINE 154
+# ATTENTION: MANUAL INPUT REQUIRED AFTER LINE ~150 (search "MANUAL INPUT
+# REQUIRED" below). This filters by verified-bad STRING protein IDs (content
+# keyed, not row-position keyed like some sibling folders' 11.1.1), so it is
+# reasonably robust to DEG size changing between runs — but if BioMart/STRING
+# ever surfaces a NEW duplicate gene not in the current bad_ids list, this
+# will need to be re-derived by hand.
 
 ########## END OF USER INPUT ##########
 
@@ -86,13 +88,13 @@ library("STRINGdb")
 packageVersion("STRINGdb") # '2.21.0'
 string_db <- STRINGdb$new(
     version = "12.0", species = db_species,
-    score_threshold = 200,
+    score_threshold = score_threshold,
     network_type = "full",
     input_directory = paste0(shared_data_path, "/PPIN")
 )
 string_db
 
-DEG <- readRDS(paste0("../../data/DEG_perState_min.prop0.25_lfc0.5_FDFR0.01.rds"))
+DEG <- readRDS(paste0(data_dir, "DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.01.rds"))
 
 DEG <- lapply(DEG, function(x) data.frame(names = x, stringsAsFactors = FALSE))
 
@@ -105,7 +107,7 @@ any(duplicated(DEG[["5"]])) # [1] FALSE
 
 ## build PPIN again and track back the correct number of edges for the duplicated gene ##
 
-markers.up <- readRDS(paste0("../../data/DEG_perState_min.prop0.25_lfc0.5_FDFR0.01.rds"))
+markers.up <- readRDS(paste0(data_dir, "DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.01.rds"))
 
 graph_list <- readRDS(file = paste0(db, "_STRING_graph_perState_notsimplified.rds"))
 graph_list <- lapply(graph_list, simplify, edge.attr.comb ='max') # !!!!!!!!!!!!!!!!!!! # FIXED

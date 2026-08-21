@@ -24,8 +24,6 @@ dir.create(file.path(updir, paste0("cisTarget_predicted_", CTS_ID)),
 )
 setwd(paste0(updir, "/cisTarget_predicted_", CTS_ID))
 
-NES_threshold <- 3
-
 ########################################################
 ##  input 6 -- RcisTarget
 library(RcisTarget)
