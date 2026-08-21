@@ -239,29 +239,12 @@ make_layout <- function(g, seed) {
     layout_with_fr(g)
 }
 
-## fill_TF_targeting_predicted_edges() calls fill_coexp_for_edges() internally,
-## which returns NULL (instead of the graph) when the CT_cluster_id cluster has
-## too few cells (<10) -- an unguarded igraph::vcount(NULL) inside the library
-## function then errors out. That's the same "empty result, don't save" case
-## already handled below via vcount(...)>0 for the ordinary vcount==0 path; this
-## wrapper extends that same handling to the NULL/error path without touching
-## R/celltype_specific_weight_v10.R.
-safe_fill_TF_targeting_predicted_edges <- function(...) {
-    tryCatch(
-        fill_TF_targeting_predicted_edges(...),
-        error = function(e) {
-            message("fill_TF_targeting_predicted_edges failed (likely too few cells in the target cluster): ", conditionMessage(e))
-            list(g_CT_sub = igraph::make_empty_graph(), g_descendant_sub = NULL)
-        }
-    )
-}
-
 for (key in key_TFs) {
     key_in_TFfamily <- key
 
     graph_TF_list <- readRDS(file = paste0("PPI_graph_", key_in_TFfamily, "_GRN_prediction_", CTS_name, "_v3.rds"))
 
-    res <- safe_fill_TF_targeting_predicted_edges(graph_TF_list,
+    res <- fill_TF_targeting_predicted_edges(graph_TF_list,
         linkage_name = "CM", graph_list,
         sce, celltype_col = celltype_col, CT_cluster_id = CP_cluster,
         descendant_cluster_id = CM_cluster, TF_symbol = key_in_TFfamily,
@@ -271,7 +254,7 @@ for (key in key_TFs) {
     # TEAD1 CM: 4 | ETS2 CM: 2
     if (vcount(res[["g_CT_sub"]]) > 0) saveRDS(res, file = paste0("PPI_graph_", key_in_TFfamily, "_GRN_prediction_", CTS_name, "_CM_final.rds"))
 
-    res_cf <- safe_fill_TF_targeting_predicted_edges(graph_TF_list,
+    res_cf <- fill_TF_targeting_predicted_edges(graph_TF_list,
         linkage_name = "CF", graph_list,
         sce, celltype_col = celltype_col, CT_cluster_id = CP_cluster,
         descendant_cluster_id = CF_cluster, TF_symbol = key_in_TFfamily,
