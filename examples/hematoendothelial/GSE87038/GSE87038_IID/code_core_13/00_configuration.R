@@ -4,15 +4,9 @@
 ## Call tips_configure() from run_TIPS_core.R (or let ensure_tips_configured()
 ## do it automatically when a numbered script is run standalone).
 ##
-## logFC.cut=0.5 (not the 0.6 literal still hardcoded in a couple of numbered
-## scripts) matches the committed DEG_..._lfc0.5_...rds file used throughout
-## this folder. NES_threshold=3 (the numbered scripts' own hardcoded default)
-## is the value actually used in the manuscript, confirmed directly against
-## the published figure ("Independent endothelial-biased subnetworks", Pijuan
-## C13 panel) — its 5 highlighted TF nodes only make sense at NES=3, since
-## SOX17 (NES 3.63) and GATA3 (NES 3.66) don't clear NES=4.5 at all. A
-## results_core_13_NES4.5/ folder from an earlier, superseded threshold
-## experiment was removed once this was confirmed.
+## logFC.cut=0.5, matching the committed DEG_..._lfc0.5_...rds file used
+## throughout this folder. NES_threshold=3 is the value used in the
+## manuscript.
 
 source(here::here("examples", "tips_core_shared_config.R"))
 

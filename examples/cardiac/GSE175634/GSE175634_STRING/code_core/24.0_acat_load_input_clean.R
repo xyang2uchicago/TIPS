@@ -9,6 +9,7 @@ source(file.path(code_dir, "00_configuration.R"))
 ensure_tips_configured(code_dir)
 setwd(results_dir)
 rebuild_mat <- TRUE
+CP_cluster  <- "3"   # cardiogenic progenitor (transitional state)
 ########## END OF USER INPUT ##########
 
 CTS_name <- paste0("CTS_", CTS_ID)
@@ -92,7 +93,7 @@ if (rebuild_mat) {
     genes <- CTS[[CTS_ID]]
 
     mat <- data.frame(
-        CP_hi = as.integer(genes %in% DEG[[CP_cluster]]),   # CP_cluster="CP" (fixed; was "3" — DEG's cluster "3" was already renamed to "CP" upstream)
+        CP_hi = as.integer(genes %in% DEG[[CP_cluster]]),
         CM_hi = as.integer(genes %in% DEG[[CM_cluster]]),
         CF_hi = as.integer(genes %in% DEG[[CF_cluster]]),
         row.names = genes
@@ -105,7 +106,7 @@ if (rebuild_mat) {
     # [1] "CP_hi"  "CM_hi"  "CF_hi"  "CTS_CP"
     colSums(mat)
     # CP_hi  CM_hi  CF_hi CTS_CP
-    #    32      1      2     76
+    #     0      0     18     57
 
     write.table(mat, file = fileName, sep = "\t", quote = FALSE,
                 row.names = TRUE, col.names = TRUE)

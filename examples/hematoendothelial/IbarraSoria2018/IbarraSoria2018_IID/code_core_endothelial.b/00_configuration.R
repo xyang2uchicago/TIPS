@@ -3,15 +3,6 @@
 ##
 ## Call tips_configure() from run_TIPS_core.R (or let ensure_tips_configured()
 ## do it automatically when a numbered script is run standalone).
-##
-## No parameter adjustment needed here (unlike GSE87038): only one DEG file
-## exists (lfc0.6, no lfc0.5 variant), only one cisTarget_predicted_endothelial.b/
-## folder exists (no duplicate NES-threshold experiment), and the committed
-## 5-TF result (ETV2, GATA2, HMGA2, SOX17, FEV) at NES_threshold=3 was
-## confirmed directly against the manuscript figure ("Independent
-## endothelial-biased subnetworks", Ibarra Endo.b panel): HMGA2 is the only
-## one of the 5 not already a CTS_endothelial.b network member, matching the
-## figure's single highlighted node exactly.
 
 source(here::here("examples", "tips_core_shared_config.R"))
 

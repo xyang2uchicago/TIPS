@@ -2,22 +2,7 @@
 ##
 ## Call tips_configure() from run_TIPS_core.R (or let ensure_tips_configured()
 ## do it automatically when a numbered script is run standalone).
-##
-## See GSE175634_IID/code_core/00_configuration.R for the shared dataset-level
-## notes (Wilcoxon DEG source, unfiltered CTS loop, CP/CP.1 second arm, the
-## CP_cluster="3"->"CP" bug fix). STRING-specific notes:
-## - Human STRING db (species=9606) is NOT present locally by default — only
-##   mouse (10090) PPIN files ship in examples/Shared_Data/PPIN/. Set
-##   download_files=TRUE once to fetch the 9606.protein.*.v12.0.txt.gz files
-##   from stringdb-static.org (same pattern as GSE87038_STRING's 11.1).
-## - 11.2.0 computes only the "combined" specificity method (step3/step4's
-##   ISL1 multi-method comparison plots and the ratio/zscore/diff variants
-##   were removed as unused; matches every other code_core folder now).
-## - 11.1.1 does row-position-based manual duplicate-vertex fixes (STRING db
-##   version-pinned "12.0", same fragile-but-accepted pattern as GSE87038_STRING's
-##   11.1.1) — preserved as-is.
-## - 11.3's producer and 12.0's consumer both use the "rewring" typo
-##   consistently (verified directly), matching the IID arm.
+
 
 source(here::here("examples", "tips_core_shared_config.R"))
 
@@ -30,7 +15,7 @@ tips_configure <- function(
     CTS_ID        = CP_cluster,
     seed_TF       = "HOXB2",  # from 12.0: top PageRank in HiGCTS_CP with BetweennessCentrality > 0; overwritten when 12.0 runs
     NES_threshold = 4.5,
-    core_count    = 4,      # original per-file value; calculate_network_specificity "runs 1 hour" per PI's own comment
+    core_count    = 1,      # parallel cores for 11.2.0 steps 1-2; default to 1, not everyone has cores to spare
     celltype_specific_weight_version = "10",
     heatmap_coding_target_only = TRUE,
     specificity_methods = c("combined"),
@@ -61,25 +46,13 @@ tips_configure <- function(
   assign("score_threshold", score_threshold, envir = envir)
   assign("download_files", download_files, envir = envir)
   assign("s", "combined", envir = envir)
-  ## TIPS_SKIP_SPECIFICITY=1 skips step1 (calculate_network_specificity, the
-  ## ~1hr step) and step2 in 11.2.0, reusing network_specificity_list.rds and
-  ## the *_combinedweighted.rds graph if they already exist from a prior run
-  ## that got this far (e.g. a resubmit after a later step failed). step2
-  ## always reads network_specificity_list.rds from disk regardless of step1,
-  ## so setting both FALSE together is safe once step1 has actually saved it.
-  skip_specificity <- Sys.getenv("TIPS_SKIP_SPECIFICITY", "FALSE") %in% c("1", "TRUE", "true", "T")
-  assign("step1", !skip_specificity, envir = envir)
-  assign("step2", !skip_specificity, envir = envir)
+  assign("step1", TRUE, envir = envir)
+  assign("step2", TRUE, envir = envir)
   assign("PPI_color_platte", c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02"), envir = envir)
   assign("top_TF_rank", 3L, envir = envir)
   assign("gene_top_n", 20L, envir = envir)
 
-  ## TIPS_RESULTS_TAG lets two concurrent runs (e.g. a gpu-partition run at
-  ## core_count=4 and a bigmem-partition run at core_count=1, submitted to
-  ## race the HPC queue) write to separate folders instead of clobbering each
-  ## other's results_core/ mid-run. Empty by default -- unset, this is a no-op.
-  results_tag <- Sys.getenv("TIPS_RESULTS_TAG", "")
-  results_dir <- paste0(wd, "results_core", results_tag, "/")
+  results_dir <- paste0(wd, "results_core/")
   data_dir    <- paste0(wd, "../data/")   # GSE175634/data/, shared with the IID arm
   ppi_path    <- results_dir              # this dataset keeps PPI outputs directly in results_core/, not a PPI_weight/ subfolder
   assign("results_dir", results_dir, envir = envir)

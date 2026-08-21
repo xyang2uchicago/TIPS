@@ -173,10 +173,3 @@ if(step2){
 }								  
 ## copy resutls locally
 # scp -p -r  xyang2@midway3.rcc.uchicago.edu:/project/imoskowitz/xyang2/heart_dev/GSE175634_iPSC_CM/PPImax_weight/* F:\projects\scRNA\results\cardiac_CTS_GRN\GSE175634_iPSC_CM_weight_PPImax\.
-		
-
-
-
-## One-time debug block removed here: a manual comparison of this run's
-## output against a local backup file (_bk.rds) to confirm reproducibility
-## on a prior pass — not part of the pipeline.

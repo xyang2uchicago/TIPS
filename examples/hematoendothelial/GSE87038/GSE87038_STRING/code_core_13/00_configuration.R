@@ -4,17 +4,8 @@
 ## Call tips_configure() from run_TIPS_core.R (or let ensure_tips_configured()
 ## do it automatically when a numbered script is run standalone).
 ##
-## logFC.cut=0.5 (not the 0.6 literal still hardcoded in a couple of numbered
-## scripts) matches the committed DEG_..._lfc0.5_...rds file, confirmed by
-## 11.1.1's/11.2.0's/24.0's own comments ("lfc_HiGCTS=0.5" etc). This folder's
-## own README.md claims NES_threshold should also move 3 -> 4.5, but that is
-## contradicted by the manuscript figure itself ("Independent endothelial-
-## biased subnetworks", Pijuan C13 panel): SOX17 (NES 3.63) and GATA3 (NES
-## 3.66) are both shown as used TFs, and neither clears NES=4.5. NES_threshold
-## stays at 3 (the numbered scripts' own default) — confirmed directly against
-## the published figure. A results_core_13_NES4.5/ folder from the superseded
-## threshold experiment the README describes was removed once this was
-## confirmed.
+## logFC.cut=0.5, matching the committed DEG_..._lfc0.5_...rds file.
+## NES_threshold=3 is the value used in the manuscript.
 
 source(here::here("examples", "tips_core_shared_config.R"))
 
@@ -25,7 +16,7 @@ tips_configure <- function(
     CM_cluster    = "7",
     CF_cluster    = "6",
     CTS_ID        = CP_cluster,
-    seed_TF       = character(0),  # HiGCTS_13 TFs have BC=0 with corrected HiG graphs; overwritten when 12.0 runs
+    seed_TF       = character(0),  # HiGCTS_13 TFs have BC=0; overwritten when 12.0 runs
     NES_threshold = 3,
     logFC.cut     = 0.5,
     core_count    = 1,      # parallel cores for 11.2.0 steps 1-2; keep 1 on Windows

@@ -8,12 +8,8 @@
 ## size/order, unlike the row-index approach some sibling folders use. Safe
 ## to chain here since STRING db version is pinned ("12.0").
 ##
-## NOTE: logFC.cut=0.5 (not the 0.6 literal a couple of numbered scripts still
-## hardcode) matches the committed data. This folder's README.md also claims
-## NES_threshold should move 3 -> 4.5, but that's contradicted by the
-## manuscript figure itself (SOX17/GATA3 are both used TFs there, and neither
-## clears NES=4.5) — NES_threshold stays at 3. See 00_configuration.R for
-## the evidence trail.
+## NOTE: logFC.cut=0.5 and NES_threshold=3 match the manuscript and the
+## committed data — see 00_configuration.R for details.
 
 species       <- "mouse"
 celltype_col  <- "label"
