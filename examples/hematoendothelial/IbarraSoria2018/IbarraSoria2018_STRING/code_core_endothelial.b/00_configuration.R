@@ -3,13 +3,6 @@
 ##
 ## Call tips_configure() from run_TIPS_core.R (or let ensure_tips_configured()
 ## do it automatically when a numbered script is run standalone).
-##
-## No parameter adjustment needed here (unlike GSE87038): only one DEG file
-## exists (lfc0.6, no lfc0.5 variant), only one cisTarget_predicted_endothelial.b/
-## folder exists (no duplicate NES-threshold experiment), and the committed
-## 5-TF result (ETV2, GATA2, HMGA2, SOX17, FEV) at NES_threshold=3 was
-## confirmed directly against the manuscript figure — see the IID arm's
-## 00_configuration.R for the full evidence trail (identical for both arms).
 
 source(here::here("examples", "tips_core_shared_config.R"))
 
@@ -23,7 +16,7 @@ tips_configure <- function(
     seed_TF       = c("ETV2"),  # from CTS_endothelial.b (code 12.0 output)
     NES_threshold = 3,
     logFC.cut     = 0.6,
-    core_count    = 8,      # original per-file value (uses mclapply fork parallelism; not Windows-safe)
+    core_count    = 1,      # parallel cores for 11.2.0 steps 1-2; default to 1, not everyone has cores to spare
     celltype_specific_weight_version = "10",
     BioTIP_version = "06232025",
     heatmap_coding_target_only = TRUE,

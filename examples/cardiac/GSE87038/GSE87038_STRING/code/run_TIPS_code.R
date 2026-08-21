@@ -1,7 +1,6 @@
 ## cardiac GSE87038 (E8.25 mouse gastrulation) — STRING arm, code/ (non-centralized)
 ##
-## Unlike code_core/run_TIPS_core.R, this driver does NOT go through
-## tips_configure() -- these are the PI's original scripts, untouched, each
+## These are the PI's original scripts, untouched, each
 ## with its own embedded USER INPUT block (species/CP_cluster/etc. hardcoded
 ## per-file). This driver only sequences them in the documented order;
 ## nothing about the sourced files themselves is edited.

@@ -45,11 +45,37 @@ TIPS/
             └── 9_Held_out_clone_fate_prediction_cursor/  # held-out clone-fate validation
 ```
 
+### Run a case study's pipeline
+
+Every `code_core*` folder above is self-contained and driven by a single `run_TIPS_core.R` script. Set the tunable parameters (species, cluster IDs, thresholds, etc.) in that same folder's `00_configuration.R`, then run the driver, e.g. `Rscript examples/cardiac/GSE87038/GSE87038_IID/code_core/run_TIPS_core.R`. All `code_core*` folders share one centralized config engine (`examples/tips_core_shared_config.R`).
+
+- **Hematopoiesis (LARRY)**
+  - Metacell, IID: `examples/hematopoietic_LARRY/metacell/7_data_MuTrans_TIPS_IID/code_core_4_9vs11/run_TIPS_core.R`
+  - Metacell, STRING: `examples/hematopoietic_LARRY/metacell/7_data_MuTrans_TIPS_STRING/code_core_4_9vs11/run_TIPS_core.R`
+  - Single cell: `examples/hematopoietic_LARRY/single_cell/code_core_11_10vs17/run_TIPS_core.R`
+- **Hematoendothelial development**
+  - GSE87038, IID: `examples/hematoendothelial/GSE87038/GSE87038_IID/code_core_13/run_TIPS_core.R`
+  - GSE87038, STRING: `examples/hematoendothelial/GSE87038/GSE87038_STRING/code_core_13/run_TIPS_core.R`
+  - IbarraSoria2018, IID: `examples/hematoendothelial/IbarraSoria2018/IbarraSoria2018_IID/code_core_endothelial.b/run_TIPS_core.R`
+  - IbarraSoria2018, STRING: `examples/hematoendothelial/IbarraSoria2018/IbarraSoria2018_STRING/code_core_endothelial.b/run_TIPS_core.R`
+- **Cardiac development**
+  - GSE175634, IID: `examples/cardiac/GSE175634/GSE175634_IID/code_core/run_TIPS_core.R`
+  - GSE175634, STRING: `examples/cardiac/GSE175634/GSE175634_STRING/code_core/run_TIPS_core.R`
+  - GSE87038, IID: `examples/cardiac/GSE87038/GSE87038_IID/code_core/run_TIPS_core.R`
+  - GSE87038, STRING: `examples/cardiac/GSE87038/GSE87038_STRING/code_core/run_TIPS_core.R`
+  - IbarraSoria2018, IID: `examples/cardiac/IbarraSoria2018/IbarraSoria2018_IID/code_core/run_TIPS_core.R`
+  - IbarraSoria2018, STRING: `examples/cardiac/IbarraSoria2018/IbarraSoria2018_STRING/code_core/run_TIPS_core.R`
+
+Cardiac case studies also keep the original, non-centralized analysis scripts under each dataset's `code/` folder, sequenced for reference by a thin `run_TIPS_code.R` driver (no shared config — each script sets its own parameters).
+
+For a detailed walkthrough of PPIN construction and topological robustness analysis on one of our key results (E8.25 Mouse Gastrulation, GSE87038, [Pijuan-Sala 2019](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE87038)) — the network-topology portion of TIPS, Fig. 3d,e of the manuscript — see the [**regulated stochasticity tutorial**](https://xyang2uchicago.github.io/TIPS/tutorial/TIPS.html), "Ordered Yet Selectively Fragile Progenitor Networks." TF–target edge reweighting, CM/CF lineage-biased module resolution, CHD-program convergence and cross-dataset/disease transfer are demonstrated in `examples/` and described in the manuscript.
+
 ### What is TIPS?
 - Name: **Transcriptional Instability–guided Prediction of Subnetworks**.
 - Goal: Identify **semi-stable transition states** obscured by program mixing (Fig. 1A).
 - Output: Quantify **state-specific network rewiring** from uncommitted progenitors to descendant fates (Fig 1B).
-- Method: BioTIP + **coexpression-weighted protein–protein interaction networks + robustness (targeted-attack) + chromatin integration** to resolve lineage-leaning arms (Fig. 1C).
+- Method: BioTIP + **coexpression-weighted protein–protein interaction networks + ordered-yet-fragile network topology (targeted-attack) + augmented evidence (lineage-matched transcription factor-binding and chromatin accessibility)** to resolve lineage-leaning arms (Fig. 1C).
+
 <br>
 <p align="center">
 <img src="https://github.com/xyang2uchicago/TIPS/blob/main/imgs/Fig3_developmental_blackbox.jpg" width="33%" height="auto">
@@ -78,31 +104,24 @@ Figure 1C
 We applied TIPS across three developmental settings (see [examples](https://github.com/xyang2uchicago/TIPS/tree/main/examples)), each testing a different axis of validity:
 
 - **Hematopoiesis** — *We ask: does this score predict a real, ground-truth future outcome?*
-  Dataset: [Weinreb, C., Rodriguez-Fraticelli, A., Camargo, F.D. & Klein, A.M. Lineage tracing on transcriptional landscapes links state to fate during differentiation. *Science* 367 (2020).](https://pubmed.ncbi.nlm.nih.gov/31974159/)
+  - Dataset: [Weinreb, C., Rodriguez-Fraticelli, A., Camargo, F.D. & Klein, A.M. Lineage tracing on transcriptional landscapes links state to fate during differentiation. *Science* 367 (2020).](https://pubmed.ncbi.nlm.nih.gov/31974159/)
+  - MuTrans evaluation is given at [github.com/MohsenZand/SEACells_MuTrans/tree/main/LARRY/scripts](https://github.com/MohsenZand/SEACells_MuTrans/tree/main/LARRY/scripts).
 
 - **Hematoendothelial development** — *We ask: does an independently-inferred module generalize to a completely different dataset?*
-  Datasets: Dataset 1 — 12.7k genes in 11k E8.25 cells, with 16 predefined developing mesoderm subtypes ([Ibarra-Soria et al., 2018](https://www.nature.com/articles/s41556-017-0013-z)); Dataset 2 — 10.9k genes of 7,240 developing mesoderm cells collected at embryonic day (E) 8.25 when precursor cells of major organs have been formed ([Pijuan-Sala et al., 2019](https://pubmed.ncbi.nlm.nih.gov/30787436/)).
+  - Dataset 1 — 12.7k genes in 11k E8.25 cells, with 16 predefined developing mesoderm subtypes ([Ibarra-Soria et al., 2018](https://www.nature.com/articles/s41556-017-0013-z)).
+  - Dataset 2 — 10.9k genes of 7,240 developing mesoderm cells collected at embryonic day (E) 8.25 when precursor cells of major organs have been formed ([Pijuan-Sala et al., 2019](https://pubmed.ncbi.nlm.nih.gov/30787436/)).
 
 - **Cardiac development** — *We ask: is TIPS prediction biologically and clinically relevant?*
-  Datasets: Dataset 1 ([Ibarra-Soria et al., 2018](https://www.nature.com/articles/s41556-017-0013-z)); Dataset 2 ([Pijuan-Sala et al., 2019](https://pubmed.ncbi.nlm.nih.gov/30787436/)); Dataset 3 — 38.9k genes in 230,786 human embryonic stem cells (hESCs) of 13 clusters ([Elorbany et al., 2022](https://pubmed.ncbi.nlm.nih.gov/35061661/)). MuTrans evaluation is given at https://github.com/MohsenZand/ipsc_cardiomyocyte.
+  - Dataset 1 ([Ibarra-Soria et al., 2018](https://www.nature.com/articles/s41556-017-0013-z)).
+  - Dataset 2 ([Pijuan-Sala et al., 2019](https://pubmed.ncbi.nlm.nih.gov/30787436/)).
+  - Dataset 3 — 38.9k genes in 230,786 human embryonic stem cells (hESCs) of 13 clusters ([Elorbany et al., 2022](https://pubmed.ncbi.nlm.nih.gov/35061661/)).
+  - MuTrans evaluation is given at [github.com/MohsenZand/SEACells_MuTrans/tree/main/ipsc_cardiomyocyte](https://github.com/MohsenZand/SEACells_MuTrans/tree/main/ipsc_cardiomyocyte).
 
 ### Where to apply TIPS?
 - TIPS connects single-cell instability signals to mechanistically grounded network architecture.
 - Apply it to complex developmental trajectories with transient transition states (e.g., cardiogenesis).
 - Apply it to disease settings where cells deviate from normal trajectories and occupy transitional or plastic states.
 
-
-### How to use TIPS analysis? 
-
-1. [**regulated stochasticity tutorial**](https://xyang2uchicago.github.io/TIPS/tutorial/TIPS.html) — "Ordered Yet Selectively Fragile Progenitor Networks": a detailed walkthrough of PPIN construction and topological robustness analysis on one of our key results (E8.25 Mouse Gastrulation, GSE87038, [Pijian-Sala 2019](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE87038)). It covers the network-topology portion of TIPS (Fig. 3d,e of the manuscript); TF–target edge reweighting, CM/CF lineage-biased module resolution, CHD-program convergence and cross-dataset/disease transfer are demonstrated in `examples/` and described in the manuscript.
-
-2. **Run a case study's pipeline directly**: every `code_core*` folder shown in the [Repository Structure](#repository-structure) above (`code_core`, `code_core_13`, `code_core_endothelial.b`, `code_core_4_9vs11`, `code_core_11_10vs17`) is self-contained and driven by a single `run_TIPS_core.R` script. Set the tunable parameters (species, cluster IDs, thresholds, etc.) in that same folder's `00_configuration.R`, then run the driver, e.g.:
-   ```r
-   Rscript examples/cardiac/GSE87038/GSE87038_IID/code_core/run_TIPS_core.R
-   ```
-   All `code_core*` folders share one centralized config engine (`examples/tips_core_shared_config.R`) and follow the pattern established in `hematopoietic_LARRY`. Cardiac case studies also keep the original, non-centralized analysis scripts under each dataset's `code/` folder, sequenced for reference by a thin `run_TIPS_code.R` driver (no shared config — each script sets its own parameters).
-
-   Note: `GSE175634` (230,786 cells) needs an HPC node with substantial memory for `11.2.0`'s network-specificity step — not a laptop; see the comments at the top of its `code_core/midway3_submit*.sbatch` scripts.
 
 ### How to install?
 To use the newest TIPS package, clone/download this repository:

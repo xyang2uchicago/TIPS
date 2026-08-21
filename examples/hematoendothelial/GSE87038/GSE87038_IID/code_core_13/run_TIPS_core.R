@@ -2,10 +2,8 @@
 ## Full docs: README.md in this folder
 ## USER PARAMETERS below → tips_configure() → 11.1 … 24.3
 ##
-## NOTE: logFC.cut=0.5 (not the 0.6 literal a couple of numbered scripts still
-## hardcode) matches the committed data; NES_threshold=3 is the numbered
-## scripts' own default and is what the manuscript actually used — see
-## 00_configuration.R for the evidence trail.
+## NOTE: logFC.cut=0.5 and NES_threshold=3 match the manuscript and the
+## committed data — see 00_configuration.R for details.
 
 species       <- "mouse"
 celltype_col  <- "label"

@@ -15,7 +15,7 @@ tips_configure <- function(
     seed_TF       = c("MEF2C", "GATA4", "MSX2"),  # from HiGCTS_cardiac.a top PageRank (code 12.0); overwritten when 12.0 runs
     NES_threshold = 3,
     logFC.cut     = 0.6,
-    core_count    = 8,      # original per-file value (uses mclapply fork parallelism; not Windows-safe)
+    core_count    = 1,      # parallel cores for 11.2.0 steps 1-2; default to 1, not everyone has cores to spare
     celltype_specific_weight_version = "10",
     BioTIP_version = "06232025",
     heatmap_coding_target_only = TRUE,

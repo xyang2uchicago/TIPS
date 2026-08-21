@@ -9,6 +9,7 @@ source(file.path(code_dir, "00_configuration.R"))
 ensure_tips_configured(code_dir)
 setwd(results_dir)
 rebuild_mat <- TRUE
+CP_cluster  <- "3"   # cardiogenic progenitor (transitional state)
 
 CTS_ID  <- "CP.1"
 seed_TF <- character(0)  # HiGCTS_CP.1 contains no non-cardiac TF with BC > 0
