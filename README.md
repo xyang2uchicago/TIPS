@@ -66,7 +66,7 @@ Every `code_core*` folder above is self-contained and driven by a single `run_TI
   - IbarraSoria2018, IID: `examples/cardiac/IbarraSoria2018/IbarraSoria2018_IID/code_core/run_TIPS_core.R`
   - IbarraSoria2018, STRING: `examples/cardiac/IbarraSoria2018/IbarraSoria2018_STRING/code_core/run_TIPS_core.R`
 
-Cardiac case studies also keep the original, non-centralized analysis scripts under each dataset's `code/` folder, sequenced for reference by a thin `run_TIPS_code.R` driver (no shared config — each script sets its own parameters).
+All case studies have been upgraded for user-friendliness by Felix Yu, tested for reproducibility.
 
 For a detailed walkthrough of PPIN construction and topological robustness analysis on one of our key results (E8.25 Mouse Gastrulation, GSE87038, [Pijuan-Sala 2019](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE87038)) — the network-topology portion of TIPS, Fig. 3d,e of the manuscript — see the [**regulated stochasticity tutorial**](https://xyang2uchicago.github.io/TIPS/tutorial/TIPS.html), "Ordered Yet Selectively Fragile Progenitor Networks." TF–target edge reweighting, CM/CF lineage-biased module resolution, CHD-program convergence and cross-dataset/disease transfer are demonstrated in `examples/` and described in the manuscript.
 
