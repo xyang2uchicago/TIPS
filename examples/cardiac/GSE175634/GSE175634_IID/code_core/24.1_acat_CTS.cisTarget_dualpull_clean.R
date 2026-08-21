@@ -1,3 +1,16 @@
+## ---------------------------------------------------------------------------
+## KNOWN BUG (fixed in 00_configuration.R/24.0, but NOT re-validated below):
+## CP_cluster was previously hardcoded to "3" instead of "CP" here and in 24.0.
+## 11.1 already renames names(DEG) from "3" to "CP", so DEG[["3"]] no longer
+## existed -- every DEG[[CP_cluster]] lookup silently returned NULL, dropping
+## all CP-cluster signal from both the CP_hi column (24.0) and the auto TF
+## candidate pool below. Fixed by setting CP_cluster="CP" in 00_configuration.R.
+## TODO: the manual `key_TFs <- c("TEAD1", "ETS2")` selection below was chosen
+## by reviewing the (bug-affected) candidate pool. Re-run with the fix in
+## place, compare the new auto-candidate list against the old committed
+## results, and re-confirm (or revise) the manual picks before treating this
+## as publication-ready.
+## ---------------------------------------------------------------------------
 code_dir <- here::here("examples", "cardiac", "GSE175634", "GSE175634_IID", "code_core")
 source(file.path(code_dir, "00_configuration.R"))
 ensure_tips_configured(code_dir)
