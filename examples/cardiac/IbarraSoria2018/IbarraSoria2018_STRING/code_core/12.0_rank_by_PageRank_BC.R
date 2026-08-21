@@ -1,13 +1,9 @@
 ########## BEGINNING OF USER INPUT ##########
-source(here::here("examples", "config.R"))
-wd          <- tips_path("examples", "cardiac", "IbarraSoria2018", "IbarraSoria2018_STRING/")
-shared_path <- paste0(shared_data_path, "/")
-celltype_specific_weight_version <- '10'
-CP_cluster  <- "cardiac.a"   # focal cluster; drives HiG_X, CTS_X, HiGCTS_X signatures
-top_TF_rank <- 3             # top N TFs to report per signature
-gene_top_n  <- 20            # top N genes to label in plot
+code_dir <- here::here("examples", "cardiac", "IbarraSoria2018", "IbarraSoria2018_STRING", "code_core")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
 ########## END OF USER INPUT ##########
-setwd(paste0(wd, "results_core/"))
+setwd(results_dir)
 
 library(clusterProfiler) # clusterProfiler v4.6.0
 library(msigdbr)
@@ -32,16 +28,9 @@ setdiff(toupper(TF_mouse), TF_human)
 # [1] "4932411N23RIK" "AW822073"      "B020011L13RIK" "BC025920"      "DUXBL1"        "DUXBL2"
 # ....
 
-coding_genes <- readRDS(file = paste0(shared_path, "coding_genes.rds")) %>% unique()
-length(coding_genes) # 19930
-names(coding_genes) <- NULL
-CHD <- NULL
-
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
 #############################
-db_specifc_output_path <- paste0(wd, "results_core/PPI_weight/")
-
 df_PageRank <- readRDS(file = paste0(db_specifc_output_path, "df_PAGERANK_strength_ANND.rewiring.P.rds"))
 
 dim(df_PageRank) # 6366   16

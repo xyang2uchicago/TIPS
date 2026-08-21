@@ -424,7 +424,7 @@ for (key in key_TFs) {
   # [1] "weight"         "corexp_sign"    "coexp_target"   "norm_PPI_score" "color"          "lty"
 
   res <- fill_TF_targeting_predicted_edges(graph_TF_list,
-    linkeage_name = "CM", graph_list,
+    linkage_name = "CM", graph_list,
     sce, celltype_col = celltype_col, CT_cluster_id = CP_cluster,
     descendant_cluster_id = CM_cluster, TF_symbol = key_in_TFfamily,
     HVG = rownames(sce)
@@ -434,7 +434,7 @@ for (key in key_TFs) {
 
 
   res <- fill_TF_targeting_predicted_edges(graph_TF_list,
-    linkeage_name = "CF", graph_list,
+    linkage_name = "CF", graph_list,
     sce, celltype_col = celltype_col, CT_cluster_id = CP_cluster,
     descendant_cluster_id = CF_cluster, TF_symbol = key_in_TFfamily,
     HVG = rownames(sce)
@@ -506,7 +506,7 @@ for (f in files) {
     unlist() %>%
     unique()
 
-  change_df <- cbind(linkeage = pull, change_df, TF_highConf = tmp$TF_highConf, motif = tmp$motif, NES = tmp$NES)
+  change_df <- cbind(linkage = pull, change_df, TF_highConf = tmp$TF_highConf, motif = tmp$motif, NES = tmp$NES)
   change_df$TF_highConf[which(change_df$from != key_in_TFfamily & change_df$to != key_in_TFfamily)] <- ""
   change_df$motif[which(change_df$from != key_in_TFfamily & change_df$to != key_in_TFfamily)] <- ""
   change_df$NES[which(change_df$from != key_in_TFfamily & change_df$to != key_in_TFfamily)] <- ""

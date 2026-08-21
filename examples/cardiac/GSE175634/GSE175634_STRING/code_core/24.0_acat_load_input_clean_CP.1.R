@@ -4,30 +4,14 @@ library(purrr)
 library(SingleCellExperiment)
 
 ########## BEGINNING OF USER INPUT ##########
-source(here::here("examples", "config.R"))
-wd <- tips_path("examples", "cardiac", "GSE175634", "GSE175634_STRING/")
-setwd(paste0(wd, "results_core/"))
-
-data_dir    <- paste0(wd, "../data/")  # GSE175634/data/ shared across PPI workflows
-ppi_path    <- paste0(wd, "results_core/")
-shared_path <- paste0(shared_data_path, "/")
-
-coding_genes <- readRDS(file = paste0(shared_path, "coding_genes.rds")) %>% unique()
-length(coding_genes) # 19930
-names(coding_genes) <- NULL
-
-celltype_specific_weight_version <- '10'
-species      <- "human"
-# leiden_0.5 raw cluster numbers match the original code (3=CP, 5=CM, 1=CF)
-celltype_col <- "leiden_0.5"
-CP_cluster   <- "3"   # cardiogenic progenitor (transitional state)
-CM_cluster   <- "5"   # cardiomyocyte (terminal CM fate)
-CF_cluster   <- "1"   # alternative fate; original code cluster assignment
+code_dir <- here::here("examples", "cardiac", "GSE175634", "GSE175634_STRING", "code_core")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+setwd(results_dir)
+rebuild_mat <- TRUE
 
 CTS_ID  <- "CP.1"
 seed_TF <- character(0)  # HiGCTS_CP.1 contains no non-cardiac TF with BC > 0
-
-heatmap_coding_target_only <- TRUE
 ########## END OF USER INPUT ##########
 
 CTS_name <- paste0("CTS_", CTS_ID)
@@ -118,21 +102,7 @@ motifAnnot <- motifAnnotations
 dim(motifAnnot)
 
 if (!file.exists("cisTarget_targets_in_all_CTS.rds")) {
-    dbFile       <- "hg38_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather"
-    feather_path <- paste0(shared_path, "cistarget/")
-
-    if (!file.exists(paste0(feather_path, dbFile))) {
-        url <- paste0(
-            "https://resources.aertslab.org/cistarget/databases/homo_sapiens/",
-            "hg38/refseq_r80/mc_v10_clust/gene_based/", dbFile
-        )
-        if (!dir.exists(feather_path)) dir.create(feather_path, recursive = TRUE)
-        options(timeout = 600)
-        download.file(url, destfile = paste0(feather_path, dbFile),
-                      mode = "wb", method = "libcurl")
-    }
-
-    motifRankings <- importRankings(paste0(feather_path, dbFile))
+    motifRankings <- importRankings(tips_core_ensure_cistarget_feather(shared_data_path))
 
     gene_sets_HiG <- DEG[intersect(c(CM_cluster, CF_cluster), names(DEG))]
     cisTarget.res_HiG <- cisTarget(

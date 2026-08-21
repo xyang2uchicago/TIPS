@@ -151,14 +151,14 @@ for (i in names(CTS)) {
   graph_list[[paste0("HiGCTS_", i)]] <- graph
 }
 
-## lastly, build for CTS
+## lastly, build for CTS (no significance filter — raw CTS[[i]] membership,
+## matching the STRING arm's CTS loop, which also takes CTS[[i]] as-is)
 # refer to 6.3_DE.statistics_CTS.R
-markers.up_all <- readRDS("../../data/markers.up_all_ttest.rds")
 
 # CTS
 for (i in names(CTS)) {
   j <- if (grepl("\\.", i) && grepl("^[0-9]+$", sub("^[^.]*\\.", "", i))) sub("\\..*$", "", i) else i
-  diff_exp <- markers.up_all[[j]][CTS[[i]], ]
+  diff_exp <- markers.up[[j]][CTS[[i]], ]
   diff_exp$symbol <- rownames(diff_exp)
 
   hits <- diff_exp$symbol
@@ -247,7 +247,7 @@ which(graphs_with_duplicates)
 # named integer(0)
 
 # Show actual edges for duplicated vertices
-g1 <- graph_list[["HiG_1"]]
+g1 <- graph_list[[names(graph_list)[1]]]
 vertex_names <- toupper(V(g1)$name)
 (duplicated_names <- unique(vertex_names[duplicated(vertex_names)]))
 # character(0)

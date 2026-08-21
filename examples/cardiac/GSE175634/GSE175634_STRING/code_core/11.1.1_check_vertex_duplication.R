@@ -33,26 +33,25 @@ library("gridExtra")
 library(ggrepel)
 library(ggpubr) # resuired by stat_compare_means()
 
-setwd('F:/projects/scRNA/results/cardiac_CTS_GRN/GSE175634_iPSC_CM_weighted_v9')
-score_threshold = 'weight'
-PPI_color_platte = c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
+code_dir <- here::here("examples", "cardiac", "GSE175634", "GSE175634_STRING", "code_core")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+setwd(results_dir)
 
-##### compare  to unweighted graphs ####
-graph_list <- readRDS( file= '../GSE175634_iPSC_CM_score200/GSE175634_STRING_graph_perState_notsimplified.rds')
-graph_list <- lapply(graph_list, simplify) #!!!!!!!!!!!!!!!!!!!
+## WARNING: the duplicate-vertex fixes below (`if (i=='1') mapped = mapped[-29,]`
+## etc.) are hardcoded ROW POSITIONS, not gene-name-keyed — they are only valid
+## for this exact STRINGdb version ("12.0") + score_threshold (200) + gene
+## symbol set. Re-running against a different STRING db version or DEG source
+## would silently remove the wrong rows. Preserved as-is (same fragile-but-
+## accepted pattern as GSE87038_STRING's own 11.1.1) since the db version is
+## pinned and this has been verified against the current data.
 
-N1 = sapply(graph_list, vcount)
-
-
-
-graph_list <- readRDS( file= 'GSE175634_STRING_graph_perState_notsimplified.rds')  
+graph_list <- readRDS( file= 'GSE175634_STRING_graph_perState_notsimplified.rds')
 graph_list <- lapply(graph_list, simplify) #!!!!!!!!!!!!!!!!!!!
 
 N = sapply(graph_list, vcount)
-all(N1==N)  # [1] TRUE
 
- 
-## degree distribution was not discussed again because it is not in the manuscript  
+## degree distribution was not discussed again because it is not in the manuscript
 #####################  #################
 # Check which graphs have duplicate vertex names
 graphs_with_duplicates <- sapply(graph_list, function(g) {
@@ -99,13 +98,12 @@ if(length(duplicated_names) > 0) {
 # refer to ../xxx_score200/11.1.1_CTS_cardiac_network_degreeDistribution.R
 library("STRINGdb")
 packageVersion('STRINGdb') # '2.14.0'
-string_db <- STRINGdb$new( version="12.0", species=9606,   # species= 10090 for mouse;    ?? for human 2021 version
-                            score_threshold = 200, #!!!!!!!!!!!default is 200
-							network_type="full", 
-                            input_directory="F:/projects/Share/PPIN/STRING/STRINGdb/human/full/") 
+string_db <- STRINGdb$new( version="12.0", species=db_species,
+                            score_threshold = score_threshold,
+							network_type="full",
+                            input_directory=paste0(shared_data_path, "/PPIN"))
 string_db
 
-inputDir= "F:/projects/scRNA/results/GSE175634_iPSC_CM/"
 load(here::here("examples", "cardiac", "GSE175634", "data", "DEG.wc_padj0.01_score40.RData"))
 lapply(DEG.wc, nrow) %>% unlist
    # 0    1    2    3    4    5    6    7    8    9   10   11   12 

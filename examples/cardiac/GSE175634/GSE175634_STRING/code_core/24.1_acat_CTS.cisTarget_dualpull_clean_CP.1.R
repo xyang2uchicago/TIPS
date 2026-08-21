@@ -1,8 +1,9 @@
-# Set True if running 24.0 the first time
-rebuild_mat <- TRUE
-source(here::here("examples", "cardiac", "GSE175634", "GSE175634_STRING", "code_core", "24.0_acat_load_input_clean_CP.1.R"))
+code_dir <- here::here("examples", "cardiac", "GSE175634", "GSE175634_STRING", "code_core")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+source(file.path(code_dir, "24.0_acat_load_input_clean_CP.1.R"))
 
-source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
+source(here::here("R", paste0("celltype_specific_weight_v", celltype_specific_weight_version, ".R")))
 
 ## check the loaded objects =========================
 seed_TF  # character(0)
@@ -15,8 +16,6 @@ dir.create(file.path(updir, paste0("cisTarget_predicted_", CTS_ID)),
     showWarnings = FALSE, recursive = TRUE
 )
 setwd(paste0(updir, "/cisTarget_predicted_", CTS_ID))
-
-NES_threshold <- 4.5
 
 ########################################################
 ##  input 6 -- RcisTarget predicted TF enriched among CTS genes

@@ -12,29 +12,15 @@ library(stringr)
 
 ########## BEGINNING OF USER INPUT ##########
 
-source(here::here("examples", "config.R"))
-wd = tips_path("examples", "hematoendothelial", "IbarraSoria2018", "IbarraSoria2018_STRING/")
-setwd(paste0(wd, "results_core_endothelial.b/PPI_weight/"))
-
-db <- "IbarraSoria2018"
-
-celltype_specific_weight_version <- '10'
-BioTIP_version <- '06232025'
-
-specificity_methods <- c("combined") # Other methods: "ratio", "zscore", "diff"
-
-isl1_cluster <- "HiGCTS_cardiac.a" # cluster containing ISL1 gene
-
-core_count <- 8 # number of cores used for parallel processing in steps 1 and 2. Use core_count = 1 if on Windows.
-
-step1 <- TRUE # calculate gene correlations and specificity
-step2 <- TRUE # update network edge weights
-step3 <- TRUE # graph comparing specificity methods for all clusters and isl1_cluster
+code_dir <- here::here("examples", "hematoendothelial", "IbarraSoria2018", "IbarraSoria2018_STRING", "code_core_endothelial.b")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+setwd(ppi_path)
 
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/heads/master/R/BioTIP_update_', BioTIP_version, '.R'))
 
-load(paste0(wd, 'data/sce_16subtype.RData'))
+load(paste0(data_dir, 'sce_16subtype.RData'))
 
 ########## END OF USER INPUT ##########
 
@@ -160,103 +146,6 @@ if(step2){
 
 }
 
-# STEP 3		
-# Compare weight methods
-# Check new weights for ISL1 in "cardiac.a"
-if(step3){
-    print('entering into step 3')
-	pdf(file=paste0('compare_specificity_method_vs_PPIscores.pdf')) # create this file for comparison
-
-	for(net_name in names(graph_list))
-		{
-		plot_data = NULL
-		par(mfrow=c(2,2))
-		for(s in specificity_methods) {
-			weighted_graph_list <- readRDS( file = paste0(db, '_STRING_graph_perState_simplified_',s,'weighted.rds'))
-			g = weighted_graph_list[[net_name]]
-			
-			# Check for ISL1 vertex and mark edges
-                isl1_vertex <- which(tolower(V(g)$name) == "isl1")
-                is_isl1_edge <- rep(FALSE, length(E(g)))
-                if(length(isl1_vertex) > 0) {
-                    isl1_edges <- incident(g, isl1_vertex, mode = "all")
-                    is_isl1_edge[isl1_edges] <- TRUE
-                }
-                
-                temp_data <- data.frame(
-                    net_name=net_name,
-                    norm_PPI_score = E(g)$norm_PPI_score,
-                    log_weight = log10(E(g)$weight),
-                    method = s,
-                    is_isl1 = is_isl1_edge
-                )
-
-                plot_data <- rbind(plot_data, temp_data)
-		}
-		p2 <- ggplot(plot_data, aes(x = norm_PPI_score, y = log_weight)) +
-			stat_binhex(bins = 50, alpha=0.7) +
-			geom_point(data = subset(plot_data, is_isl1 == TRUE), 
-					   aes(x = norm_PPI_score, y = log_weight), 
-					   color = "red", size = 1.5) +
-			scale_fill_viridis_c() +
-			facet_wrap(~method, scales = "free") +
-			theme_minimal() +
-			labs(title = paste("Edge Weight Density -", net_name),
-				 x = "E(g)$norm_PPI_score", 
-				 y = "log10(E(g)$weight)",
-				 fill = "Count") +
-			theme(legend.position = "bottom")
-
-		print(p2)
-	}
-	dev.off()
-}
-
-net_name = isl1_cluster	# Specific to the 2018 dataset
-plot_data = NULL
-
-for(s in specificity_methods) {
-	graph_list <- readRDS( file = paste0(db, '_STRING_graph_perState_simplified_',s,'weighted.rds'))
-	g = graph_list[[net_name]]
-	
-	# Check for ISL1 vertex and mark edges
-	isl1_vertex <- which(tolower(V(g)$name) == 'isl1')
-	is_isl1_edge <- rep(FALSE, length(E(g)))
-	if(length(isl1_vertex) > 0) {
-		isl1_edges <- incident(g, isl1_vertex, mode = "all")
-		is_isl1_edge[isl1_edges] <- TRUE
-	}
-    else{
-        print(paste0("No ISL1 found in ", isl1_cluster))
-        break
-    }
-	
-	temp_data <- data.frame(
-		net_name=net_name,
-		norm_PPI_score = E(g)$norm_PPI_score,
-		log_weight = log10(E(g)$weight),
-		method = s,
-		is_isl1 = is_isl1_edge
-	)
-
-	plot_data <- rbind(plot_data, temp_data)
-}
-
-if(length(isl1_vertex) > 0){
-    temp = subset(plot_data,is_isl1==TRUE)
-    pdf(file=paste0('compare_specificity_method_', isl1_cluster,'_vs_PPIscores.pdf'))	
-        p3 <- ggplot(temp, aes(x = norm_PPI_score, y = log_weight, color=as.factor(norm_PPI_score))) +
-                    geom_point() +
-                    scale_fill_viridis_c() +
-                    facet_wrap(~method, scales = "free") +
-                    theme_minimal() +
-                    labs(title = paste("Isl1 linkages -", net_name),
-                        x = "E(g)$norm_PPI_score", 
-                        y = "log10(E(g)$weight)") +
-                    theme(legend.position = "bottom")
-        print(p3)
-    dev.off()	
-}
 
 
 

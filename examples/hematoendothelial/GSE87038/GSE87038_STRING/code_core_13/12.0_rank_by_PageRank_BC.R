@@ -1,13 +1,9 @@
 ########## BEGINNING OF USER INPUT ##########
-source(here::here("examples", "config.R"))
-wd          <- tips_path("examples", "hematoendothelial", "GSE87038", "GSE87038_STRING/")
-shared_path <- paste0(shared_data_path, "/")
-celltype_specific_weight_version <- '10'
-CP_cluster  <- "13"  # focal cluster; drives HiG_X, CTS_X, HiGCTS_X signatures
-top_TF_rank <- 3     # top N TFs to report per signature
-gene_top_n  <- 20    # top N genes to label in plot
+code_dir <- here::here("examples", "hematoendothelial", "GSE87038", "GSE87038_STRING", "code_core_13")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
 ########## END OF USER INPUT ##########
-setwd(paste0(wd, "results_core_13/"))
+setwd(results_dir)
 
 library(clusterProfiler) # clusterProfiler v4.6.0
 library(msigdbr)
@@ -22,16 +18,9 @@ data(dorothea_mm, package = "dorothea")
 TF_mouse <- unique(dorothea_mm$tf)
 length(TF_mouse) # [1] 1113
 
-coding_genes <- readRDS(file = paste0(shared_path, "coding_genes.rds")) %>% unique()
-length(coding_genes) # 19930
-names(coding_genes) <- NULL
-CHD <- NULL
-
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
 #############################
-db_specifc_output_path <- paste0(wd, "results_core_13/PPI_weight/")
-
 df_PageRank <- readRDS(file = paste0(db_specifc_output_path, "df_PAGERANK_strength_ANND.rewiring.P.rds"))
 
 dim(df_PageRank) # 10549   16

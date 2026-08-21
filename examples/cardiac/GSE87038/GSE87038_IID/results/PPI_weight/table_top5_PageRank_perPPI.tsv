@@ -1,11 +1,3 @@
-"signature"	"gene"	"PPI_cat"	"rank_by_PR"	"PCGC_AllCurated"
-"CTS_8"	"EPHA2"	"CTS"	1	FALSE
-"CTS_8"	"FGF8"	"CTS"	2	FALSE
-"CTS_8"	"FGFR2"	"CTS"	3	TRUE
-"CTS_8"	"IRX5"	"CTS"	5	TRUE
-"CTS_8"	"NR2F1"	"CTS"	4	FALSE
-"HiG_8"	"CCNB1"	"HiG"	5	FALSE
-"HiG_8"	"EZH2"	"HiG"	4	FALSE
-"HiG_8"	"HSPA5"	"HiG"	1	FALSE
-"HiG_8"	"NCL"	"HiG"	3	FALSE
-"HiG_8"	"TPM1"	"HiG"	2	FALSE
+version https://git-lfs.github.com/spec/v1
+oid sha256:2ac05b99dd7fec46451498766aae425698b542f2486841452204637ddab9c6ea
+size 8340

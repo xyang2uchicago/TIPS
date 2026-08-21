@@ -4,30 +4,10 @@ library(purrr)
 library(SingleCellExperiment)
 
 ########## BEGINNING OF USER INPUT ##########
-source(here::here("examples", "config.R"))
-wd <- tips_path("examples", "hematoendothelial", "GSE87038", "GSE87038_STRING/")
-setwd(paste0(wd, "results_core_13/"))
-
-data_dir    <- paste0(wd, "../data/")
-ppi_path    <- paste0(wd, "results_core_13/PPI_weight/")
-shared_path <- paste0(shared_data_path, "/")
-
-coding_genes <- readRDS(file = paste0(shared_path, "coding_genes_mouse.rds")) %>% unique()
-coding_genes <- toupper(coding_genes) # uppercase to match gene symbol processing
-length(coding_genes) # 26310
-names(coding_genes) <- NULL
-
-celltype_specific_weight_version <- '10'
-species      <- "mouse"
-celltype_col <- "label"
-CP_cluster   <- "13"   # cardiac progenitor cluster
-CM_cluster   <- "7"    # cardiomyocyte (blood) cluster
-CF_cluster   <- "6"    # cardiac fibroblast (endothelium) cluster
-
-CTS_ID  <- "13"
-seed_TF <- NULL  # determined by 12.0; key_TFs set manually in 24.1
-
-heatmap_coding_target_only <- TRUE
+code_dir <- here::here("examples", "hematoendothelial", "GSE87038", "GSE87038_STRING", "code_core_13")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+setwd(results_dir)
 rebuild_mat <- TRUE
 ########## END OF USER INPUT ##########
 
@@ -106,7 +86,7 @@ lengths(CTS)
 
 ########################################################
 ##  input 3 -- data-driven --- DEGs
-DEG <- readRDS(paste0(data_dir, "DEG_perState_min.prop0.25_lfc0.5_FDFR0.01.rds"))
+DEG <- readRDS(paste0(data_dir, "DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.01.rds"))
 lengths(DEG)
 # 1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19
 # 423 566 549 425 431 637 412 448 480 577 572 452 531 475 537 657 653 578 677
@@ -183,21 +163,7 @@ motifAnnot <- motifAnnotations
 dim(motifAnnot) # [1] 253096      8
 
 if (!file.exists("cisTarget_targets_in_all_CTS.rds")) {
-    dbFile       <- "hg38_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather"
-    feather_path <- paste0(shared_path, "cistarget/")
-
-    if (!file.exists(paste0(feather_path, dbFile))) {
-        url <- paste0(
-            "https://resources.aertslab.org/cistarget/databases/homo_sapiens/",
-            "hg38/refseq_r80/mc_v10_clust/gene_based/", dbFile
-        )
-        if (!dir.exists(feather_path)) dir.create(feather_path, recursive = TRUE)
-        options(timeout = 600)
-        download.file(url, destfile = paste0(feather_path, dbFile),
-                      mode = "wb", method = "libcurl")
-    }
-
-    motifRankings <- importRankings(paste0(feather_path, dbFile))
+    motifRankings <- importRankings(tips_core_ensure_cistarget_feather(shared_data_path))
 
     gene_sets_HiG <- DEG[intersect(c(CM_cluster, CF_cluster), names(DEG))]
     cisTarget.res_HiG <- cisTarget(

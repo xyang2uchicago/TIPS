@@ -1,7 +1,10 @@
+code_dir <- here::here("examples", "cardiac", "GSE175634", "GSE175634_STRING", "code_core")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
 rebuild_mat <- FALSE
-source(here::here("examples", "cardiac", "GSE175634", "GSE175634_STRING", "code_core", "24.0_acat_load_input_clean_CP.1.R"))
+source(file.path(code_dir, "24.0_acat_load_input_clean_CP.1.R"))
 
-source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
+source(here::here("R", paste0("celltype_specific_weight_v", celltype_specific_weight_version, ".R")))
 
 library(igraph)
 library(dplyr)

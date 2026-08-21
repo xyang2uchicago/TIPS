@@ -1,8 +1,9 @@
-# Set True if running 24.0 the first time
-rebuild_mat <- TRUE
-source(here::here("examples", "cardiac", "GSE175634", "GSE175634_IID", "code_core", "24.0_acat_load_input_clean.R"))
+code_dir <- here::here("examples", "cardiac", "GSE175634", "GSE175634_IID", "code_core")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+source(file.path(code_dir, "24.0_acat_load_input_clean.R"))
 
-source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
+source(here::here("R", paste0("celltype_specific_weight_v", celltype_specific_weight_version, ".R")))
 
 ## check the loaded objects =========================
 seed_TF
@@ -10,7 +11,7 @@ names(graph_list)
 names(DEG)
 
 celltype_col # "leiden_0.5"
-CP_cluster   # "3"
+CP_cluster   # "CP"
 CM_cluster   # "5"
 CF_cluster   # "1"
 
@@ -31,8 +32,6 @@ CTS_name # "CTS_CP"
 dir.create(file.path(updir, paste0("cisTarget_predicted_", CTS_ID)),
     showWarnings = FALSE, recursive = TRUE)
 setwd(paste0(updir, "/cisTarget_predicted_", CTS_ID))
-
-NES_threshold <- 4.5
 
 ########################################################
 ##  input 6 -- RcisTarget
@@ -117,10 +116,10 @@ if (length(files) > 0) {
         if (length(idx) > 0) idx[1] else NA_integer_
     })
     x <- x[!is.na(x)]
+    key_TFs <- names(x)  # re-sync: drop any manually-selected TF that had no matching cisTarget column
     x
     colnames(mat)[x]
 
-    names(x) <- names(x)  # names already set by sapply
     if (length(x) > 0) {
         for (j in seq_along(x)) {
             key <- names(x)[j]

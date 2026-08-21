@@ -6,29 +6,17 @@ library(igraph)
 
 ########## BEGINNING OF USER INPUT ##########
 
-source(here::here("examples", "config.R"))
-wd = tips_path("examples", "hematoendothelial", "GSE87038", "GSE87038_STRING/")
-setwd(paste0(wd, "results_core_13/PPI_weight/"))
+code_dir <- here::here("examples", "hematoendothelial", "GSE87038", "GSE87038_STRING", "code_core_13")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+setwd(ppi_path)
 
-db <- "GSE87038"
-
-specificity_methods <- c("combined") # Other methods: "ratio", "zscore", "diff"
-
-cluster_labels <- "label"
-
-core_count <- 1 # number of cores used for parallel processing in steps 1 and 2. Use core_count = 1 if on Windows.
-
-step1 <- TRUE # calculate gene correlations and specificity
-step2 <- TRUE # update network edge weights
-
-
-celltype_specific_weight_version <- '10'
-BioTIP_version <- '06232025'
+cluster_labels <- celltype_col
 
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/BioTIP/refs/heads/master/R/BioTIP_update_', BioTIP_version, '.R'))
 
-load(paste0(wd, "../data/sce_E8.25_uncorrected.RData"))
+load(paste0(data_dir, "sce_E8.25_uncorrected.RData"))
 
 ########## END OF USER INPUT ##########
 

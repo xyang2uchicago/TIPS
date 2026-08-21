@@ -12,16 +12,11 @@ library(brainGraph)
 
 ########## BEGINNING OF USER INPUT ##########
 
-source(here::here("examples", "config.R"))
-wd <- tips_path("examples", "cardiac", "GSE87038", "GSE87038_IID/")
-setwd(paste0(wd, "results_core/PPI_weight/"))
-inputdir <- file.path(wd, "../data/")
-
-PPI_color_palette <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
-
-db <- "GSE87038"
-
-s <- "combined" # specificity method
+code_dir <- here::here("examples", "cardiac", "GSE87038", "GSE87038_IID", "code_core")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+setwd(ppi_path)
+inputdir <- data_dir
 
 ########## END OF USER INPUT ##########
 
@@ -528,7 +523,7 @@ wilcox.test(df_median$bc.median[a], df_median$bc.median[c]) # p-value = 0.000293
 wilcox.test(df_median$bc.median[b], df_median$bc.median[c]) # p-value = NA	HiGCTS vs CTS
 # t.test(df_median$bc.median[a], df_median$bc.median[b]) # not enough HiGCTS
 t.test(df_median$bc.median[a], df_median$bc.median[c]) # p-value =  3.73e-05	HiG vs CTS
-t.test(df_median$bc.median[b], df_median$bc.median[c]) # p-value = 3.73e-05	HiGCTS vs CTS
+# t.test(df_median$bc.median[b], df_median$bc.median[c]) # not enough HiGCTS (only 1 surviving network with current data)
 
 
 density_median_bc_plot <- ggplot(df_median, aes(x = log10(bc.median), color = PPI_cat, fill = PPI_cat)) +

@@ -1,13 +1,9 @@
 ########## BEGINNING OF USER INPUT ##########
-source(here::here("examples", "config.R"))
-wd          <- tips_path("examples", "cardiac", "IbarraSoria2018", "IbarraSoria2018_IID/")
-shared_path <- paste0(shared_data_path, "/")
-celltype_specific_weight_version <- '10'
-CP_cluster  <- "cardiac.a"   # focal cluster; drives HiG_X, CTS_X, HiGCTS_X signatures
-top_TF_rank <- 3
-gene_top_n  <- 20
+code_dir <- here::here("examples", "cardiac", "IbarraSoria2018", "IbarraSoria2018_IID", "code_core")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
 ########## END OF USER INPUT ##########
-setwd(paste0(wd, "results_core/PPI_weight/"))
+setwd(ppi_path)
 
 library(clusterProfiler)
 library(msigdbr)
@@ -23,16 +19,9 @@ length(TF_mouse) # 1113
 TF_human <- unique(dorothea_hs$tf)
 length(TF_human) # 1333
 
-coding_genes <- readRDS(file = paste0(shared_path, "coding_genes.rds")) %>% unique()
-length(coding_genes) # 19930
-names(coding_genes) <- NULL
-CHD <- NULL
-
 source(paste0('https://raw.githubusercontent.com/xyang2uchicago/TIPS/refs/heads/main/R/celltype_specific_weight_v', celltype_specific_weight_version, '.R'))
 
 #############################
-db_specifc_output_path <- paste0(wd, "results_core/PPI_weight/")
-
 # IbarraSoria2018_IID uses no prefix on the PageRank file (vs GSE87038_IID which has "IID_" prefix)
 df_PageRank <- readRDS(file = paste0(db_specifc_output_path, "df_PAGERANK_strength_ANND.rewiring.P.rds"))
 

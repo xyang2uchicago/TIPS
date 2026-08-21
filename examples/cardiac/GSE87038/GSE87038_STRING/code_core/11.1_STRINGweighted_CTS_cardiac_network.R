@@ -11,23 +11,18 @@ library("SingleCellExperiment")
 
 ########## BEGINNING OF USER INPUT ##########
 
-source(here::here("examples", "config.R"))
-wd = tips_path("examples", "cardiac", "GSE87038", "GSE87038_STRING/")
-setwd(paste0(wd, "results/"))
-
-db <- "GSE87038"
-
-db_species <- 10090 # 10090 for mouse, 9606 for human
-
-download_files <- FALSE
+code_dir <- here::here("examples", "cardiac", "GSE87038", "GSE87038_STRING", "code_core")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+setwd(results_dir)
 
 # Download data files
-if(download_files){
+if (download_files) {
 
     # BioTIP.res.Rdata
     download.file(
         "https://github.com/xyang2uchicago/BioTIP/raw/refs/heads/master/examples/result/gastrulationE8.25_Pijuan-Sala2019/C_SNNGraph_allcells/BioTIP.res.RData",
-        "../../data/BioTIP.res.RData"
+        paste0(data_dir, "BioTIP.res.RData")
     )
 
     # STRING db
@@ -47,8 +42,8 @@ if(download_files){
     }
 }
 
-load(file = "../../data/BioTIP.res.RData")
-load("../../data/sce_E8.25_uncorrected.RData")
+load(file = paste0(data_dir, "BioTIP.res.RData"))
+load(paste0(data_dir, "sce_E8.25_uncorrected.RData"))
 
 CTS <- res$CTS.candidate[which(res$significant)]
 
@@ -69,7 +64,6 @@ names(CTS)
 # we used the findMarkers function in scran package, using pairwise Welch t-tests for genes that are detected in a minimum 25% per cluster, with fold changes larger than 2.
 # refer to CTS_cardiac_network_robustness_notsimplified.R
 ########################
-logFC.cut <- 0.6 # 1
 
 sce
 # class: SingleCellExperiment
@@ -144,11 +138,11 @@ for (i in c(setdiff(names(markers.up), names(CTS)), unique_CTS_ID)) {
     DEG[[i]] <- subset(interesting.up, summary.logFC > logFC.cut & FDR < 0.01) %>% rownames()
 }
 
-saveRDS(DEG, file = paste0("../../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.01.rds"))
-saveRDS(markers.up, file = "../../data/markers.up_ttest_min.prop0.25.rds")
+saveRDS(DEG, file = paste0(data_dir, "DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.01.rds"))
+saveRDS(markers.up, file = paste0(data_dir, "markers.up_ttest_min.prop0.25.rds"))
 dim(markers.up[[1]])
 
-DEG <- readRDS(file = paste0("../../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.01.rds"))
+DEG <- readRDS(file = paste0(data_dir, "DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.01.rds"))
 lengths(DEG)
 
 ######################################################
@@ -166,7 +160,7 @@ library(tibble)
 
 string_db <- STRINGdb$new(
     version = "12.0", species = db_species, # species= 10090 for mouse
-    score_threshold = 200, # !!!!!!!!!!!default is 200
+    score_threshold = score_threshold,
     network_type = "full",
     input_directory = paste0(shared_data_path, "/PPIN")
 )

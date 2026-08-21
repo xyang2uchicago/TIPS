@@ -4,29 +4,10 @@ library(purrr)
 library(SingleCellExperiment)
 
 ########## BEGINNING OF USER INPUT ##########
-source(here::here("examples", "config.R"))
-wd <- tips_path("examples", "cardiac", "GSE87038", "GSE87038_STRING/")
-setwd(paste0(wd, "results_core/"))
-
-data_dir    <- paste0(wd, "../data/")
-ppi_path    <- paste0(wd, "results_core/PPI_weight/")
-shared_path <- paste0(shared_data_path, "/")
-
-coding_genes <- readRDS(file = paste0(shared_path, "coding_genes.rds")) %>% unique()
-length(coding_genes) # 19930
-names(coding_genes) <- NULL
-
-celltype_specific_weight_version <- '10'
-species      <- "mouse"
-celltype_col <- "label"
-CP_cluster   <- "8"    # cardiac progenitor cluster
-CM_cluster   <- "17"   # cardiomyocyte cluster
-CF_cluster   <- "16"   # cardiac fibroblast cluster
-
-CTS_ID  <- "8"
-seed_TF <- NULL
-
-heatmap_coding_target_only <- TRUE
+code_dir <- here::here("examples", "cardiac", "GSE87038", "GSE87038_STRING", "code_core")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+setwd(results_dir)
 ########## END OF USER INPUT ##########
 
 CTS_name <- paste0("CTS_", CTS_ID)
@@ -176,21 +157,7 @@ motifAnnot <- motifAnnotations
 dim(motifAnnot) # [1] 253096      8
 
 if (!file.exists("cisTarget_targets_in_all_CTS.rds")) {
-    dbFile       <- "hg38_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather"
-    feather_path <- paste0(shared_path, "cistarget/")
-
-    if (!file.exists(paste0(feather_path, dbFile))) {
-        url <- paste0(
-            "https://resources.aertslab.org/cistarget/databases/homo_sapiens/",
-            "hg38/refseq_r80/mc_v10_clust/gene_based/", dbFile
-        )
-        if (!dir.exists(feather_path)) dir.create(feather_path, recursive = TRUE)
-        options(timeout = 600)
-        download.file(url, destfile = paste0(feather_path, dbFile),
-                      mode = "wb", method = "libcurl")
-    }
-
-    motifRankings <- importRankings(paste0(feather_path, dbFile))
+    motifRankings <- importRankings(tips_core_ensure_cistarget_feather(shared_data_path))
 
     gene_sets_HiG <- DEG[intersect(c(CM_cluster, CF_cluster), names(DEG))]
     cisTarget.res_HiG <- cisTarget(

@@ -5,14 +5,14 @@ CTS_ID # [1] "8"
 length(CHD) # 295
 celltype_col # [1] "label"
 
-updir <- here::here("examples", "cardiac", "GSE87038", "GSE87038_IID", "results", "PijuanSara2019_vsCF18", "GSE181346_heart_scATAC")
+updir <- here::here("examples", "cardiac", "GSE87038", "GSE87038_IID", "results", "PijuanSala2019_vsCF18", "GSE181346_heart_scATAC")
 setwd(paste0(updir, "/cisTarget_predicted_", CTS_ID))
 
 library(igraph)
 library(dplyr)
 library(igraph)
 
-file <- paste0(db_specifc_input_path, "GSE87038_IID_graph_perState_simplified_combinedweighted.rds")
+file <- paste0(db_specifc_result_path, "PPI_weight/GSE87038_IID_graph_perState_simplified_combinedweighted.rds")
 graph_list <- readRDS(file)
 names(graph_list)
 #  [1] "HiG_1"     "HiG_2"     "HiG_3"     "HiG_4"     "HiG_5"     "HiG_6"
@@ -41,7 +41,7 @@ key_TFs # [1] "HMGA2" "KLF6"  "RARB"
 
 final_table <- read.table(file = file, header = TRUE, sep = "\t")
 head(final_table)
-#   linkeage   from     to         w1          w2      delta abs_delta direction
+#   linkage   from     to         w1          w2      delta abs_delta direction
 # 1       CF   DAB2  HMGA2  0.0000000 -0.12320331 -0.1232033 0.1232033  decrease
 # 2       CM  HMGA2 MPPED2 -0.1528846  0.14451668  0.2974013 0.2974013  increase
 # 3       CM   FGF8  HMGA2 -0.1243642  0.01338294  0.1377472 0.1377472  increase
@@ -71,13 +71,14 @@ source(here::here("R", "celltype_specific_weight_v10.R"))
 # g = graph_from_data_frame(final_table[,c('from','to')], directed = FALSE)
 
 
-g_merged <- make_merged_TIPS_graph(subset(final_table, linkeage == "CM"),
+g_merged <- make_merged_TIPS_graph(subset(final_table, linkage == "CM"),
   CHD = CHD,
   added_TF = setdiff(key_TFs, V(graph_list[[paste0("CTS_", CTS_ID)]])$name %>% toupper()), top_n_label = 5,
   g_string = graph_list[[paste0("CTS_", CTS_ID)]]
 )
 
 set.seed(2)
+pdf(file = "PPI_graph_merged_GRN_prediction_CTS_lateral_plate_mesoderm_CM_final.pdf")
 plot(
   g_merged,
   layout = layout_with_fr(g_merged, weights = NA),
@@ -87,16 +88,16 @@ plot(
   main = "Merged CMvsCP TIPS delta-edge reweighting"
 )
 mtext("CMvsCP edges labeled by delta (top abs_delta)", side = 1, line = -1, cex = 1.2)
+dev.off()
 
-dev.copy2pdf(file = "PPI_graph_merged_GRN_prediction_CTS_lateral_plate_mesoderm_CM_final.pdf")
-
-g_merged <- make_merged_TIPS_graph(subset(final_table, linkeage == "CF"),
+g_merged <- make_merged_TIPS_graph(subset(final_table, linkage == "CF"),
   CHD = CHD,
   added_TF = setdiff(key_TFs, V(graph_list[[paste0("CTS_", CTS_ID)]])$name %>% toupper()), top_n_label = 5,
   g_string = graph_list[[paste0("CTS_", CTS_ID)]]
 )
 
 set.seed(2)
+pdf(file = "PPI_graph_merged_GRN_prediction_CTS_lateral_plate_mesoderm_CF_final.pdf")
 plot(
   g_merged,
   layout = layout_with_fr(g_merged, weights = NA),
@@ -106,8 +107,7 @@ plot(
   main = "Merged CFvsCP TIPS delta-edge reweighting"
 )
 mtext("CFvsCP edges labeled by delta (top abs_delta)", side = 1, line = -1, cex = 1.2)
-
-dev.copy2pdf(file = "PPI_graph_merged_GRN_prediction_CTS_lateral_plate_mesoderm_CF_final.pdf")
+dev.off()
 
 
 ######## query the HMGA2 appeaing often in the results #########

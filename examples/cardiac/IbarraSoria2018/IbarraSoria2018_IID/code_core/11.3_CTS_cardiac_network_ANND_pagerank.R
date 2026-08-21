@@ -12,19 +12,11 @@ library(brainGraph)
 
 ########## BEGINNING OF USER INPUT ##########
 
-source(here::here("examples", "config.R"))
-wd <- tips_path("examples", "cardiac", "IbarraSoria2018", "IbarraSoria2018_IID/")
-outdir <- paste0(wd, "results_core/PPI_weight/")
-inputdir <- paste0(wd, "../data/")
-shared_path <- paste0(shared_data_path, "/")
-dir.create(outdir, recursive = TRUE, showWarnings = FALSE)
-setwd(outdir)
-
-PPI_color_palette <- c("CTS" = "#7570B3", "HiGCTS" = "#E7298A", "HiG" = "#E6AB02")
-
-db <- "IbarraSoria2018"
-
-s <- "combined" # specificity method
+code_dir <- here::here("examples", "cardiac", "IbarraSoria2018", "IbarraSoria2018_IID", "code_core")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+setwd(ppi_path)
+inputdir <- data_dir
 
 ########## END OF USER INPUT ##########
 

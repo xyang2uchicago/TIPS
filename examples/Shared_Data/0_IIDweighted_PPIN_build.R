@@ -380,8 +380,9 @@ iid <- iid[mouse == 1];
 # add weight based on the number of experimental publications
 iid[, n_exp_pmids := as.integer(n_exp_pmids)]
 iid[is.na(n_exp_pmids), n_exp_pmids := 0L]
+pdf(file='hist_iid_n_exp_pmid.pdf')
 hist(log10(iid$n_exp_pmids), 100, main='wdighting IID PPINS')
-dev.copy2pdf(file='hist_iid_n_exp_pmid.pdf')
+dev.off()
 
 iid[, w := fifelse(n_exp_pmids >= 100L, 1000, n_exp_pmids * 10) / 1000] # normalize to 0-1
 

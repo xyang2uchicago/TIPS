@@ -340,14 +340,19 @@ for (key in motif_TF_highConf) { # !!!!!!!!
     key_in_TFfamily <- key
   }
 
-  p <- heatmap_pull_candidate(mat, graph_list, CTS_name, CHD,
-    key = key_in_TFfamily, coding_genes = coding_genes, TF = TF_human,
-    show_SMC_access = TRUE
+  p <- tryCatch(
+    heatmap_pull_candidate(mat, graph_list, CTS_name, CHD,
+      key = key_in_TFfamily, coding_genes = coding_genes, TF = TF_human,
+      show_SMC_access = TRUE
+    ),
+    error = function(e) { message("heatmap skipped for '", paste(key_in_TFfamily, collapse=";"), "': ", e$message); NULL }
   )
   ## for Fig 5, only the PRRX1 CP bound genes are shown
-  pdf(file = paste0("heatmap_blocked_", CTS_name, "_scATAC_cisTarget_", key_in_TFfamily, "_v3_coding_target.pdf"), height = 4)
-  print(p)
-  dev.off()
+  if (!is.null(p)) {
+    pdf(file = paste0("heatmap_blocked_", CTS_name, "_scATAC_cisTarget_", key_in_TFfamily, "_v3_coding_target.pdf"), height = 4)
+    print(p)
+    dev.off()
+  }
 }
 
 # candidate genes:  1
@@ -590,7 +595,7 @@ for (key in key_TFs) {
   # [1] "weight"         "corexp_sign"    "coexp_target"   "norm_PPI_score" "color"          "lty"
 
   res <- fill_TF_targeting_predicted_edges(graph_TF_list,
-    linkeage_name = "CM", graph_list,
+    linkage_name = "CM", graph_list,
     sce, celltype_col = celltype_col, CT_cluster_id = CP_cluster,
     descendant_cluster_id = CM_cluster, TF_symbol = key_in_TFfamily,
     HVG = rownames(sce)
@@ -600,7 +605,7 @@ for (key in key_TFs) {
 
 
   res <- fill_TF_targeting_predicted_edges(graph_TF_list,
-    linkeage_name = "CF", graph_list,
+    linkage_name = "CF", graph_list,
     sce, celltype_col = celltype_col, CT_cluster_id = CP_cluster,
     descendant_cluster_id = CF_cluster, TF_symbol = key_in_TFfamily,
     HVG = rownames(sce)
@@ -658,7 +663,7 @@ for (f in files) {
     unlist() %>%
     unique()
 
-  change_df <- cbind(linkeage = pull, change_df, TF_highConf = tmp$TF_highConf, motif = tmp$motif, NES = tmp$NES)
+  change_df <- cbind(linkage = pull, change_df, TF_highConf = tmp$TF_highConf, motif = tmp$motif, NES = tmp$NES)
   change_df$TF_highConf[which(change_df$from != key_in_TFfamily & change_df$to != key_in_TFfamily)] <- ""
   change_df$motif[which(change_df$from != key_in_TFfamily & change_df$to != key_in_TFfamily)] <- ""
   change_df$NES[which(change_df$from != key_in_TFfamily & change_df$to != key_in_TFfamily)] <- ""
@@ -678,7 +683,7 @@ write.table(final_table,
 key_in_TFfamily <- "HMGA2"
 graph_TF_list <- readRDS(file = paste0("PPI_graph_", key_in_TFfamily, "_GRN_prediction_", CTS_name, "_v3.rds"))
 res <- fill_TF_targeting_predicted_edges(graph_TF_list,
-  linkeage_name = "CF", graph_list,
+  linkage_name = "CF", graph_list,
   sce, celltype_col = celltype_col, CT_cluster_id = CP_cluster,
   descendant_cluster_id = CF_cluster, TF_symbol = key_in_TFfamily,
   HVG = rownames(sce),
@@ -688,7 +693,7 @@ E(res[[2]])$weight # [1] 0.02714859
 E(res[[1]])$weight # [1] 0
 
 res <- fill_TF_targeting_predicted_edges(graph_TF_list,
-  linkeage_name = "CF", graph_list,
+  linkage_name = "CF", graph_list,
   sce, celltype_col = celltype_col, CT_cluster_id = CP_cluster,
   descendant_cluster_id = CF_cluster, TF_symbol = key_in_TFfamily,
   HVG = rownames(sce),

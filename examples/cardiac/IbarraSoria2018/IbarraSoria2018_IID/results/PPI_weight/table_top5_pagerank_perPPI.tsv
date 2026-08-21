@@ -1,16 +1,3 @@
-"signature"	"gene"	"PPI_cat"	"rank_by_PR"	"PCGC_AllCurated"
-"CTS_cardiac.a"	"DPYSL3"	"CTS"	5	FALSE
-"CTS_cardiac.a"	"GATA4"	"CTS"	1	TRUE
-"CTS_cardiac.a"	"PARD6B"	"CTS"	4	FALSE
-"CTS_cardiac.a"	"RND3"	"CTS"	2	FALSE
-"CTS_cardiac.a"	"TBX5"	"CTS"	3	TRUE
-"HiGCTS_cardiac.a"	"ANXA2"	"HiGCTS"	3.5	FALSE
-"HiGCTS_cardiac.a"	"ARL4C"	"HiGCTS"	3.5	FALSE
-"HiGCTS_cardiac.a"	"GATA4"	"HiGCTS"	1	TRUE
-"HiGCTS_cardiac.a"	"MSX2"	"HiGCTS"	3.5	TRUE
-"HiGCTS_cardiac.a"	"PODXL"	"HiGCTS"	3.5	FALSE
-"HiG_cardiac.a"	"ACTB"	"HiG"	2	FALSE
-"HiG_cardiac.a"	"HSP90AA1"	"HiG"	4	FALSE
-"HiG_cardiac.a"	"HSPA5"	"HiG"	1	FALSE
-"HiG_cardiac.a"	"KRT18"	"HiG"	5	FALSE
-"HiG_cardiac.a"	"TPM1"	"HiG"	3	FALSE
+version https://git-lfs.github.com/spec/v1
+oid sha256:75ec6dcfba4968ea2d7c616685189ff7c3b6c563504745bdd488e8f1bddbcabe
+size 7518

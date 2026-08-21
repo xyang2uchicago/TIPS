@@ -36,8 +36,6 @@ dir.create(file.path(updir, paste0("cisTarget_predicted_", CTS_ID)),
 )
 setwd(paste0(updir, "/cisTarget_predicted_", CTS_ID))
 
-NES_threshold <- 3
-
 ########################################################
 ##  input 6 -- data-driven --- RcisTarget predicted TF that are enriched among CTS genes
 library(RcisTarget)
@@ -142,6 +140,11 @@ if (length(files) > 0) {
         if (length(matches) == 0) NA_integer_ else matches[1]
     })
     x <- x[!is.na(x)]
+    # Keep key_TFs in sync with x: any hardcoded key_TF that doesn't actually
+    # match a cisTarget column at this NES_threshold must be dropped here, or
+    # every downstream loop that iterates key_TFs (not x) crashes trying to
+    # reference a "<key>_CP_candidate"-style column that was never created.
+    key_TFs <- names(x)
     if (length(x) > 0) {
         for (j in seq_along(x)) {
             key <- names(x)[j]

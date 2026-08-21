@@ -64,6 +64,7 @@ g_merged <- make_merged_TIPS_graph(subset(final_table, linkage == "CM"),
 )
 
 set.seed(2)
+pdf(file="PPI_graph_merged_GRN_prediction_CTS_8_CM_final.pdf")
 plot(
     g_merged,
     layout = layout_with_fr(g_merged, weights = NA),
@@ -73,8 +74,7 @@ plot(
     main = "Merged CMvsCP TIPS delta-edge reweighting"
 )
 mtext("CMvsCP edges labeled by delta (top abs_delta)", side = 1, line = -1, cex = 1.2)
-
-dev.copy2pdf(file="PPI_graph_merged_GRN_prediction_CTS_8_CM_final.pdf")
+dev.off()
 
 
 

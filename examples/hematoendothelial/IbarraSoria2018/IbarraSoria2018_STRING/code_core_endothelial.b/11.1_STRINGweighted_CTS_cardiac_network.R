@@ -11,24 +11,18 @@ library("SingleCellExperiment")
 
 ########## BEGINNING OF USER INPUT ##########
 
-# Set working directory
-source(here::here("examples", "config.R"))
-wd <- tips_path("examples", "hematoendothelial", "IbarraSoria2018", "IbarraSoria2018_STRING/")
-setwd(paste0(wd, "results_core_endothelial.b/"))
-
-# Database settings
-db <- "IbarraSoria2018"
-db_species <- 10090 # 10090 for mouse, 9606 for human
-
-download_files <- TRUE
+code_dir <- here::here("examples", "hematoendothelial", "IbarraSoria2018", "IbarraSoria2018_STRING", "code_core_endothelial.b")
+source(file.path(code_dir, "00_configuration.R"))
+ensure_tips_configured(code_dir)
+setwd(results_dir)
 
 # Download data files
-if(download_files){
+if (download_files) {
 
     # BioTIP.res.Rdata
     download.file(
         "https://github.com/xyang2uchicago/BioTIP/raw/refs/heads/master/examples/result/gastrulationE8.25_Ibarra-Soria2018/subcelltype/BioTIP.res.RData",
-        "../../data/BioTIP.res.RData"
+        paste0(data_dir, "BioTIP.res.RData")
     )
 
     # STRING db
@@ -49,8 +43,8 @@ if(download_files){
 }
 
 # Load BioTIP results and sce object
-load(file = "../../data/BioTIP.res.RData")
-load("../../data/sce_16subtype.RData") 
+load(file = paste0(data_dir, "BioTIP.res.RData"))
+load(paste0(data_dir, "sce_16subtype.RData"))
 
 ########## END OF USER INPUT ##########
 
@@ -58,8 +52,6 @@ load("../../data/sce_16subtype.RData")
 CTS <- res$CTS.candidate[which(res$significant)]
 names(CTS)
 # [1] "endothelial.b" "cardiac.a"
-
-logFC.cut <- 0.6
 
 sce
 # class: SingleCellExperiment 
@@ -95,12 +87,12 @@ for (i in c(setdiff(names(markers.up), names(CTS)), unique_CTS_ID)) {
     DEG[[i]] <- rownames(interesting.up[interesting.up$summary.logFC > logFC.cut & interesting.up$FDR < 0.01, ])
 }
 
-saveRDS(DEG, file = paste0("../../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.01.rds"))
-saveRDS(markers.up, file = "../../data/markers.up_ttest_min.prop0.25.rds")
+saveRDS(DEG, file = paste0(data_dir, "DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.01.rds"))
+saveRDS(markers.up, file = paste0(data_dir, "markers.up_ttest_min.prop0.25.rds"))
 
 dim(markers.up[[1]]) # just to check dimensions
 
-DEG <- readRDS(file = paste0("../../data/DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.01.rds"))
+DEG <- readRDS(file = paste0(data_dir, "DEG_perState_min.prop0.25_lfc", logFC.cut, "_FDFR0.01.rds"))
 lengths(DEG)
 
 ######################################################
@@ -116,8 +108,8 @@ library("STRINGdb")
 packageVersion('STRINGdb') # '2.14.0'
 library(tibble)
 
-string_db <- STRINGdb$new( version="12.0", species=10090,   # species= 10090 for mouse;    ?? for human 2021 version
-                        score_threshold = 200, #!!!!!!!!!!!default is 200
+string_db <- STRINGdb$new( version="12.0", species=db_species,   # species= 10090 for mouse;    ?? for human 2021 version
+                        score_threshold = score_threshold,
                         network_type="full", 
                         input_directory=paste0(shared_data_path, "/PPIN")) 
 string_db

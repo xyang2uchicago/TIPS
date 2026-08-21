@@ -3,8 +3,8 @@ source(here::here("examples", "config.R"))
 wd <- tips_path("examples", "cardiac", "IbarraSoria2018", "IbarraSoria2018_IID/")
 setwd(paste0(wd, "results/GSE181346_heart_scATAC/"))
 db_specifc_result_path <- paste0(wd, "results/")
-db_specifc_input_path <- paste0(wd, "data/")
-db_specifc_CTS_path <- paste0(wd, "data/")
+db_specifc_input_path <- paste0(wd, "../data/")
+db_specifc_CTS_path <- paste0(wd, "../data/")
 shared_path <- paste0(shared_data_path, "/")
 cardiac_data_path <- paste0(tips_path("examples", "cardiac", "data"), "/")
 species <- "mouse"
@@ -326,7 +326,7 @@ head(DEG[[1]], 4)
 ## get the whole IID genes
 library(igraph)
 # refer to 11.2.0_weighted_graph_attack_robustness.R
-file <- paste0(db_specifc_input_path, "IbarraSoria2018_IID_graph_perState_simplified_combinedweighted.rds")
+file <- paste0(db_specifc_result_path, "PPI_weight/IbarraSoria2018_IID_graph_perState_simplified_combinedweighted.rds")
 graph_list <- readRDS(file)
 names(graph_list)
 # [1] "HiG_blood"                  "HiG_cardiac.b"              "HiG_cardiac.c"

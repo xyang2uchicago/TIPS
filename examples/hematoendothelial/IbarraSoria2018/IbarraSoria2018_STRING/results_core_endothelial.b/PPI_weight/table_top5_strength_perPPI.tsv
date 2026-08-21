@@ -1,16 +1,3 @@
-"signature"	"gene"	"PPI_cat"	"normalized.strength"	"PCGC_AllCurated"
-"CTS_cardiac.a"	"Mef2c"	"CTS"	0.0456846527809716	TRUE
-"CTS_cardiac.a"	"Tbx5"	"CTS"	0.0292289127046288	TRUE
-"CTS_cardiac.a"	"Gata4"	"CTS"	0.0269562023628895	TRUE
-"CTS_cardiac.a"	"Msx2"	"CTS"	0.0248654702291884	TRUE
-"CTS_cardiac.a"	"Gata6"	"CTS"	0.0202733130492176	TRUE
-"HiGCTS_cardiac.a"	"Mef2c"	"HiGCTS"	0.0946088160220117	TRUE
-"HiGCTS_cardiac.a"	"Gata4"	"HiGCTS"	0.0622331524241162	TRUE
-"HiGCTS_cardiac.a"	"Msx2"	"HiGCTS"	0.0600064904815361	TRUE
-"HiGCTS_cardiac.a"	"Isl1"	"HiGCTS"	0.0464087222683196	TRUE
-"HiGCTS_cardiac.a"	"Gata6"	"HiGCTS"	0.0449764994430136	TRUE
-"HiG_cardiac.a"	"Actb"	"HiG"	0.0129865845807339	FALSE
-"HiG_cardiac.a"	"Acta2"	"HiG"	0.0127318387356924	TRUE
-"HiG_cardiac.a"	"Hsp90aa1"	"HiG"	0.00978955469214199	FALSE
-"HiG_cardiac.a"	"Hspa5"	"HiG"	0.00913149627407329	FALSE
-"HiG_cardiac.a"	"Vim"	"HiG"	0.00901447697137137	FALSE
+version https://git-lfs.github.com/spec/v1
+oid sha256:b0af58f4b319d425f572321090fb8b65888084e02892da0265623dba3a0679d3
+size 5705
