@@ -94,7 +94,7 @@ if (length(files) > 0) {
     dim(mat) # [1] 37 57
     colnames(mat)
 
-    ##  extend seed_TF candidates to those 1) being CTS itself, or 2) CTS_enriched motifs having target genes highly expressed in CP, CM, or CF
+    ##  extend seed_TF candidates with regulators of CTS-enriched motifs that are themselves 1) CTS genes, or 2) DEGs in CP, CM, or CF (checks the TF itself, not its motif target genes)
     x <- colnames(mat)[grepl("cisTarget_", colnames(mat))]
     x <- gsub("cisTarget_", "", x) %>% gsub("\\.motif_target", "", .)
     x <- unlist(strsplit(x, ";")) %>% unique()

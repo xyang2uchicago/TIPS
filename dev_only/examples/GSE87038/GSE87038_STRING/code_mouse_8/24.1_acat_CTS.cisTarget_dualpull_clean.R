@@ -327,7 +327,7 @@ if (length(files) > 0) {
     # [101] "ZNF615"  "ZNF701"  "ZNF737"  "ZNF740"  "ZNF875"  "ZNF880"  "ZNF281"  "ATF2"    "GTF2H3"  "ZNF282"
     # [111] "BARX1"   "ZKSCAN2"
 
-    ##  extend seed_TF candidates to those 1) being CTS itself, or 2) CTS_enriched motifs having target genes highly expressed in CP, CM, or CF ===============
+    ##  extend seed_TF candidates with regulators of CTS-enriched motifs that are themselves 1) CTS genes, or 2) DEGs in CP, CM, or CF (checks the TF itself, not its motif target genes) ===============
     key_TFs <- seed_TF
     for (i in x) {
         for (j in c(CM_cluster, CF_cluster, CP_cluster)) {
