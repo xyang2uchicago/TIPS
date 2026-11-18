@@ -548,7 +548,7 @@ for (f in files) {
     final_table <- rbind(final_table, change_df)
 }
 
-dim(final_table) # 21  13
+dim(final_table) # 20  13
 ####### generateing final table of the predicted subnetwork #################
 
 write.table(final_table,
