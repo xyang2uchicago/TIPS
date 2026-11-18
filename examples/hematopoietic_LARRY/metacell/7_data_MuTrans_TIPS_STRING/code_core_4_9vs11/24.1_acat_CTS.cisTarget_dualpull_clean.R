@@ -307,44 +307,6 @@ tf_symbol_from_ppi_filename <- function(f) {
   hit[[2L]]
 }
 
-## Felix code_core_13 / Ibarra endothelial.b: cisTarget row for dualpull_final_table motif columns
-cistarget_motif_annotation_row <- function(
-    tf_key, motifAnnot_sub, cisTarget.res, CTS_ID, NES_threshold
-) {
-  tf_key <- as.character(tf_key)
-  reg <- as.character(motifAnnot_sub$regulators)
-  y <- motifAnnot_sub[
-    reg %in% tf_key | grepl(tf_key, reg, ignore.case = TRUE),
-    ,
-    drop = FALSE
-  ]
-  motif_vals <- unique(y$motif_TF_highConf)
-  motif_vals <- motif_vals[!is.na(motif_vals) & nzchar(motif_vals)]
-  if (!length(motif_vals)) {
-    return(data.frame(TF_highConf = NA, motif = NA, NES = NA))
-  }
-  gs_ok <- as.character(cisTarget.res$geneSet) == as.character(CTS_ID)
-  tmp <- cisTarget.res[
-    gs_ok &
-      !is.na(cisTarget.res$NES) &
-      cisTarget.res$NES >= NES_threshold &
-      cisTarget.res$motif %in% motif_vals,
-    ,
-    drop = FALSE
-  ]
-  if (!nrow(tmp)) {
-    return(data.frame(TF_highConf = NA, motif = NA, NES = NA))
-  }
-  tmp[1L, c("TF_highConf", "motif", "NES"), drop = FALSE]
-}
-
-tf_key_from_ppi_filename <- function(f, key_TFs) {
-  pattern <- paste(key_TFs, collapse = "|")
-  key <- regmatches(f, regexpr(pattern, f, perl = TRUE))
-  if (length(key) && nzchar(key)) return(key)
-  tf_symbol_from_ppi_filename(f)
-}
-
 ## All TFs in PageRank order within HiGCTS_<CP>, else CTS_<CP> (Felix 12.0 / rank_TF_CHD_in_PPIN)
 pagerank_tfs_in_higcts <- function(df_PageRank, TF_mouse, CP_cluster, gene_top_n = 20L) {
   higcts_sig <- paste0("HiGCTS_", CP_cluster)
@@ -709,13 +671,56 @@ for (key in key_TFs) {
 ##########################################################
 ## step 2.2) reporting — lineage-biased edges (dualpull_final_table)
 ##########################################################
+## Motif label (TF_highConf, motif, NES) for a key TF in the dual-pull final table.
+## Uses the motif column that supplied the TF's targets, matched exactly. Substring matching
+## (grepl(key, regulators)) picked other TFs' motifs, e.g. "BCL6" -> BCL6B's motif.
+## For a merged column (cisTarget_<TF>.merged_motif_target) it reports the best-NES motif
+## among those listing <TF> as an exact regulator.
+cistarget_label_for_column <- function(col_name, motifAnnot_sub, cisTarget.res,
+                                       geneSet_id, NES_threshold) {
+    stopifnot(length(col_name) == 1L, !is.na(col_name),
+              grepl("^cisTarget_.+\\.(merged_)?motif_target$", col_name))
+    regs <- sub("\\.(merged_)?motif_target$", "", sub("^cisTarget_", "", col_name))
+    raw_regs <- as.character(motifAnnot_sub$regulators)
+    ann_regs <- toupper(raw_regs)
+    ## 24.1 builds each column from the first annotation row of its key (match(key, regulators))
+    first <- !is.na(raw_regs) & !duplicated(raw_regs)
+    if (grepl("\\.merged_motif_target$", col_name)) {
+        hit <- first & vapply(strsplit(ann_regs, ";", fixed = TRUE),
+                              function(p) toupper(regs) %in% p, logical(1L))
+    } else {
+        ## exact key first: keys differing only in case (FOXM1, Foxm1) are separate columns
+        hit <- first & raw_regs == regs
+        if (!any(hit)) hit <- first & ann_regs == toupper(regs)
+    }
+    vals <- unique(as.character(motifAnnot_sub$motif_TF_highConf[hit]))
+    vals <- vals[!is.na(vals) & nzchar(vals)]
+    if (!length(vals)) {
+        stop("cistarget_label_for_column: no motif annotation for column ", col_name,
+             call. = FALSE)
+    }
+    keep <- as.character(cisTarget.res$geneSet) == as.character(geneSet_id) &
+        !is.na(cisTarget.res$NES) & cisTarget.res$NES >= NES_threshold &
+        (as.character(cisTarget.res$motif) %in% vals |
+             as.character(cisTarget.res$TF_highConf) %in% vals)
+    tmp <- cisTarget.res[keep, , drop = FALSE]
+    if (!nrow(tmp)) {
+        warning("cistarget_label_for_column: no cisTarget row with NES >= ", NES_threshold,
+                " for ", col_name, call. = FALSE)
+        return(data.frame(TF_highConf = NA, motif = NA, NES = NA))
+    }
+    tmp <- tmp[which.max(tmp$NES), , drop = FALSE]
+    data.frame(TF_highConf = as.character(tmp$TF_highConf), motif = as.character(tmp$motif),
+               NES = tmp$NES, stringsAsFactors = FALSE)
+}
+
 files <- list.files(pattern = "PPI_graph_.*_GRN_prediction_.*_final\\.rds$")
 print(files)
 
 final_table <- NULL
 for (f in files) {
   pull <- ifelse(grepl("_CF_final", f), "CF", "CM")
-  key <- tf_key_from_ppi_filename(f, key_TFs)
+  key <- tf_symbol_from_ppi_filename(f)
   if (!length(key) || !nzchar(key)) {
     message("Skip (cannot parse TF from filename): ", f)
     next
@@ -745,9 +750,18 @@ for (f in files) {
     next
   }
 
-  tmp1 <- cistarget_motif_annotation_row(
-    key, motifAnnot_sub, cisTarget.res, CTS_ID, NES_threshold
-  )
+  ## Label from the motif column that supplied this TF's targets (x[[k]]); substring
+  ## matching picked other TFs' motifs (e.g. BCL6 -> BCL6B).
+  k <- names(resolved_key_TFs)[match(key_in_TFfamily, resolved_key_TFs)]
+  if (is.na(k) && key %in% names(x)) k <- key
+  tmp1 <- if (is.na(k)) {
+    message("[24.1] ", key_in_TFfamily, " is not a current key TF (stale per-TF file?): motif label left NA")
+    data.frame(TF_highConf = NA, motif = NA, NES = NA)
+  } else {
+    cistarget_label_for_column(
+      colnames(mat)[x[[k]]], motifAnnot_sub, cisTarget.res, CTS_ID, NES_threshold
+    )
+  }
   change_df <- cbind(
     linkage = pull, change_df,
     TF_highConf = tmp1$TF_highConf, motif = tmp1$motif, NES = tmp1$NES

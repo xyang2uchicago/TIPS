@@ -303,9 +303,10 @@ resolve_key_tf_map <- function(
 }
 
 tf_symbol_from_ppi_filename <- function(f) {
-  m <- regexpr("^PPI_graph_([^_]+)_GRN_prediction_.*_final\\.rds$", f, perl = TRUE)
-  if (m[1L] < 0L) return(character())
-  regmatches(f, m)
+  ## Exact capture of the TF (group 1); regmatches(regexpr()) returned the whole filename.
+  pat <- "^PPI_graph_([^_]+)_GRN_prediction_.*_final\\.rds$"
+  if (!grepl(pat, f, perl = TRUE)) return(character())
+  sub(pat, "\\1", f, perl = TRUE)
 }
 
 ## All TFs in PageRank order within HiGCTS_<CP>, else CTS_<CP> (Felix 12.0 / rank_TF_CHD_in_PPIN)
@@ -672,6 +673,49 @@ for (key in key_TFs) {
 ##########################################################
 ## step 2.2) reporting — lineage-biased edges (dualpull_final_table)
 ##########################################################
+## Motif label (TF_highConf, motif, NES) for a key TF in the dual-pull final table.
+## Uses the motif column that supplied the TF's targets, matched exactly. Substring matching
+## (grepl(key, regulators)) picked other TFs' motifs, e.g. "BCL6" -> BCL6B's motif.
+## For a merged column (cisTarget_<TF>.merged_motif_target) it reports the best-NES motif
+## among those listing <TF> as an exact regulator.
+cistarget_label_for_column <- function(col_name, motifAnnot_sub, cisTarget.res,
+                                       geneSet_id, NES_threshold) {
+    stopifnot(length(col_name) == 1L, !is.na(col_name),
+              grepl("^cisTarget_.+\\.(merged_)?motif_target$", col_name))
+    regs <- sub("\\.(merged_)?motif_target$", "", sub("^cisTarget_", "", col_name))
+    raw_regs <- as.character(motifAnnot_sub$regulators)
+    ann_regs <- toupper(raw_regs)
+    ## 24.1 builds each column from the first annotation row of its key (match(key, regulators))
+    first <- !is.na(raw_regs) & !duplicated(raw_regs)
+    if (grepl("\\.merged_motif_target$", col_name)) {
+        hit <- first & vapply(strsplit(ann_regs, ";", fixed = TRUE),
+                              function(p) toupper(regs) %in% p, logical(1L))
+    } else {
+        ## exact key first: keys differing only in case (FOXM1, Foxm1) are separate columns
+        hit <- first & raw_regs == regs
+        if (!any(hit)) hit <- first & ann_regs == toupper(regs)
+    }
+    vals <- unique(as.character(motifAnnot_sub$motif_TF_highConf[hit]))
+    vals <- vals[!is.na(vals) & nzchar(vals)]
+    if (!length(vals)) {
+        stop("cistarget_label_for_column: no motif annotation for column ", col_name,
+             call. = FALSE)
+    }
+    keep <- as.character(cisTarget.res$geneSet) == as.character(geneSet_id) &
+        !is.na(cisTarget.res$NES) & cisTarget.res$NES >= NES_threshold &
+        (as.character(cisTarget.res$motif) %in% vals |
+             as.character(cisTarget.res$TF_highConf) %in% vals)
+    tmp <- cisTarget.res[keep, , drop = FALSE]
+    if (!nrow(tmp)) {
+        warning("cistarget_label_for_column: no cisTarget row with NES >= ", NES_threshold,
+                " for ", col_name, call. = FALSE)
+        return(data.frame(TF_highConf = NA, motif = NA, NES = NA))
+    }
+    tmp <- tmp[which.max(tmp$NES), , drop = FALSE]
+    data.frame(TF_highConf = as.character(tmp$TF_highConf), motif = as.character(tmp$motif),
+               NES = tmp$NES, stringsAsFactors = FALSE)
+}
+
 files <- list.files(pattern = "PPI_graph_.*_GRN_prediction_.*_final\\.rds$")
 print(files)
 
@@ -708,17 +752,18 @@ for (f in files) {
     next
   }
 
-  y <- motifAnnot_sub[
-    motifAnnot_sub$regulators %in% key_in_TFfamily |
-      grepl(key_in_TFfamily, motifAnnot_sub$regulators, fixed = TRUE),
-  ]
-  motif_TF_highConf_val <- if (nrow(y)) y$motif_TF_highConf[1] else NA
-  tmp <- subset(
-    cisTarget.res,
-    geneSet == CTS_ID & NES >= NES_threshold &
-      (motif == motif_TF_highConf_val | TF_highConf == motif_TF_highConf_val)
-  )
-  tmp1 <- if (nrow(tmp)) tmp[1, , drop = FALSE] else data.frame(TF_highConf = NA, motif = NA, NES = NA)
+  ## Label from the motif column that supplied this TF's targets (x[[k]]); substring
+  ## matching picked other TFs' motifs (e.g. BCL6 -> BCL6B).
+  k <- names(resolved_key_TFs)[match(key_in_TFfamily, resolved_key_TFs)]
+  if (is.na(k) && key_raw %in% names(x)) k <- key_raw
+  tmp1 <- if (is.na(k)) {
+    message("[24.1] ", key_in_TFfamily, " is not a current key TF (stale per-TF file?): motif label left NA")
+    data.frame(TF_highConf = NA, motif = NA, NES = NA)
+  } else {
+    cistarget_label_for_column(
+      colnames(mat)[x[[k]]], motifAnnot_sub, cisTarget.res, CTS_ID, NES_threshold
+    )
+  }
   change_df <- cbind(
     linkage = pull, change_df,
     TF_highConf = tmp1$TF_highConf, motif = tmp1$motif, NES = tmp1$NES
